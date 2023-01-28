@@ -8,9 +8,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+
+
 
 class AuthController extends Controller
 {
+
+    
     /** 
      * Create User
      * @param Request $request
@@ -47,6 +53,10 @@ class AuthController extends Controller
                     'status' => $request->status,
                 ]);
 
+
+
+                // $user->assignRole('agente');
+
                 return response()->json([
                     'status' => true,
                     'message' => 'User Created Successfully!',
@@ -60,7 +70,7 @@ class AuthController extends Controller
                 'error' => $validateUser->errors()],
                 500);
         }
-
+        
     }
 
     /**
@@ -92,12 +102,26 @@ class AuthController extends Controller
                     'message' => 'Email & Password does not match with our record.',
                 ], 401);
            }
+
            $user = User::where([['email',$request->email],['status',1]])->first();
            if(isset($user)){
+
+                // gourp permissions for a user
+                // $user->removeRole('agente');
+                // $user->assignRole('admin');
+
+                 $role = Role::findOrFail($user->roles->first()->id);
+                 $groupsWithRoles = $role->getPermissionNames();
+                //  $permissios =  $groupsWithRoles;
+                
                 return response()->json([
                     'status' => true,
                     'message' => 'User Logged In Successfully!',
-                    'token' => $user ->createToken("API TOKEN")->plainTextToken],
+                    'data' =>[ 'token' => $user ->createToken("API TOKEN")->plainTextToken,
+                                'user' => $user,
+                                'permissions' => $groupsWithRoles,
+                              
+                ]],
                     200);
             }else{
                 return response()->json([
@@ -124,7 +148,11 @@ class AuthController extends Controller
     public function logoutUser(Request $request)
     {
         try {
-            $request->user()->tokens()->delete();
+            // $request->user()->tokens()->delete();
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            
           return response()->json([
             'status' => true,
             'message' => 'User Logged Out Successfully!',
@@ -137,6 +165,23 @@ class AuthController extends Controller
                 'message' => $th->getMessage()],
                 500);
         }
+    }
+
+    /**
+     * Permission User
+     * @param Request $request
+     * @return User
+     */
+    public function userPermission(Request $request){
+        $role = Role::findOrFail($request->user()->roles->first()->id);
+        $groupsWithRoles = $role->getPermissionNames();
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'permissions' => $groupsWithRoles,
+            ],
+             ],
+            200); 
     }
 
 }
