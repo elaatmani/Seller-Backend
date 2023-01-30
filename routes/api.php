@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Admin\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,7 +18,6 @@ use Illuminate\Support\Facades\Route;
 
 
 
-
 //User Login
 Route::post('/auth/login',[AuthController::class,'loginUser']);
 
@@ -25,7 +25,10 @@ Route::post('/auth/login',[AuthController::class,'loginUser']);
 Route::group(['middleware' => ['auth:sanctum']], function(){
     //User Permission
     Route::get('/auth/permission',[AuthController::class,'userPermission']);
-
+    
+    //All Rules
+    Route::get('/auth/roles',[UserController::class,'roles']);
+    
     //User Register
     Route::post('/auth/register',[AuthController::class,'createUser']);
 
