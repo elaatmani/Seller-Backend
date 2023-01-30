@@ -14,11 +14,15 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // create permissions
+        Permission::create(['name' => 'users_show']);
+        Permission::create(['name' => 'users_create']);
+        Permission::create(['name' => 'users_update']);
+        Permission::create(['name' => 'users_delete']);   
+        Permission::create(['name' => 'users_access']);
+
         Permission::create(['name' => 'user_show']);
-        Permission::create(['name' => 'user_create']);
         Permission::create(['name' => 'user_update']);
-        Permission::create(['name' => 'user_delete']);   
-        Permission::create(['name' => 'user_access']);
+
 
         Permission::create(['name' => 'product_show']);
         Permission::create(['name' => 'product_create']);
@@ -62,7 +66,8 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // for admin
         $role = Role::create(['name' => 'admin']);
-        $role->givePermissionTo(['user_show','user_create' ,'user_update' ,'user_delete' ,'user_access', 
+        $role->givePermissionTo(['user_show' ,'user_update' ,
+        'users_show','users_create' ,'users_update' ,'users_delete' ,'users_access', 
         'product_show','product_create' ,'product_update' ,'product_delete' ,'product_access',
         'inventory_state_show','inventory_state_create' ,'inventory_state_update' ,'inventory_state_delete' ,'inventory_state_access',
         'inventory_movement_show','inventory_movement_create' ,'inventory_movement_update' ,'inventory_movement_delete' ,'inventory_movement_access',
@@ -72,10 +77,12 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // for agente
         $role = Role::create(['name' => 'agente'])
-            ->givePermissionTo(['order_show','order_create' ,'order_update' ,'order_delete' ,'order_access']);
+            ->givePermissionTo(['user_show' ,'user_update' ,
+            'order_show','order_create' ,'order_update' ,'order_delete' ,'order_access']);
 
         // for delivery
         $role = Role::create(['name' => 'delivery']);
-        $role->givePermissionTo(['result_show','result_create' ,'result_update' ,'result_delete' ,'result_access']);
+        $role->givePermissionTo(['user_show' ,'user_update' ,
+        'result_show','result_create' ,'result_update' ,'result_delete' ,'result_access']);
     }
 }

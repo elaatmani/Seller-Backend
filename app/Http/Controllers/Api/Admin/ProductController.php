@@ -188,7 +188,7 @@ class ProductController extends Controller
                     
 
 
-                $res = $product->save();
+                $product->save();
 
                 return response()->json([
                     'status' => true,
@@ -233,12 +233,22 @@ class ProductController extends Controller
                    405);
               }
             
+               
+            $product = Product::find($id);
+            if(isset($product)){
                 Product::where('id',$id)->delete();
                 return response()->json([
                     'status' => true,
                     'code' => 'PRODUCT_DELETED',
                     'message' => 'Product Deleted Successfully!',
-                    200]);
+                    200
+                ]);
+            }
+            return  response()->json([
+                        'status' => false,
+                        'code' => 'PRODUCT_NOT_FOUND',
+                        'message' => 'Product Not Exist!',
+                        404]);
 
     }catch(\Throwable $th){
         return response()->json([

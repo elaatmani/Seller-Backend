@@ -19,17 +19,19 @@ use Illuminate\Support\Facades\Route;
 */
 
 
+
 //User Login
 Route::post('/auth/login',[AuthController::class,'loginUser']);
 
 //Sanctum Use
 Route::group(['middleware' => ['auth:sanctum']], function(){
+
     //User Permission
     Route::get('/auth/permission',[AuthController::class,'userPermission']);
-    
+
     //All Rules
     Route::get('/auth/roles',[UserController::class,'roles']);
-    
+
     //User Register
     Route::post('/auth/register',[AuthController::class,'createUser']);
     
@@ -37,6 +39,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         return $request->user();
     });
     
+
     //Product
     Route::get('/products',[ProductController::class,'index']);
     Route::get('/products/{id}',[ProductController::class,'show']);
@@ -44,6 +47,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/products/update/{id}',[ProductController::class,'update']);
     Route::delete('/products/delete/{id}',[ProductController::class,'delete']);
     
+    //All Users
+    Route:: get('/users',[UserController::class,'index']);
 });
 
 //User Logout
