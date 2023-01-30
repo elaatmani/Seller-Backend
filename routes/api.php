@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Admin\ProductController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,7 +19,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-
 //User Login
 Route::post('/auth/login',[AuthController::class,'loginUser']);
 
@@ -31,11 +32,18 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     
     //User Register
     Route::post('/auth/register',[AuthController::class,'createUser']);
-
+    
     Route::get('/user', function(Request $request) {
         return $request->user();
     });
-
-    //User Logout
+    
+    //Product
+    Route::get('/products',[ProductController::class,'index']);
+    Route::get('/products/{id}',[ProductController::class,'show']);
+    Route::post('/products/new', [ProductController::class,'create']);
+    Route::post('/products/update/{id}',[ProductController::class,'update']);
+    Route::delete('/products/delete/{id}',[ProductController::class,'delete']);
+    
 });
+//User Logout
 Route::get('/auth/logout',[AuthController::class,'logoutUser']);
