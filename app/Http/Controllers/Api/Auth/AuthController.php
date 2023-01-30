@@ -39,6 +39,7 @@ class AuthController extends Controller
                 if($validateUser->fails()){
                     return response()->json([
                         'status' => false,
+                        'code' => 'VALIDATION_ERROR',
                         'message' => 'validation error',
                         'error' => $validateUser->errors()],
                         401);
@@ -59,6 +60,7 @@ class AuthController extends Controller
 
                 return response()->json([
                     'status' => true,
+                    'code' => 'USER_CREATED',
                     'message' => 'User Created Successfully!',
                     'token' => $user ->createToken("API TOKEN")->plainTextToken],
                     200);
@@ -66,6 +68,7 @@ class AuthController extends Controller
         }catch(\Throwable $th){
             return response()->json([
                 'status' => false,
+                'code' => 'SERVER_ERROR',
                 'message' => $th->getMessage(),
                 'error' => $validateUser->errors()],
                 500);
@@ -92,6 +95,7 @@ class AuthController extends Controller
                return response()->json([
                    'status' => false,
                    'message' => 'validation error',
+                   'code' => 'VALIDATION_ERROR',
                    'error' => $validateUser->errors()],
                    401);
            }
@@ -99,6 +103,7 @@ class AuthController extends Controller
            if(!Auth::attempt($request->only(['email','password']))){
                 return response()->json([
                     'status' => false,
+                    'code' => 'INVALID_CREDENTIALS',
                     'message' => 'Email & Password does not match with our record.',
                 ], 401);
            }
@@ -109,7 +114,6 @@ class AuthController extends Controller
                 // gourp permissions for a user
                 // $user->removeRole('agente');
                 // $user->assignRole('admin');
-
                  $role = Role::findOrFail($user->roles->first()->id);
                  $groupsWithRoles = $role->getPermissionNames();
                 //  $permissios =  $groupsWithRoles;
@@ -117,6 +121,7 @@ class AuthController extends Controller
                 return response()->json([
                     'status' => true,
                     'message' => 'User Logged In Successfully!',
+                    'code' => 'AUTHENTICATION_SUCCESSFUL',
                     'data' =>[ 'token' => $user ->createToken("API TOKEN")->plainTextToken,
                                 'user' => $user,
                                 'permissions' => $groupsWithRoles,
@@ -126,6 +131,7 @@ class AuthController extends Controller
             }else{
                 return response()->json([
                     'status' => false,
+                    'code' => 'NOT_ACTIVE_ERROR',
                     'message' => 'You dont Have Access anymore!',
                      ],
                     500);
@@ -135,6 +141,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage(),
+                'code' => 'SERVER_ERROR',
                 'error' => $validateUser->errors()],
                 500);
         }
@@ -155,6 +162,7 @@ class AuthController extends Controller
             
           return response()->json([
             'status' => true,
+            'code' => 'LOGOUT_SUCCESSFUL',
             'message' => 'User Logged Out Successfully!',
              ],
             200);
@@ -162,6 +170,7 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
+                'code' => 'SERVER_ERROR',
                 'message' => $th->getMessage()],
                 500);
         }
@@ -177,6 +186,7 @@ class AuthController extends Controller
         $groupsWithRoles = $role->getPermissionNames();
         return response()->json([
             'status' => true,
+            'code' => 'SUCCESS',
             'data' => [
                 'permissions' => $groupsWithRoles,
             ],
