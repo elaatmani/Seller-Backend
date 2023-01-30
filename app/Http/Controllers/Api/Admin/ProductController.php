@@ -170,13 +170,21 @@ class ProductController extends Controller
             $product = Product::find($id);
             if(isset($product)){
                 //Validated
-                $validateProduct = Validator::make($request->all(),
+                $productValidator = Validator::make($request->all(),
                 [
                 'name' => 'required',
                 'buying_price' => 'required',
                 'quantity' => 'required'
                 ]);
-                
+
+                if($productValidator->fails()){
+                    return response()->json([
+                        'status' => false,
+                        'code' => 'VALIDATION_ERROR',
+                        'message' => 'validation error',
+                        'error' => $productValidator->errors()],
+                        401);
+                }
                 $product->name = $request->name;
                 $product->buying_price = $request->buying_price;
                 $product->quantity = $request->quantity;

@@ -31,15 +31,12 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     //All Rules
     Route::get('/auth/roles',[UserController::class,'roles']);
-
-    //User Register
-    Route::post('/auth/register',[AuthController::class,'createUser']);
     
+    //Auth User
     Route::get('/user', function(Request $request) {
         return $request->user();
     });
     
-
     //Product
     Route::get('/products',[ProductController::class,'index']);
     Route::get('/products/{id}',[ProductController::class,'show']);
@@ -49,6 +46,10 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     
     //All Users
     Route:: get('/users',[UserController::class,'index']);
+    Route:: get('/users/{id}',[UserController::class,'show']);
+    Route::post('/auth/register',[AuthController::class,'createUser']);
+    Route:: post('/users/update/{id}',[UserController::class,'update']);
+    Route::delete('/users/delete/{id}',[UserController::class,'delete']);
 });
 
 //User Logout
