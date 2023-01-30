@@ -22,6 +22,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         Permission::create(['name' => 'user_show']);
         Permission::create(['name' => 'user_update']);
+        Permission::create(['name' => 'user_access']);
 
 
         Permission::create(['name' => 'product_show']);
@@ -66,7 +67,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // for admin
         $role = Role::create(['name' => 'admin']);
-        $role->givePermissionTo(['user_show' ,'user_update' ,
+        $role->givePermissionTo(['user_show' ,'user_update' ,'user_access',
         'users_show','users_create' ,'users_update' ,'users_delete' ,'users_access', 
         'product_show','product_create' ,'product_update' ,'product_delete' ,'product_access',
         'inventory_state_show','inventory_state_create' ,'inventory_state_update' ,'inventory_state_delete' ,'inventory_state_access',
@@ -77,12 +78,12 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // for agente
         $role = Role::create(['name' => 'agente'])
-            ->givePermissionTo(['user_show' ,'user_update' ,
+            ->givePermissionTo(['user_show' ,'user_update' ,'user_access',
             'order_show','order_create' ,'order_update' ,'order_delete' ,'order_access']);
 
         // for delivery
         $role = Role::create(['name' => 'delivery']);
-        $role->givePermissionTo(['user_show' ,'user_update' ,
+        $role->givePermissionTo(['user_show' ,'user_update' ,'user_access',
         'result_show','result_create' ,'result_update' ,'result_delete' ,'result_access']);
     }
 }
