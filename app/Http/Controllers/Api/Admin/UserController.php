@@ -85,7 +85,7 @@ class UserController extends Controller
 
     /**
      * Display the specified resource.
-     *
+     * @param  Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -101,14 +101,22 @@ class UserController extends Controller
                     405);
             }
             $user = User::find($id);
+            if(isset($user)){
+                return response()->json([
+                    'status' => true,
+                    'code' => 'USER_SUCCESS',
+                    'data' => [
+                        'user' => $user
+                    ],
+                    ],
+                    200); 
+            }
             return response()->json([
-                'status' => true,
-                'code' => 'USER_SUCCESS',
-                'data' => [
-                    'user' => $user
+                'status' => false,
+                'code' => 'USER_NOT_FOUND',
+                'message' => 'User Does Not Exist'
                 ],
-                ],
-                200); 
+                404);
         }catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -175,9 +183,9 @@ class UserController extends Controller
                     200); 
             }
             return response()->json([
-                'status' => true,
+                'status' => false,
                 'code' => 'USER_NOT_FOUNDED',
-                'message' => 'User Not Exist!'
+                'message' => 'User Does Not Exist'
                 ],
                 404); 
         }catch (\Throwable $th) {
@@ -221,7 +229,7 @@ class UserController extends Controller
             return  response()->json([
                         'status' => false,
                         'code' => 'USER_NOT_FOUND',
-                        'message' => 'User Not Exist!',
+                        'message' => 'User Does Not Exist',
                         404]);
 
     }catch(\Throwable $th){
