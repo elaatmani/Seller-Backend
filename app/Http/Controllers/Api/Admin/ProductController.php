@@ -14,7 +14,7 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         if(!$request->user()->can('product_show')){
             return response()->json([
@@ -35,7 +35,7 @@ class ProductController extends Controller
              ],
             200); 
     }
-    
+
 
     /**
      * Show the form for creating a new resource.
@@ -107,7 +107,7 @@ class ProductController extends Controller
      * Display the specified resource.
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request,$id)
     {
         try{
             if(!$request->user()->can('product_show')){
@@ -221,9 +221,17 @@ class ProductController extends Controller
      * @param  Request $request
      * @return \Illuminate\Http\Response
      */
-    public function delete($id)
+    public function delete(Request $request,$id)
     {
         try{
+            if(!$request->user()->can('product_delete')){
+                return response()->json([
+                   'status' => false,
+                   'code' => 'NOT_ALLOWED',
+                   'message' => 'You Dont Have Access To Delete the Product',
+                   ],
+                   405);
+              }
             
                 Product::where('id',$id)->delete();
                 return response()->json([
