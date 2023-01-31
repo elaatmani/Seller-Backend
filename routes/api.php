@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\ProductController;
-
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +49,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     //Main Account
     Route::get('/user', [UserController::class,'showUserAccount']);
     Route::post('/user/update', [UserController::class,'updateAccount']);
+
 });
 
 //User Logout

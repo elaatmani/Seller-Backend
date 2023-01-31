@@ -177,6 +177,13 @@ class UserController extends Controller
                         $imagePath = 'user/images/'.$imageName;
                         // Upload the Image
                         Image::make($image_tmp)->save($imagePath);
+
+                        $oldImage = $user->image;
+                        if(!empty($oldImage)){
+                            if(file_exists('account/product/images/'.$oldImage)){
+                                unlink('account/product/images/'.$oldImage);
+                            }
+                        }
                     }
                 }else if(!empty($user->image)){
                     $imageName = $user->image;
@@ -188,9 +195,9 @@ class UserController extends Controller
                 $user->lastname = $request->lastname;
                 $user->phone = $request->phone;
                 $user->email = $request->email;
+                $user->photo = $imageName;
                 $user->password = Hash::make($request->password);
                 $user->status = $request->status;
-                $user->photo = $imageName;
                     
                 $user->save();
 
@@ -298,12 +305,39 @@ class UserController extends Controller
                         'error' => $userValidator->errors()],
                         401);
                 }
+                
 
                 $user = User::find($request->user()->id);
+
+                //Upload User Photo
+                if($request->hasFile('user_image')){
+                    $image_tmp = $request->file('user_image');
+                    if($image_tmp->isValid()){
+                        // Get Image Extension
+                        $extension = $image_tmp->getClientOriginalExtension();
+                        // Generate New Image Name
+                        $imageName = rand(111,99999).'.'.$extension;
+                        $imagePath = 'user/images/'.$imageName;
+                        // Upload the Image
+                        Image::make($image_tmp)->save($imagePath);
+
+                        $oldImage = $user->photo;
+                        if(!empty($oldImage)){
+                            if(file_exists('account/product/images/'.$oldImage)){
+                                unlink('account/product/images/'.$oldImage);
+                            }
+                        }
+                    }
+                }else if(!empty($user->image)){
+                    $imageName = $user->image;
+                }else{
+                    $imageName = "";
+                }
 
                 $user->firstname = $request->firstname;
                 $user->lastname = $request->lastname;
                 $user->phone = $request->phone;
+                $user->photo = $imageName;
                 $user->password = Hash::make($request->password);
                 $user->status = $request->status;
                     

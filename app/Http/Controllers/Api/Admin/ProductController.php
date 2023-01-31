@@ -198,6 +198,13 @@ class ProductController extends Controller
                         $imagePath = 'account/product/images/'.$imageName;
                         // Upload the Image
                         Image::make($image_tmp)->save($imagePath);
+
+                        $oldImage = $product->image;
+                        if(!empty($oldImage)){
+                            if(file_exists('account/product/images/'.$oldImage)){
+                                unlink('account/product/images/'.$oldImage);
+                            }
+                        }
                     }
                 }else if(!empty($product->image)){
                     $imageName = $product->image;
