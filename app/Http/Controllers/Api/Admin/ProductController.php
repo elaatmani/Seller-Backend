@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Intervention\Image\Facades\Image;
 
 class ProductController extends Controller
 {
@@ -185,14 +186,32 @@ class ProductController extends Controller
                         'error' => $productValidator->errors()],
                         401);
                 }
+
+                //Upload Product Image
+                if($request->hasFile('product_image')){
+                    $image_tmp = $request->file('product_image');
+                    if($image_tmp->isValid()){
+                        // Get Image Extension
+                        $extension = $image_tmp->getClientOriginalExtension();
+                        // Generate New Image Name
+                        $imageName = rand(111,99999).'.'.$extension;
+                        $imagePath = 'account/product/images/'.$imageName;
+                        // Upload the Image
+                        Image::make($image_tmp)->save($imagePath);
+                    }
+                }else if(!empty($product->image)){
+                    $imageName = $product->image;
+                }else{
+                    $imageName = "";
+                }
+
                 $product->name = $request->name;
                 $product->buying_price = $request->buying_price;
                 $product->quantity = $request->quantity;
                 $product->size = $request->size;
                 $product->color = $request->color;
-                $product->image = $request->image;
+                $product->image = $imageName;
                 $product->description = $request->description;
-                $product->status = 1;
                     
 
 

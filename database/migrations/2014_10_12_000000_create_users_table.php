@@ -19,7 +19,9 @@ return new class extends Migration
             $table->string('lastname');
             $table->string('phone');
             $table->string('email')->unique();
+            $table->string('photo')->nullable();
             $table->string('password');
+            $table->tinyInteger('is_online')->default(0);
             $table->tinyInteger('status');
             $table->rememberToken();
             $table->timestamps();

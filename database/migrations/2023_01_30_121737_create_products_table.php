@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('name');
             $table->integer('buying_price');
             $table->integer('quantity');
-            $table->string('size');
-            $table->string('color');
-            $table->string('image');
-            $table->text('description');
-            $table->tinyInteger('status');
+            $table->string('size')->nullable();
+            $table->string('color')->nullable();
+            $table->string('image')->nullable();
+            $table->text('description')->nullable();
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }

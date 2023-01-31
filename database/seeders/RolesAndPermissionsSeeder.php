@@ -81,6 +81,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ->givePermissionTo(['user_show' ,'user_update' ,'user_access',
             'order_show','order_create' ,'order_update' ,'order_delete' ,'order_access']);
 
+            
         // for delivery
         $role = Role::create(['name' => 'delivery']);
         $role->givePermissionTo(['user_show' ,'user_update' ,'user_access',

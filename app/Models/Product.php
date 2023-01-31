@@ -16,7 +16,6 @@ class Product extends Model
         'size',
         'color',
         'image',
-        'description',
-        'status'
+        'description'
     ];
 }

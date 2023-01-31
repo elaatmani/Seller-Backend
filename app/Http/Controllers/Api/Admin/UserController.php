@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
-
+use Intervention\Image\Facades\Image;
 
 class UserController extends Controller
 
@@ -166,12 +166,31 @@ class UserController extends Controller
                         401);
                 }
 
+                 //Upload User Photo
+                if($request->hasFile('user_image')){
+                    $image_tmp = $request->file('user_image');
+                    if($image_tmp->isValid()){
+                        // Get Image Extension
+                        $extension = $image_tmp->getClientOriginalExtension();
+                        // Generate New Image Name
+                        $imageName = rand(111,99999).'.'.$extension;
+                        $imagePath = 'user/images/'.$imageName;
+                        // Upload the Image
+                        Image::make($image_tmp)->save($imagePath);
+                    }
+                }else if(!empty($user->image)){
+                    $imageName = $user->image;
+                }else{
+                    $imageName = "";
+                }
+
                 $user->firstname = $request->firstname;
                 $user->lastname = $request->lastname;
                 $user->phone = $request->phone;
                 $user->email = $request->email;
                 $user->password = Hash::make($request->password);
                 $user->status = $request->status;
+                $user->photo = $imageName;
                     
                 $user->save();
 
