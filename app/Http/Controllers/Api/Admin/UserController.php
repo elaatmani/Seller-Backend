@@ -241,4 +241,92 @@ class UserController extends Controller
     }
 
     }
+
+
+    /**
+     * Update account
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateAccount(Request $request)
+    {
+        try {
+            if(!$request->user()->can('user_update')){
+                return response()->json([
+                    'status' => false,
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You Dont Have Access To See Update Users',
+                    ],
+                    405);
+            }
+
+                //validate
+                $userValidator = Validator::make($request->all(),
+                [
+                    'firstname' => 'required',
+                    'lastname' => 'required',
+                    'phone' => 'required',
+                    'password' => 'required',
+                    'status' => 'required'
+                ]);
+
+                if($userValidator->fails()){
+                    return response()->json([
+                        'status' => false,
+                        'code' => 'VALIDATION_ERROR',
+                        'message' => 'validation error',
+                        'error' => $userValidator->errors()],
+                        401);
+                }
+
+                $user = User::find($request->user()->id);
+
+                $user->firstname = $request->firstname;
+                $user->lastname = $request->lastname;
+                $user->phone = $request->phone;
+                $user->password = Hash::make($request->password);
+                $user->status = $request->status;
+                    
+                $user->save();
+
+                return response()->json([
+                    'status' => true,
+                    'code' => 'USER_UPDATED',
+                    'message' => 'User updated Successfully!'
+                    ],
+                    200); 
+
+
+        }catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+                'code' => 'SERVER_ERROR'],
+                500);
+        }
+    }
+    
+        public function showUserAccount(Request $request)
+        {
+            try {
+                $user = $request->user();
+                return response()->json([
+                    'status' => true,
+                    'code' => 'USER_SHOWED',
+                    'data' => [
+                        'user' => $user,
+                    ]
+                    ],
+                    200); 
+    
+            }catch (\Throwable $th) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'],
+                    500);
+            }
+        }
+
 }
