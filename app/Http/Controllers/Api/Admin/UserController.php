@@ -271,13 +271,13 @@ class UserController extends Controller
                         'message' => 'User Does Not Exist',
                         404]);
 
-    }catch(\Throwable $th){
+         }catch(\Throwable $th){
         return response()->json([
             'status' => false,
             'code' => 'SERVER_ERROR',
             'message' => $th->getMessage(),],
             500);
-    }
+        }
 
     }
 

@@ -153,7 +153,7 @@ class AuthController extends Controller
                     'code' => 'NOT_ACTIVE_ERROR',
                     'message' => 'You dont Have Access anymore!',
                      ],
-                    500);
+                    405);
             }
 
         } catch (\Throwable $th) {
