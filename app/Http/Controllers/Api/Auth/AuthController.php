@@ -25,6 +25,14 @@ class AuthController extends Controller
     public function createUser(Request $request)
     {
         try{
+                if(!$request->user()->can('users_create')){
+                    return response()->json([
+                    'status' => false,
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You Dont Have Access To Create User',
+                    ],
+                    405);
+                }
                 //Validated
                 $validateUser = Validator::make($request->all(),
                 [
@@ -35,7 +43,7 @@ class AuthController extends Controller
                 'password' => 'required',
                 'status' => 'required'
                 ]);
-        
+               
                 if($validateUser->fails()){
                     return response()->json([
                         'status' => false,
@@ -45,6 +53,7 @@ class AuthController extends Controller
                         401);
                 }
 
+                
                 $user = User::create([
                     'firstname' => $request->firstname,
                     'lastname' => $request->lastname,
@@ -54,7 +63,8 @@ class AuthController extends Controller
                     'status' => $request->status,
                 ]);
 
-
+                $role = Role::where('id', $request->role)->value('name');
+                $user->assignRole($role);
 
                 // $user->assignRole('agente');
 
@@ -111,20 +121,29 @@ class AuthController extends Controller
            $user = User::where([['email',$request->email],['status',1]])->first();
            if(isset($user)){
 
-                // gourp permissions for a user
-                // $user->removeRole('agente');
-                // $user->assignRole('admin');
+
                  $role = Role::findOrFail($user->roles->first()->id);
                  $groupsWithRoles = $role->getPermissionNames();
-                //  $permissios =  $groupsWithRoles;
-                
+
+
                 return response()->json([
                     'status' => true,
                     'message' => 'User Logged In Successfully!',
                     'code' => 'AUTHENTICATION_SUCCESSFUL',
                     'data' =>[ 'token' => $user ->createToken("API TOKEN")->plainTextToken,
-                                'user' => $user,
-                                'permissions' => $groupsWithRoles,
+                            'user' => [
+                                'id' => $user->id,
+                                'firstname' => $user->firstname,
+                                'lastname' => $user->lastname,
+                                'email' => $user->email,
+                                'photo' => $user->photo,
+                                'phone' => $user->phone,
+                                'status' => $user->status,
+                                "is_online" => $user->is_online,
+                                'role' => $user->roles->first()->name,
+                                'permissions' => $groupsWithRoles
+                            ]
+                                
                               
                 ]],
                     200);

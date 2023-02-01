@@ -30,15 +30,28 @@ class UserController extends Controller
                     ],
                     405);
             }
-            $users = User::all();
+            $users = User::with('role')->get();;
             return response()->json([
                 'status' => true,
                 'code' => 'SHOW_ALL_USERS',
                 'data' => [
-                    'users' => $users
+                    'users' => $users->map(function ($user) {
+                        return [
+                            'id' => $user->id,
+                            'firstname' => $user->firstname,
+                            'lastname' => $user->lastname,
+                            'phone' => $user->phone,
+                            'email' => $user->email,
+                            'photo' => $user->photo,
+                            'is_online' => $user->is_online,
+                            'status' => $user->status,
+                            'created_at' => $user->created_at,
+                            'updated_at' => $user->updated_at,
+                            'role_name' => $user->roles->pluck('name')->first(),      
+                        ];
+                    })
                 ],
-                ],
-                200);
+            ], 200);
         }catch (\Throwable $th) {
             return response()->json([
                 'status' => false,

@@ -42,6 +42,6 @@ class UserSeeder extends Seeder
             'status' => 1
         ]);
 
-        $delivery->assignRole('agente');
+        $delivery->assignRole('delivery');
     }
 }
