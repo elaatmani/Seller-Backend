@@ -45,10 +45,12 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/auth/register',[AuthController::class,'createUser']);
     Route:: post('/users/update/{id}',[UserController::class,'update']);
     Route::delete('/users/delete/{id}',[UserController::class,'delete']);
+    Route::post('/users/status/{id}',[UserController::class,'updateUserStatus']);
     
     //Main Account
     Route::get('/user', [UserController::class,'showUserAccount']);
     Route::post('/user/update', [UserController::class,'updateAccount']);
+
 
 });
 

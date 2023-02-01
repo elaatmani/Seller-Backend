@@ -373,18 +373,24 @@ class UserController extends Controller
         }
     }
     
-        public function showUserAccount(Request $request)
-        {
-            try {
-                $user = $request->user();
-                return response()->json([
-                    'status' => true,
-                    'code' => 'USER_SHOWED',
-                    'data' => [
-                        'user' => $user,
-                    ]
-                    ],
-                    200); 
+     /**
+     * Show account Infos
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function showUserAccount(Request $request)
+    {
+        try {
+            $user = $request->user();
+            return response()->json([
+                'status' => true,
+                'code' => 'USER_SHOWED',
+                'data' => [
+                    'user' => $user,
+                ]
+                ],
+                200); 
     
             }catch (\Throwable $th) {
                 return response()->json([
@@ -394,5 +400,48 @@ class UserController extends Controller
                     500);
             }
         }
+    
+
+     /**
+     * Update User Status
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateUserStatus(Request $request,$id){
+
+        try {
+            if(!$request->user()->can('users_update')){
+                return response()->json([
+                    'status' => false,
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You Dont Have Access To See Update Users',
+                    ],
+                    405);
+            }
+            $user = User::find($id);
+
+            $user->status = $request->status;
+
+            $user->save();
+
+            return response()->json([
+                'status' => true,
+                'code' => 'STATUS_USER_UPDATED',
+                'message' => 'User Status Updated Successfully!'
+                ],
+                200); 
+    
+        }catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+                'code' => 'SERVER_ERROR'],
+                500);
+        }
+            
+
+        
+    }
 
 }
