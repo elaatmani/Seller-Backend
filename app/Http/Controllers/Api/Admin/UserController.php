@@ -421,14 +421,21 @@ class UserController extends Controller
             }
             $user = User::find($id);
 
-            $user->status = $request->status;
+            //test if status false or true
+            if($request->status == 'true'){
+                $userStatus = 1; 
+            }else{
+                $userStatus = 0;
+            }
 
+            $user->status = $userStatus;
             $user->save();
 
             return response()->json([
                 'status' => true,
                 'code' => 'STATUS_USER_UPDATED',
-                'message' => 'User Status Updated Successfully!'
+                'message' => 'User Status Updated Successfully!',
+                'data' => $user->status
                 ],
                 200); 
     
