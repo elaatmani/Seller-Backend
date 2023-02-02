@@ -119,14 +119,26 @@ class UserController extends Controller
                     'status' => true,
                     'code' => 'USER_SUCCESS',
                     'data' => [
-                        'user' => $user
+                        'user' =>  [
+                                'id' => $user->id,
+                                'firstname' => $user->firstname,
+                                'lastname' => $user->lastname,
+                                'phone' => $user->phone,
+                                'email' => $user->email,
+                                'photo' => $user->photo,
+                                'is_online' => $user->is_online,
+                                'status' => $user->status,
+                                'created_at' => $user->created_at,
+                                'updated_at' => $user->updated_at,
+                                'role_name' => $user->roles->pluck('name')->first(),      
+                            ]
                     ],
                     ],
                     200); 
             }
             return response()->json([
                 'status' => false,
-                'code' => 'USER_NOT_FOUND',
+                'code' => 'NOT_FOUND',
                 'message' => 'User Does Not Exist'
                 ],
                 404);
@@ -223,7 +235,7 @@ class UserController extends Controller
             }
             return response()->json([
                 'status' => false,
-                'code' => 'USER_NOT_FOUNDED',
+                'code' => 'NOT_FOUND',
                 'message' => 'User Does Not Exist'
                 ],
                 404); 
@@ -267,7 +279,7 @@ class UserController extends Controller
             }
             return  response()->json([
                         'status' => false,
-                        'code' => 'USER_NOT_FOUND',
+                        'code' => 'NOT_FOUND',
                         'message' => 'User Does Not Exist',
                         404]);
 
@@ -336,8 +348,8 @@ class UserController extends Controller
 
                         $oldImage = $user->photo;
                         if(!empty($oldImage)){
-                            if(file_exists('account/product/images/'.$oldImage)){
-                                unlink('account/product/images/'.$oldImage);
+                            if(file_exists('account/user/images/'.$oldImage)){
+                                unlink('account/user/images/'.$oldImage);
                             }
                         }
                     }

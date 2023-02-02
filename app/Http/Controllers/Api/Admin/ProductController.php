@@ -133,7 +133,7 @@ class ProductController extends Controller
             }else{
                 return response()->json([
                     'status' => false,
-                    'code' => 'PRODUCT_NOT_FOUND',
+                    'code' => 'NOT_FOUND',
                     'message' => 'Product Not Exist',
                     ],
                     404);
@@ -233,7 +233,7 @@ class ProductController extends Controller
             }else{
                 return response()->json([
                     'status' => false,
-                    'code' => 'PRODUCT_NOT_FOUND',
+                    'code' => 'NOT_FOUND',
                     'message' => 'Product Not Exist',
                     ],
                     404);
@@ -280,7 +280,7 @@ class ProductController extends Controller
             }
             return  response()->json([
                         'status' => false,
-                        'code' => 'PRODUCT_NOT_FOUND',
+                        'code' => 'NOT_FOUND',
                         'message' => 'Product Not Exist!',
                         404]);
 

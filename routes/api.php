@@ -25,19 +25,14 @@ Route::post('/auth/login',[AuthController::class,'loginUser']);
 
 //Sanctum Use
 Route::group(['middleware' => ['auth:sanctum']], function(){
-
-    //User Permission
-    Route::get('/auth/permission',[AuthController::class,'userPermission']);
-
+    
     //All Roles
     Route::get('/auth/roles',[UserController::class,'roles']);
     
-    //Product
-    Route::get('/products',[ProductController::class,'index']);
-    Route::get('/products/{id}',[ProductController::class,'show']);
-    Route::post('/products/new', [ProductController::class,'create']);
-    Route::post('/products/update/{id}',[ProductController::class,'update']);
-    Route::delete('/products/delete/{id}',[ProductController::class,'delete']);
+    //Main Account
+    Route::get('/user', [UserController::class,'showUserAccount']);
+    Route::post('/user/update', [UserController::class,'updateAccount']);
+    Route::get('/auth/permission',[AuthController::class,'userPermission']);
     
     //All Users
     Route:: get('/users',[UserController::class,'index']);
@@ -47,10 +42,14 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::delete('/users/delete/{id}',[UserController::class,'delete']);
     Route::post('/users/status/{id}',[UserController::class,'updateUserStatus']);
     
-    //Main Account
-    Route::get('/user', [UserController::class,'showUserAccount']);
-    Route::post('/user/update', [UserController::class,'updateAccount']);
-
+    
+    //Product
+    Route::get('/products',[ProductController::class,'index']);
+    Route::get('/products/{id}',[ProductController::class,'show']);
+    Route::post('/products/new', [ProductController::class,'create']);
+    Route::post('/products/update/{id}',[ProductController::class,'update']);
+    Route::delete('/products/delete/{id}',[ProductController::class,'delete']);
+    
 
 });
 
