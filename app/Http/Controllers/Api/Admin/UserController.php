@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Intervention\Image\Facades\Image;
+use Illuminate\Validation\Rule;
+
 
 class UserController extends Controller
 
@@ -177,7 +179,11 @@ class UserController extends Controller
                     'firstname' => 'required',
                     'lastname' => 'required',
                     'phone' => 'required',
-                    'email' => 'required|email|unique:users,email',
+                    'email' =>  [
+                        'required',
+                        'email',
+                        Rule::unique('users')->ignore($user),
+                    ],
                     'password' => 'required',
                     'status' => 'required'
                 ]);
@@ -199,14 +205,14 @@ class UserController extends Controller
                         $extension = $image_tmp->getClientOriginalExtension();
                         // Generate New Image Name
                         $imageName = rand(111,99999).'.'.$extension;
-                        $imagePath = 'user/images/'.$imageName;
+                        $imagePath = 'account/user/images/'.$imageName;
                         // Upload the Image
                         Image::make($image_tmp)->save($imagePath);
 
-                        $oldImage = $user->image;
+                        $oldImage = $user->photo;
                         if(!empty($oldImage)){
-                            if(file_exists('account/product/images/'.$oldImage)){
-                                unlink('account/product/images/'.$oldImage);
+                            if(file_exists('account/user/images/'.$oldImage)){
+                                unlink('account/user/images/'.$oldImage);
                             }
                         }
                     }
@@ -342,11 +348,12 @@ class UserController extends Controller
                         $extension = $image_tmp->getClientOriginalExtension();
                         // Generate New Image Name
                         $imageName = rand(111,99999).'.'.$extension;
-                        $imagePath = 'user/images/'.$imageName;
+                        $imagePath = 'account/user/images/'.$imageName;
                         // Upload the Image
                         Image::make($image_tmp)->save($imagePath);
 
                         $oldImage = $user->photo;
+
                         if(!empty($oldImage)){
                             if(file_exists('account/user/images/'.$oldImage)){
                                 unlink('account/user/images/'.$oldImage);
