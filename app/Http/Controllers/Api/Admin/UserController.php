@@ -228,15 +228,17 @@ class UserController extends Controller
                 $user->photo = $imageName;
                 if($request->updatePassword == 'true'){
                     $user->password = Hash::make($request->password);
+                }else{
+                    $user->password = $user->password;
                 }
                 $user->status = $request->status;
-                    
                 $user->save();
 
                 return response()->json([
                     'status' => true,
                     'code' => 'USER_UPDATED',
-                    'message' => 'User updated Successfully!'
+                    'message' => 'User updated Successfully!',
+                    'data' => $user->password
                     ],
                     200); 
             }
