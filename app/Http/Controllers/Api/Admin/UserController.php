@@ -184,7 +184,6 @@ class UserController extends Controller
                         'email',
                         Rule::unique('users')->ignore($user),
                     ],
-                    'password' => 'required',
                     'status' => 'required'
                 ]);
 
@@ -227,7 +226,9 @@ class UserController extends Controller
                 $user->phone = $request->phone;
                 $user->email = $request->email;
                 $user->photo = $imageName;
-                $user->password = Hash::make($request->password);
+                if($request->updatePassword == 'true'){
+                    $user->password = Hash::make($request->password);
+                }
                 $user->status = $request->status;
                     
                 $user->save();
