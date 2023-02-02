@@ -210,14 +210,16 @@ class UserController extends Controller
                         Image::make($image_tmp)->save($imagePath);
 
                         $oldImage = $user->photo;
-                        if(!empty($oldImage)){
-                            if(file_exists('account/user/images/'.$oldImage)){
-                                unlink('account/user/images/'.$oldImage);
+                    if(!empty($oldImage)){
+                            if($oldImage != 'photo.png'){
+                                if(file_exists('account/user/images/'.$oldImage)){
+                                    unlink('account/user/images/'.$oldImage);
+                                }
                             }
                         }
+                    }else if(!empty($user->image)){
+                        $imageName = $user->image;
                     }
-                }else if(!empty($user->image)){
-                    $imageName = $user->image;
                 }
 
                 $user->firstname = $request->firstname;

@@ -24,35 +24,35 @@ class AuthController extends Controller
     public function createUser(Request $request)
     {
         try{    
-            if(!$request->user()->can('users_create')){
-                return response()->json([
+       
+                if(!$request->user()->can('users_create')){
+                    return response()->json([
                     'status' => false,
                     'code' => 'NOT_ALLOWED',
                     'message' => 'You Dont Have Access To Create User',
-                ],
-                405);
+                    ],
+                    405);
                 }
                 //Validated
                 $validateUser = Validator::make($request->all(),
                 [
-                    'firstname' => 'required',
-                    'lastname' => 'required',
-                    'phone' => 'required',
-                    'email' => 'required|email|unique:users,email',
+                'firstname' => 'required',
+                'lastname' => 'required',
+                'phone' => 'required',
+                'email' => 'required|email|unique:users,email',
                 'password' => 'required',
                 'status' => 'required'
-            ]);
-            
-            if($validateUser->fails()){
-                return response()->json([
-                    'status' => false,
-                    'code' => 'VALIDATION_ERROR',
-                    'message' => 'validation error',
-                    'error' => $validateUser->errors()],
-                    401);
+                ]);
+               
+                if($validateUser->fails()){
+                    return response()->json([
+                        'status' => false,
+                        'code' => 'VALIDATION_ERROR',
+                        'message' => 'validation error',
+                        'error' => $validateUser->errors()],
+                        401);
                 }
-                
-                $imageName = null;
+
                 if($request->hasFile('user_image')){
                     $image_tmp = $request->file('user_image');
                     if($image_tmp->isValid()){
@@ -64,6 +64,8 @@ class AuthController extends Controller
                         // Upload the Image
                         Image::make($image_tmp)->save($imagePath);
                     }
+                }else{
+                    $imageName = "photo.png";
                 }
 
                 $user = User::create([
