@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-
-
+use Intervention\Image\Facades\Image;
 
 class AuthController extends Controller
 {
@@ -53,13 +52,26 @@ class AuthController extends Controller
                         401);
                 }
 
-                
+                if($request->hasFile('user_image')){
+                    $image_tmp = $request->file('user_image');
+                    if($image_tmp->isValid()){
+                        // Get Image Extension
+                        $extension = $image_tmp->getClientOriginalExtension();
+                        // Generate New Image Name
+                        $imageName = rand(111,99999).'.'.$extension;
+                        $imagePath = 'account/user/images/'.$imageName;
+                        // Upload the Image
+                        Image::make($image_tmp)->save($imagePath);
+                    }
+                }
+
                 $user = User::create([
                     'firstname' => $request->firstname,
                     'lastname' => $request->lastname,
                     'phone' => $request->phone,
                     'email' => $request->email, 
                     'password' => Hash::make($request->password),
+                    'photo' => $imageName,
                     'status' => $request->status,
                 ]);
 
