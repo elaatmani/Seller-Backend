@@ -218,8 +218,6 @@ class UserController extends Controller
                     }
                 }else if(!empty($user->image)){
                     $imageName = $user->image;
-                }else{
-                    $imageName = "";
                 }
 
                 $user->firstname = $request->firstname;
@@ -350,8 +348,8 @@ class UserController extends Controller
 
                 $user = User::find($request->user()->id);
 
-                //Upload User Photo
-                if($request->hasFile('user_image')){
+                  //Upload User Photo
+                  if($request->hasFile('user_image')){
                     $image_tmp = $request->file('user_image');
                     if($image_tmp->isValid()){
                         // Get Image Extension
@@ -363,7 +361,6 @@ class UserController extends Controller
                         Image::make($image_tmp)->save($imagePath);
 
                         $oldImage = $user->photo;
-
                         if(!empty($oldImage)){
                             if(file_exists('account/user/images/'.$oldImage)){
                                 unlink('account/user/images/'.$oldImage);
@@ -372,9 +369,8 @@ class UserController extends Controller
                     }
                 }else if(!empty($user->image)){
                     $imageName = $user->image;
-                }else{
-                    $imageName = "";
                 }
+
 
                 $user->firstname = $request->firstname;
                 $user->lastname = $request->lastname;
