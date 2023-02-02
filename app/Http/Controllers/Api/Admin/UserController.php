@@ -184,7 +184,8 @@ class UserController extends Controller
                         'email',
                         Rule::unique('users')->ignore($user),
                     ],
-                    'status' => 'required'
+                    'status' => 'required',
+                    'role' => 'required'
                 ]);
 
                 if($userValidator->fails()){
@@ -232,6 +233,12 @@ class UserController extends Controller
                     $user->password = $user->password;
                 }
                 $user->status = $request->status;
+
+                // remove existing role
+                $user->removeRole($user->roles->first()->name);
+                $role = Role::where('id', $request->role)->value('name');
+                // assign new role
+                $user->assignRole($role);
                 $user->save();
 
                 return response()->json([
