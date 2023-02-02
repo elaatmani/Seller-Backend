@@ -132,7 +132,7 @@ class UserController extends Controller
                                 'status' => $user->status,
                                 'created_at' => $user->created_at,
                                 'updated_at' => $user->updated_at,
-                                'role_name' => $user->roles->pluck('name')->first(),      
+                                'role' => $user->roles->pluck('id')->first(),      
                             ]
                     ],
                     ],
