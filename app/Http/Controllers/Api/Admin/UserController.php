@@ -219,6 +219,8 @@ class UserController extends Controller
                         }
                     }else if(!empty($user->image)){
                         $imageName = $user->image;
+                    }else{
+                        $imageName = null;
                     }
                 }
 
