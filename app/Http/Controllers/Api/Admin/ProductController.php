@@ -58,8 +58,8 @@ class ProductController extends Controller
                 $validateProduct = Validator::make($request->all(),
                 [
                 'name' => 'required',
-                'buying_price' => 'required',
-                'quantity' => 'required'
+                'buying_price' => 'required|integer',
+                'quantity' => 'required|integer'
                 ]);
         
                 if($validateProduct->fails()){
