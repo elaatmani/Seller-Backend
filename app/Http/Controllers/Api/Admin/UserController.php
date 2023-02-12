@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
-use Intervention\Image\Facades\Image;
 use Illuminate\Validation\Rule;
 
 
@@ -197,38 +196,10 @@ class UserController extends Controller
                         401);
                 }
 
-                 //Upload User Photo
-                if($request->hasFile('user_image')){
-                    $image_tmp = $request->file('user_image');
-                    if($image_tmp->isValid()){
-                        // Get Image Extension
-                        $extension = $image_tmp->getClientOriginalExtension();
-                        // Generate New Image Name
-                        $imageName = rand(111,99999).'.'.$extension;
-                        $imagePath = 'account/user/images/'.$imageName;
-                        // Upload the Image
-                        Image::make($image_tmp)->save($imagePath);
-
-                        $oldImage = $user->photo;
-                    if(!empty($oldImage)){
-                            if($oldImage != 'photo.png'){
-                                if(file_exists('account/user/images/'.$oldImage)){
-                                    unlink('account/user/images/'.$oldImage);
-                                }
-                            }
-                        }
-                    }else if(!empty($user->image)){
-                        $imageName = $user->image;
-                    }else{
-                        $imageName = null;
-                    }
-                }
-
                 $user->firstname = $request->firstname;
                 $user->lastname = $request->lastname;
                 $user->phone = $request->phone;
                 $user->email = $request->email;
-                $user->photo = $imageName;
                 if($request->updatePassword == 'true'){
                     $user->password = Hash::make($request->password);
                 }else{
@@ -352,34 +323,12 @@ class UserController extends Controller
 
                 $user = User::find($request->user()->id);
 
-                  //Upload User Photo
-                  if($request->hasFile('user_image')){
-                    $image_tmp = $request->file('user_image');
-                    if($image_tmp->isValid()){
-                        // Get Image Extension
-                        $extension = $image_tmp->getClientOriginalExtension();
-                        // Generate New Image Name
-                        $imageName = rand(111,99999).'.'.$extension;
-                        $imagePath = 'account/user/images/'.$imageName;
-                        // Upload the Image
-                        Image::make($image_tmp)->save($imagePath);
-
-                        $oldImage = $user->photo;
-                        if(!empty($oldImage)){
-                            if(file_exists('account/user/images/'.$oldImage)){
-                                unlink('account/user/images/'.$oldImage);
-                            }
-                        }
-                    }
-                }else if(!empty($user->image)){
-                    $imageName = $user->image;
-                }
+            
 
 
                 $user->firstname = $request->firstname;
                 $user->lastname = $request->lastname;
                 $user->phone = $request->phone;
-                $user->photo = $imageName;
                 $user->password = Hash::make($request->password);
                 $user->status = $request->status;
                     
