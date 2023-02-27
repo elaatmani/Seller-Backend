@@ -61,8 +61,9 @@ class ProductController extends Controller
                         $validateProduct = Validator::make($request->all(),
                         [
                         'name' => 'required',
-                        'ref' => 'required|unique',
+                        'ref' => 'required|unique:product,ref',
                         'buying_price' => 'required|integer',
+                        'selling_price' => 'required|integer',
                         'quantity' => 'required|integer'
                         ]);
                 
@@ -85,8 +86,7 @@ class ProductController extends Controller
                         ]);
 
                         $data = $request->all();
-                        foreach($data['variants'] as $key => $value){
-                   
+                        foreach($data['variants'] as $key => $value){                 
                                 ProductVariation::create([
                                     'product_id' => $product->id(),
                                     'size'  => $data['size'][$key],
