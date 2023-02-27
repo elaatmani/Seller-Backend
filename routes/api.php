@@ -3,8 +3,6 @@
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\ProductController;
-use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,8 +24,11 @@ Route::post('/auth/login',[AuthController::class,'loginUser']);
 //Sanctum Use
 Route::group(['middleware' => ['auth:sanctum']], function(){
     
-    //All Roles
+    //Roles
     Route::get('/auth/roles',[UserController::class,'roles']);
+    Route::post('/roles/add',[UserController::class,'createRole']);
+    Route::post('/roles/update/{id}',[UserController::class,'updateRole']);
+    Route::delete('/roles/delete/{id}',[UserController::class,'deleteRole']);
     
     //Main Account
     Route::get('/user', [UserController::class,'showUserAccount']);
@@ -41,6 +42,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route:: post('/users/update/{id}',[UserController::class,'update']);
     Route::delete('/users/delete/{id}',[UserController::class,'delete']);
     Route::post('/users/status/{id}',[UserController::class,'updateUserStatus']);
+
+ 
     
     
     //Product

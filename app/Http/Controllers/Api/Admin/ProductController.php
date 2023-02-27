@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
+use App\Models\ProductVariation;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 
@@ -54,43 +55,53 @@ class ProductController extends Controller
                        ],
                        405);
                     }
-                //Validated
-                $validateProduct = Validator::make($request->all(),
-                [
-                'name' => 'required',
-                'buying_price' => 'required|integer',
-                'quantity' => 'required|integer'
-                ]);
-        
-                if($validateProduct->fails()){
-                    return response()->json([
-                        'status' => false,
-                        'code' => 'VALIDATION_ERROR',
-                        'message' => 'validation error',
-                        'error' => $validateProduct->errors()],
-                        401);
-                }
 
-                $product = Product::create([
-                    'name' => $request->name,
-                    'buying_price' => $request->buying_price,
-                    'quantity' => $request->quantity,
-                    'size' => $request->size, 
-                    'color' => $request->color,
-                    'image' => $request->image,
-                    'description' => $request->description,
-                    'status' => 1,
-                ]);
+                
+                        //Validated
+                        $validateProduct = Validator::make($request->all(),
+                        [
+                        'name' => 'required',
+                        'ref' => 'required|unique',
+                        'buying_price' => 'required|integer',
+                        'quantity' => 'required|integer'
+                        ]);
+                
+                        if($validateProduct->fails()){
+                            return response()->json([
+                                'status' => false,
+                                'code' => 'VALIDATION_ERROR',
+                                'message' => 'validation error',
+                                'error' => $validateProduct->errors()],
+                                401);
+                        }
 
+                        $product = Product::create([
+                            'name' => $request->name,
+                            'ref' => $request->ref,
+                            'buying_price' => $request->buying_price,
+                            'selling_price' => $request->selling_price,
+                            'description' => $request->description,
+                            'status' => 1
+                        ]);
 
-                return response()->json([
-                    'status' => true,
-                    'code' => 'PRODUCT_CREATED',
-                    'message' => 'Product Created Successfully!',
-                    'data' => [
-                        'product' => $product
-                    ]],
-                    200);
+                        $data = $request->all();
+                        foreach($data['variants'] as $key => $value){
+                   
+                                ProductVariation::create([
+                                    'product_id' => $product->id(),
+                                    'size'  => $data['size'][$key],
+                                    'color' => $data['color'][$key],
+                                    'quantity' => $data['quantity'][$key]
+                                ]);
+                        
+                        }       
+
+                                return response()->json([
+                                    'status' => true,
+                                    'code' => 'PRODUCT_CREATED',
+                                    'message' => 'Product Created Successfully!'],
+                                    200);
+                
 
         }catch(\Throwable $th){
             return response()->json([
@@ -216,13 +227,11 @@ class ProductController extends Controller
                 $product->buying_price = $request->buying_price;
                 $product->quantity = $request->quantity;
                 $product->size = $request->size;
-                $product->color = $request->color;
                 $product->image = $imageName;
                 $product->description = $request->description;
-                    
-
-
                 $product->save();
+              
+
 
                 return response()->json([
                     'status' => true,
@@ -293,4 +302,6 @@ class ProductController extends Controller
     }
 
     }
+
+
 }

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rule;
-
+use Spatie\Permission\Models\Permission;
 
 class UserController extends Controller
 
@@ -23,13 +23,15 @@ class UserController extends Controller
     public function index(Request $request)
     {
         try {
-            if(!$request->user()->can('users_show')){
-                return response()->json([
-                    'status' => false,
-                    'code' => 'NOT_ALLOWED',
-                    'message' => 'You Dont Have Access To See All Users',
+            if (!$request->user()->can('users_show')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To See All Users',
                     ],
-                    405);
+                    405
+                );
             }
             $users = User::with('role')->get();;
             return response()->json([
@@ -48,79 +50,53 @@ class UserController extends Controller
                             'status' => $user->status,
                             'created_at' => $user->created_at,
                             'updated_at' => $user->updated_at,
-                            'role_name' => $user->roles->pluck('name')->first(),      
+                            'role_name' => $user->roles->pluck('name')->first(),
                         ];
                     })
                 ],
             ], 200);
-        }catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage(),
-                'code' => 'SERVER_ERROR'],
-                500);
-        }
-    }
-
-    /**
-     * Display a listing of the Roles.
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function roles(Request $request)
-    {
-        try {
-            if(!$request->user()->can('users_show')){
-                return response()->json([
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
                     'status' => false,
-                    'code' => 'NOT_ALLOWED',
-                    'message' => 'You Dont Have Access To See All Roles',
-                    ],
-                    405);
-            }
-            $roles = Role::get(['id', 'name']);
-            return response()->json([
-                'status' => true,
-                'code' => 'SUCCESS',
-                'data' => [
-                    'roles' => $roles
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
                 ],
-                ],
-                200); 
-        }catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage(),
-                'code' => 'SERVER_ERROR'],
-                500);
+                500
+            );
         }
     }
 
 
+    
+    
     /**
      * Display the specified resource.
      * @param  Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request ,$id)
+    public function show(Request $request, $id)
     {
         try {
-            if(!$request->user()->can('users_show')){
-                return response()->json([
-                    'status' => false,
-                    'code' => 'NOT_ALLOWED',
-                    'message' => 'You Dont Have Access To See Users',
+            if (!$request->user()->can('users_show')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To See Users',
                     ],
-                    405);
+                    405
+                );
             }
             $user = User::find($id);
-            if(isset($user)){
-                return response()->json([
-                    'status' => true,
-                    'code' => 'USER_SUCCESS',
-                    'data' => [
-                        'user' =>  [
+            if (isset($user)) {
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'USER_SUCCESS',
+                        'data' => [
+                            'user' =>  [
                                 'id' => $user->id,
                                 'firstname' => $user->firstname,
                                 'lastname' => $user->lastname,
@@ -131,26 +107,33 @@ class UserController extends Controller
                                 'status' => $user->status,
                                 'created_at' => $user->created_at,
                                 'updated_at' => $user->updated_at,
-                                'role' => $user->roles->pluck('id')->first(),      
-                            ]
+                                'role' => $user->roles->pluck('id')->first(),
+                                ]
+                        ],
                     ],
-                    ],
-                    200); 
+                    200
+                );
             }
-            return response()->json([
-                'status' => false,
-                'code' => 'NOT_FOUND',
-                'message' => 'User Does Not Exist'
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'NOT_FOUND',
+                    'message' => 'User Does Not Exist'
                 ],
-                404);
-        }catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage(),
-                'code' => 'SERVER_ERROR'],
-                500);
+                404
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
         }
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -162,51 +145,58 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            if(!$request->user()->can('users_show')){
-                return response()->json([
-                    'status' => false,
-                    'code' => 'NOT_ALLOWED',
-                    'message' => 'You Dont Have Access To See Update Users',
+            if (!$request->user()->can('users_show')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To See Update Users',
                     ],
-                    405);
+                    405
+                );
             }
             $user = User::find($id);
-            if(isset($user)){
+            if (isset($user)) {
                 //validate
-                $userValidator = Validator::make($request->all(),
-                [
-                    'firstname' => 'required',
-                    'lastname' => 'required',
-                    'phone' => 'required',
-                    'email' =>  [
-                        'required',
-                        'email',
-                        Rule::unique('users')->ignore($user),
-                    ],
-                    'status' => 'required',
-                    'role' => 'required'
-                ]);
+                $userValidator = Validator::make(
+                    $request->all(),
+                    [
+                        'firstname' => 'required',
+                        'lastname' => 'required',
+                        'phone' => 'required',
+                        'email' =>  [
+                            'required',
+                            'email',
+                            Rule::unique('users')->ignore($user),
+                        ],
+                        'status' => 'required',
+                        'role' => 'required'
+                    ]
+                );
 
-                if($userValidator->fails()){
-                    return response()->json([
-                        'status' => false,
-                        'code' => 'VALIDATION_ERROR',
-                        'message' => 'validation error',
-                        'error' => $userValidator->errors()],
-                        401);
+                if ($userValidator->fails()) {
+                    return response()->json(
+                        [
+                            'status' => false,
+                            'code' => 'VALIDATION_ERROR',
+                            'message' => 'validation error',
+                            'error' => $userValidator->errors()
+                        ],
+                        401
+                    );
                 }
 
                 $user->firstname = $request->firstname;
                 $user->lastname = $request->lastname;
                 $user->phone = $request->phone;
                 $user->email = $request->email;
-                if($request->updatePassword == 'true'){
+                if ($request->updatePassword == 'true') {
                     $user->password = Hash::make($request->password);
-                }else{
+                } else {
                     $user->password = $user->password;
                 }
                 $user->status = $request->status;
-
+                
                 // remove existing role
                 $user->removeRole($user->roles->first()->name);
                 $role = Role::where('id', $request->role)->value('name');
@@ -214,28 +204,36 @@ class UserController extends Controller
                 $user->assignRole($role);
                 $user->save();
 
-                return response()->json([
-                    'status' => true,
-                    'code' => 'USER_UPDATED',
-                    'message' => 'User updated Successfully!',
-                    'data' => $user->password
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'USER_UPDATED',
+                        'message' => 'User updated Successfully!',
+                        'data' => $user->password
                     ],
-                    200); 
+                    200
+                );
             }
-            return response()->json([
-                'status' => false,
-                'code' => 'NOT_FOUND',
-                'message' => 'User Does Not Exist'
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'NOT_FOUND',
+                    'message' => 'User Does Not Exist'
                 ],
-                404); 
-        }catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage(),
-                'code' => 'SERVER_ERROR'],
-                500);
+                404
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
         }
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -243,22 +241,24 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function delete(Request $request ,$id)
+    public function delete(Request $request, $id)
     {
-        try{
-            if(!$request->user()->can('users_delete')){
-                return response()->json([
-                   'status' => false,
-                   'code' => 'NOT_ALLOWED',
-                   'message' => 'You Dont Have Access To Delete the User',
-                   ],
-                   405);
-              }
-            
-               
+        try {
+            if (!$request->user()->can('users_delete')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Delete the User',
+                    ],
+                    405
+                );
+            }
+
+
             $user = User::find($id);
-            if(isset($user)){
-                User::where('id',$id)->delete();
+            if (isset($user)) {
+                User::where('id', $id)->delete();
                 return response()->json([
                     'status' => true,
                     'code' => 'USER_DELETED',
@@ -267,19 +267,21 @@ class UserController extends Controller
                 ]);
             }
             return  response()->json([
-                        'status' => false,
-                        'code' => 'NOT_FOUND',
-                        'message' => 'User Does Not Exist',
-                        404]);
-
-         }catch(\Throwable $th){
-        return response()->json([
-            'status' => false,
-            'code' => 'SERVER_ERROR',
-            'message' => $th->getMessage(),],
-            500);
+                'status' => false,
+                'code' => 'NOT_FOUND',
+                'message' => 'User Does Not Exist',
+                404
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
         }
-
     }
 
 
@@ -292,67 +294,85 @@ class UserController extends Controller
     public function updateAccount(Request $request)
     {
         try {
-            if(!$request->user()->can('user_update')){
-                return response()->json([
-                    'status' => false,
-                    'code' => 'NOT_ALLOWED',
-                    'message' => 'You Dont Have Access To See Update Users',
+            if (!$request->user()->can('user_update')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To See Update Users',
                     ],
-                    405);
+                    405
+                );
             }
 
-                //validate
-                $userValidator = Validator::make($request->all(),
+            //validate
+            $userValidator = Validator::make(
+                $request->all(),
                 [
                     'firstname' => 'required',
                     'lastname' => 'required',
                     'phone' => 'required',
                     'password' => 'required',
                     'status' => 'required'
-                ]);
+                ]
+            );
 
-                if($userValidator->fails()){
-                    return response()->json([
+            if ($userValidator->fails()) {
+                return response()->json(
+                    [
                         'status' => false,
                         'code' => 'VALIDATION_ERROR',
                         'message' => 'validation error',
-                        'error' => $userValidator->errors()],
-                        401);
-                }
-                
-
-                $user = User::find($request->user()->id);
-
-            
+                        'error' => $userValidator->errors()
+                    ],
+                    401
+                );
+            }
 
 
-                $user->firstname = $request->firstname;
-                $user->lastname = $request->lastname;
-                $user->phone = $request->phone;
-                $user->password = Hash::make($request->password);
-                $user->status = $request->status;
-                    
-                $user->save();
+            $user = User::find($request->user()->id);
 
-                return response()->json([
+
+
+
+            $user->firstname = $request->firstname;
+            $user->lastname = $request->lastname;
+            $user->phone = $request->phone;
+            $user->password = Hash::make($request->password);
+            $user->status = $request->status;
+
+            $user->save();
+
+            return response()->json(
+                [
                     'status' => true,
                     'code' => 'USER_UPDATED',
                     'message' => 'User updated Successfully!'
-                    ],
-                    200); 
-
-
-        }catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage(),
-                'code' => 'SERVER_ERROR'],
-                500);
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
         }
     }
-    
-     /**
+
+    /**
      * Show account Infos
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    
+
+    /**
+     * Status User Account
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -361,72 +381,289 @@ class UserController extends Controller
     {
         try {
             $user = $request->user();
-            return response()->json([
-                'status' => true,
-                'code' => 'USER_SHOWED',
-                'data' => [
-                    'user' => $user,
-                ]
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'USER_SHOWED',
+                    'data' => [
+                        'user' => $user,
+                    ]
                 ],
-                200); 
-    
-            }catch (\Throwable $th) {
-                return response()->json([
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
                     'status' => false,
                     'message' => $th->getMessage(),
-                    'code' => 'SERVER_ERROR'],
-                    500);
-            }
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
         }
-    
+    }
 
-     /**
+
+    /**
      * Update User Status
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function updateUserStatus(Request $request,$id){
+    public function updateUserStatus(Request $request, $id)
+    {
 
         try {
-            if(!$request->user()->can('users_update')){
-                return response()->json([
-                    'status' => false,
-                    'code' => 'NOT_ALLOWED',
-                    'message' => 'You Dont Have Access To See Update Users',
+            if (!$request->user()->can('users_update')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To See Update Users',
                     ],
-                    405);
+                    405
+                );
             }
             $user = User::find($id);
 
             //test if status false or true
-            if($request->status == 'true'){
-                $userStatus = 1; 
-            }else{
+            if ($request->status == 'true') {
+                $userStatus = 1;
+            } else {
                 $userStatus = 0;
             }
 
             $user->status = $userStatus;
             $user->save();
 
-            return response()->json([
-                'status' => true,
-                'code' => 'STATUS_USER_UPDATED',
-                'message' => 'User Status Updated Successfully!',
-                'data' => $user->status
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'STATUS_USER_UPDATED',
+                    'message' => 'User Status Updated Successfully!',
+                    'data' => $user->status
                 ],
-                200); 
-    
-        }catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage(),
-                'code' => 'SERVER_ERROR'],
-                500);
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
         }
+    }
+    
+
+
+    /**
+     * Display a listing of the Roles.
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function roles(Request $request)
+    {
+        try {
+            if (!$request->user()->can('users_show')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To See All Roles',
+                    ],
+                    405
+                );
+            }
+            $roles = Role::get(['id', 'name']);
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'roles' => $roles
+                    ],
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
+
+
+    
+    /**
+     * Create Roles
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function createRole(Request $request)
+    {
+        try {
+            if (!$request->user()->hasRole('admin')) {
+                return response()->json([
+                    'status' => false,
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You Dont Have Access To Create Role',
+                ], 405);
+            }
+
+            //Validated
+            $validateUser = Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'permissions' => 'required'
+                ]
+            );
+
+            if ($validateUser->fails()) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'VALIDATION_ERROR',
+                        'message' => 'validation error',
+                        'error' => $validateUser->errors()
+                    ],
+                    401
+                );
+            }
+
+            $role = Role::create(['name' => $request->name]);
+            $role->givePermissionTo($request->permissions);
+            
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'message' => 'Role and Permissions Added Successfully!'
+                ],
+                200
+            );
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                    'error' => $validateUser->errors()
+                ],
+                500
+            );
+        }
+    }
+
+
+    /**
+     * Update Roles
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateRole(Request $request,$id)
+    {
+        try {
+            if (!$request->user()->hasRole('admin')) {
+                return response()->json([
+                    'status' => false,
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You Dont Have Access To Update Roles',
+                ], 405);
+            }
+
+            //Validated
+            $validateUser = Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'permissions' => 'required'
+                ]
+            );
+
+
+                
+            if ($validateUser->fails()) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'VALIDATION_ERROR',
+                        'message' => 'validation error',
+                        'error' => $validateUser->errors()
+                    ],
+                    401
+                );
+            }
+
+
+
+
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                    'error' => $validateUser->errors()
+                ],
+                500
+            );
+        }
+    }
+
+
+    /**
+     * Remove the specified resource from storage.
+     * @param Request $request 
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function deleteRole(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->hasRole('admin')) {
+                return response()->json([
+                    'status' => false,
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You Dont Have Access To See Delete Roles',
+                ], 405);
+            }
+
             
 
-        
+            $role = Role::findByName('role_name');
+            $role->revokePermissionTo(Permission::all());
+            $role->delete();
+
+
+          
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
     }
+
+
+
+
+
 
 }

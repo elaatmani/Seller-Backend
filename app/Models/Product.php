@@ -9,6 +9,7 @@ class Product extends Model
 {
     use HasFactory;
 
+  
     protected $fillable = [
         'name',
         'buying_price',
@@ -18,4 +19,9 @@ class Product extends Model
         'image',
         'description'
     ];
+
+    public function variations(){
+        return $this->hasMany('App\Models\ProductVariation');
+    }
+    
 }
