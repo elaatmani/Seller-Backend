@@ -64,7 +64,6 @@ class ProductController extends Controller
                         'ref' => 'required|unique:product,ref',
                         'buying_price' => 'required|integer',
                         'selling_price' => 'required|integer',
-                        'quantity' => 'integer'
                         ]);
                 
                         if($validateProduct->fails()){
