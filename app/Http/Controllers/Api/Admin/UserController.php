@@ -539,7 +539,8 @@ class UserController extends Controller
                     401
                 );
             }
-
+            $data = $request->all();
+            // echo "<pre>";print_r($data["permissions"]);die;
             $role = Role::create(['name' => $request->name]);
             $role->givePermissionTo($request->permissions);
             

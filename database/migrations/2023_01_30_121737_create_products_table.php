@@ -19,10 +19,6 @@ return new class extends Migration
             $table->string('name');
             $table->integer('selling_price');
             $table->integer('buying_price');
-            $table->integer('quantity');
-            $table->string('size')->nullable();
-            $table->string('color')->nullable();
-            $table->string('image')->nullable();
             $table->text('description')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();

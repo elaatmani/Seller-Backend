@@ -61,7 +61,7 @@ class ProductController extends Controller
                         $validateProduct = Validator::make($request->all(),
                         [
                         'name' => 'required',
-                        'ref' => 'required|unique:product,ref',
+                        'ref' => 'required',
                         'buying_price' => 'required|integer',
                         'selling_price' => 'required|integer',
                         ]);
@@ -83,14 +83,15 @@ class ProductController extends Controller
                             'description' => $request->description,
                             'status' => 1
                         ]);
+                        
 
-                        $data = $request->all();
-                        foreach($data['variants'] as $key => $value){                 
+                        foreach($request->variants as  $value){                 
                                 ProductVariation::create([
-                                    'product_id' => $product->id(),
-                                    'size'  => $data['size'][$key],
-                                    'color' => $data['color'][$key],
-                                    'quantity' => $data['quantity'][$key]
+                                    'product_id' => $product->id,
+                                    'product_ref' => $product->ref,
+                                    'size'  => $value['size'],
+                                    'color' => $value['color'],
+                                    'quantity' => $value['quantity']
                                 ]);
                         
                         }       
@@ -98,7 +99,8 @@ class ProductController extends Controller
                                 return response()->json([
                                     'status' => true,
                                     'code' => 'PRODUCT_CREATED',
-                                    'message' => 'Product Created Successfully!'],
+                                    'message' => 'Product Created Successfully!',
+                                ],
                                     200);
                 
 

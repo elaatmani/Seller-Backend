@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('product_variations', function (Blueprint $table) {
             $table->id();
             $table->integer('product_id');
+            $table->string('product_ref');
             $table->string('size');
             $table->string('color');
             $table->integer('quantity');

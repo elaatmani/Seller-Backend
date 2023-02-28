@@ -77,8 +77,8 @@ class RolesAndPermissionsSeeder extends Seeder
 
 
         // for agente
-        $role = Role::create(['name' => 'agente'])
-            ->givePermissionTo(['user_show' ,'user_update' ,'user_access',
+        $role = Role::create(['name' => 'agente']);
+        $role->givePermissionTo(['user_show' ,'user_update' ,'user_access',
             'order_show','order_update' ,'order_access']);
 
             
