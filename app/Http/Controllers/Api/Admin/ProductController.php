@@ -180,14 +180,19 @@ class ProductController extends Controller
                 405);
            }
             
-            $product = Product::find($id);
+            $product = Product::with('variations')->find($id);
+            $productVariant = ProductVariation::where('product_id',$product->id)->delete();
+
+
+            
             if(isset($product)){
                 //Validated
                 $productValidator = Validator::make($request->all(),
                 [
-                'name' => 'required',
-                'buying_price' => 'required|integer',
-                'quantity' => 'required|integer'
+                    'name' => 'required',
+                    'ref' => 'required|unique:products,ref',
+                    'buying_price' => 'required|integer',
+                    'selling_price' => 'required|integer',
                 ]);
 
                 if($productValidator->fails()){
@@ -199,39 +204,22 @@ class ProductController extends Controller
                         401);
                 }
 
-                //Upload Product Image
-                if($request->hasFile('product_image')){
-                    $image_tmp = $request->file('product_image');
-                    if($image_tmp->isValid()){
-                        // Get Image Extension
-                        $extension = $image_tmp->getClientOriginalExtension();
-                        // Generate New Image Name
-                        $imageName = rand(111,99999).'.'.$extension;
-                        $imagePath = 'account/product/images/'.$imageName;
-                        // Upload the Image
-                        Image::make($image_tmp)->save($imagePath);
-
-                        $oldImage = $product->image;
-                        if(!empty($oldImage)){
-                            if(file_exists('account/product/images/'.$oldImage)){
-                                unlink('account/product/images/'.$oldImage);
-                            }
-                        }
-                    }
-                }else if(!empty($product->image)){
-                    $imageName = $product->image;
-                }else{
-                    $imageName = "";
-                }
-
                 $product->name = $request->name;
+                $product->ref = $request->ref;
                 $product->buying_price = $request->buying_price;
-                $product->quantity = $request->quantity;
-                $product->size = $request->size;
-                $product->image = $imageName;
+                $product->selling_price = $request->selling_price;
                 $product->description = $request->description;
+                foreach($request->variants as $variant){
+                    $productVariant = new ProductVariation();
+                    $productVariant->product_id=$product->id;
+                    $productVariant->product_ref=$request->ref;
+                    $productVariant->quantity=$variant['quantity'];
+                    $productVariant->size =$variant['size'];
+                    $productVariant->color =$variant['color'];
+                    $productVariant->save();
+                }
                 $product->save();
-              
+                
 
 
                 return response()->json([
