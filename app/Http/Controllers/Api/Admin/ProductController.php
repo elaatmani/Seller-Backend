@@ -132,7 +132,7 @@ class ProductController extends Controller
                    405);
                 }
 
-            $product = Product::find($id);
+            $product = Product::with('variations')->find($id);
             if(isset($product)){
                 return response()->json([
                     'status' => true,
