@@ -539,8 +539,8 @@ class UserController extends Controller
                     401
                 );
             }
-            $data = $request->all();
-            // echo "<pre>";print_r($data["permissions"]);die;
+
+
             $role = Role::create(['name' => $request->name]);
             $role->givePermissionTo($request->permissions);
             
@@ -644,7 +644,7 @@ class UserController extends Controller
 
             
 
-            $role = Role::findByName('role_name');
+            $role = Role::findById($id);
             $role->revokePermissionTo(Permission::all());
             $role->delete();
 
@@ -661,10 +661,5 @@ class UserController extends Controller
             );
         }
     }
-
-
-
-
-
 
 }
