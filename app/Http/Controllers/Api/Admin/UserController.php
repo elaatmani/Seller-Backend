@@ -606,9 +606,19 @@ class UserController extends Controller
                     401
                 );
             }
+            $role = Role::findById($id);
+            $role->update(['name' => $request->name]);
+            $role->syncPermissions([$request->permissions]);
 
-
-
+            
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'message' => 'Role and Permissions Updated Successfully!'
+                ],
+                200
+            );
 
 
         } catch (\Throwable $th) {
