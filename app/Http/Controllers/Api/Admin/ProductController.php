@@ -26,7 +26,7 @@ class ProductController extends Controller
                ],
                405);
             }
-        $products = Product::all();
+            $products = Product::with('variations')->get();
 
         return response()->json([
             'status' => true,
