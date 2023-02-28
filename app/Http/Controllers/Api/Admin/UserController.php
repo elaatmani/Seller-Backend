@@ -649,7 +649,15 @@ class UserController extends Controller
             $role->delete();
 
 
-          
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'message' => 'Role and Permissions Deleted Successfully!'
+                ],
+                200
+            );
+
         } catch (\Throwable $th) {
             return response()->json(
                 [
