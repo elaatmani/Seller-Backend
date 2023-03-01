@@ -180,8 +180,7 @@ class ProductController extends Controller
                 405);
            }
             
-            $product = Product::with('variations')->find($id);
-            $productVariant = ProductVariation::where('product_id',$product->id)->delete();
+            $product = Product::findOrFail($id);
 
 
             
@@ -190,7 +189,7 @@ class ProductController extends Controller
                 $productValidator = Validator::make($request->all(),
                 [
                     'name' => 'required',
-                    'ref' => 'required|unique:products,ref',
+                    'ref' => 'required|unique:products,ref,'.$product->id,
                     'buying_price' => 'required|integer',
                     'selling_price' => 'required|integer',
                 ]);
@@ -204,22 +203,30 @@ class ProductController extends Controller
                         401);
                 }
 
+                
                 $product->name = $request->name;
                 $product->ref = $request->ref;
                 $product->buying_price = $request->buying_price;
                 $product->selling_price = $request->selling_price;
                 $product->description = $request->description;
-                foreach($request->variants as $variant){
-                    $productVariant = new ProductVariation();
-                    $productVariant->product_id=$product->id;
-                    $productVariant->product_ref=$request->ref;
-                    $productVariant->quantity=$variant['quantity'];
-                    $productVariant->size =$variant['size'];
-                    $productVariant->color =$variant['color'];
-                    $productVariant->save();
-                }
+                $product->status = 1;
+
                 $product->save();
-                
+
+                if ($request->has('variants')) {
+                    foreach ($request->input('variants') as $variant) {
+                        ProductVariation::updateOrCreate(
+                            ['id' => $variant['id']], 
+                            [
+                                'product_id' => $id,
+                                'product_ref' => $product->ref,
+                                'size' => $variant['size'],
+                                'color' => $variant['color'],
+                                'quantity' => $variant['quantity'],
+                            ]
+                        );
+                    }
+                }
 
 
                 return response()->json([

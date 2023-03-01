@@ -608,7 +608,7 @@ class UserController extends Controller
             }
             $role = Role::findById($id);
             $role->update(['name' => $request->name]);
-            $role->syncPermissions([$request->permissions]);
+            $role->syncPermissions($request->permissions);
 
             
             return response()->json(
