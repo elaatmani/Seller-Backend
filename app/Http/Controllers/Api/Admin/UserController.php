@@ -547,7 +547,7 @@ class UserController extends Controller
             return response()->json(
                 [
                     'status' => true,
-                    'code' => 'SUCCESS',
+                    'code' => 'ROLE_ADDED',
                     'message' => 'Role and Permissions Added Successfully!'
                 ],
                 200
@@ -614,7 +614,7 @@ class UserController extends Controller
             return response()->json(
                 [
                     'status' => true,
-                    'code' => 'SUCCESS',
+                    'code' => 'ROLE_UPDATED',
                     'message' => 'Role and Permissions Updated Successfully!'
                 ],
                 200
@@ -662,7 +662,7 @@ class UserController extends Controller
             return response()->json(
                 [
                     'status' => true,
-                    'code' => 'SUCCESS',
+                    'code' => 'ROLE_DELETED',
                     'message' => 'Role and Permissions Deleted Successfully!'
                 ],
                 200
