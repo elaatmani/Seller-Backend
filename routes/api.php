@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/test',[ProductController::class,'test']);
 
 
 //User Login
@@ -26,11 +27,12 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     
     //Roles
     Route::get('/auth/roles',[UserController::class,'roles']);
+    Route::get('/roles/{id}',[UserController::class,'showRole']);
     Route::post('/roles/add',[UserController::class,'createRole']);
     Route::post('/roles/update/{id}',[UserController::class,'updateRole']);
     Route::delete('/roles/delete/{id}',[UserController::class,'deleteRole']);
     
-    //Main Account
+    //Main AccountshowRole
     Route::get('/user', [UserController::class,'showUserAccount']);
     Route::post('/user/update', [UserController::class,'updateAccount']);
     Route::get('/auth/permission',[AuthController::class,'userPermission']);

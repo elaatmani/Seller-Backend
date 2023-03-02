@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
 use App\Models\ProductVariation;
+
+use Revolution\Google\Sheets\Facades\Sheets;
+
 use Illuminate\Http\Request;
 
 
@@ -344,5 +347,43 @@ class ProductController extends Controller
                 500
             );
         }
+    }
+
+
+
+
+
+
+
+
+    public function test(){
+        $sheets = Sheets::spreadsheet(config('sheets.post_spreadsheet_id'))
+
+        ->sheetById(config('sheets.post_sheet_id'))
+
+        ->all();
+
+        $sheet = array_slice($sheets, 1);
+
+        $posts = array();
+
+        foreach ($sheet AS $data) {
+
+            $posts[] = array(
+
+                'name' => $data[0],
+                
+
+
+            );
+
+        }
+        return response()->json([
+            'status' => true,
+            'code' => 'OORDERS_SUCCESS',
+            'message' => 'Orders Fetched Successfully!',
+            'data' => $posts,
+            200
+        ]);
     }
 }

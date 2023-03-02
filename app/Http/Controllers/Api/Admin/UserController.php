@@ -501,6 +501,53 @@ class UserController extends Controller
     }
 
 
+
+      
+    /**
+     * Display the specified resource.
+     * @param  Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showRole(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->hasRole('admin')) {
+                return response()->json([
+                    'status' => false,
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You Dont Have Access To Create Role',
+                ], 405);
+            }
+
+            $role = Role::findOrFail($id);
+            $groupsWithRoles = $role->getPermissionNames();
+
+
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'NOT_FOUND',
+                    'message' => 'User Does Not Exist',
+                    'data' => [
+                        'role' => $role->name,
+                        'permission' => $groupsWithRoles,
+                    ]
+                ],
+                404
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
+
     
     /**
      * Create Roles

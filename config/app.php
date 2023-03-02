@@ -197,6 +197,8 @@ return [
 
         Spatie\Permission\PermissionServiceProvider::class,
 
+        PulkitJalan\Google\GoogleServiceProvider::class
+
     ],
 
     /*
