@@ -527,8 +527,8 @@ class UserController extends Controller
             return response()->json(
                 [
                     'status' => false,
-                    'code' => 'NOT_FOUND',
-                    'message' => 'User Does Not Exist',
+                    'code' => 'ROLE_PERMISSION_SUCCESS',
+                    'message' => 'ROLE and PERMISSION Fetched SUCCESFULLY!',
                     'data' => [
                         'role' => $role->name,
                         'permission' => $groupsWithRoles,
