@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/test',[ProductController::class,'test']);
+// Route::get('/test',[ProductController::class,'test']);
 
 
 //User Login

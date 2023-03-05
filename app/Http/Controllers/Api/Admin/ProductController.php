@@ -356,34 +356,34 @@ class ProductController extends Controller
 
 
 
-    public function test(){
-        $sheets = Sheets::spreadsheet(config('sheets.post_spreadsheet_id'))
+    // public function test(){
+    //     $sheets = Sheets::spreadsheet(config('sheets.post_spreadsheet_id'))
 
-        ->sheetById(config('sheets.post_sheet_id'))
+    //     ->sheetById(config('sheets.post_sheet_id'))
 
-        ->all();
+    //     ->all();
 
-        $sheet = array_slice($sheets, 1);
+    //     $sheet = array_slice($sheets, 1);
 
-        $posts = array();
+    //     $posts = array();
 
-        foreach ($sheet AS $data) {
+    //     foreach ($sheet AS $data) {
 
-            $posts[] = array(
+    //         $posts[] = array(
 
-                'name' => $data[0],
+    //             'name' => $data[0],
                 
 
 
-            );
+    //         );
 
-        }
-        return response()->json([
-            'status' => true,
-            'code' => 'OORDERS_SUCCESS',
-            'message' => 'Orders Fetched Successfully!',
-            'data' => $posts,
-            200
-        ]);
-    }
+    //     }
+    //     return response()->json([
+    //         'status' => true,
+    //         'code' => 'OORDERS_SUCCESS',
+    //         'message' => 'Orders Fetched Successfully!',
+    //         'data' => $posts,
+    //         200
+    //     ]);
+    // }
 }

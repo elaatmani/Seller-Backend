@@ -534,7 +534,7 @@ class UserController extends Controller
                         'permission' => $groupsWithRoles,
                     ]
                 ],
-                404
+                200
             );
         } catch (\Throwable $th) {
             return response()->json(
