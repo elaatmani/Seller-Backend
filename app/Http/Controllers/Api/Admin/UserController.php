@@ -654,6 +654,16 @@ class UserController extends Controller
                 );
             }
             $role = Role::findById($id);
+            if($role === 1 || $role == 2 || $role == 3){
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Rights to Update this Role',
+                    ],
+                    405
+                );
+            }
             $role->update(['name' => $request->name]);
             $role->syncPermissions($request->permissions);
 
@@ -702,6 +712,16 @@ class UserController extends Controller
             
 
             $role = Role::findById($id);
+            if($role === 1 || $role == 2 || $role == 3){
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Rights to Update this Role',
+                    ],
+                    405
+                );
+            }
             $role->revokePermissionTo(Permission::all());
             $role->delete();
 
