@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\ProductController;
+use App\Http\Controllers\Api\Public\OrderController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -55,6 +56,9 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/products/update/{id}',[ProductController::class,'update']);
     Route::delete('/products/delete/{id}',[ProductController::class,'delete']);
     
+
+    //Order
+    Route::get('/orders',[OrderController::class,'index']);
 
 });
 
