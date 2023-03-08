@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Models\ProductAgente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -60,6 +61,11 @@ class AuthController extends Controller
                     'email' => $request->email, 
                     'password' => Hash::make($request->password),
                     'status' => $request->status,
+                ]);
+
+                ProductAgente::create([
+                    'agente_id' => $user->id,
+                    'product_id' => $request->product_id
                 ]);
 
                 $role = Role::where('id', $request->role)->value('name');
