@@ -62,12 +62,12 @@ class AuthController extends Controller
                     'password' => Hash::make($request->password),
                     'status' => $request->status,
                 ]);
-
-                ProductAgente::create([
-                    'agente_id' => $user->id,
-                    'product_id' => $request->product_id
-                ]);
-
+                if(isset($request->product_id)){
+                    ProductAgente::create([
+                        'agente_id' => $user->id,
+                        'product_id' => $request->product_id
+                    ]);
+                 }
                 $role = Role::where('id', $request->role)->value('name');
                 $user->assignRole($role);
 
