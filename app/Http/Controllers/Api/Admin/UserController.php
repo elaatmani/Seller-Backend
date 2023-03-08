@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ProductAgente;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -156,6 +157,7 @@ class UserController extends Controller
                 );
             }
             $user = User::find($id);
+
             if (isset($user)) {
                 //validate
                 $userValidator = Validator::make(
@@ -185,24 +187,37 @@ class UserController extends Controller
                         401
                     );
                 }
-
+                
+             
+               
                 $user->firstname = $request->firstname;
                 $user->lastname = $request->lastname;
                 $user->phone = $request->phone;
                 $user->email = $request->email;
                 if ($request->updatePassword == 'true') {
                     $user->password = Hash::make($request->password);
-                } else {
-                    $user->password = $user->password;
-                }
+                } 
                 $user->status = $request->status;
                 
-                // remove existing role
-                $user->removeRole($user->roles->first()->name);
-                $role = Role::where('id', $request->role)->value('name');
-                // assign new role
-                $user->assignRole($role);
+               
+                if($user->roles->first()->name != $request->role){
+                    
+                        // remove existing role
+                        $user->removeRole($user->roles->first()->name);
+                        $role = Role::where('id', $request->role)->value('name');
+                        // assign new role
+                        $user->assignRole($role);
+                }
+
                 $user->save();
+
+                if ($request->role === 2) {
+                    $productAgente = ProductAgente::where('agente_id', $user->id)->first();
+                    if ($productAgente) {
+                        $productAgente->product_id = $request->product_id;
+                        $productAgente->save();
+                    }
+                }
 
                 return response()->json(
                     [

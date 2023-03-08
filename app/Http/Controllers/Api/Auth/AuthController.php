@@ -41,7 +41,8 @@ class AuthController extends Controller
                 'phone' => 'required',
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required',
-                'status' => 'required'
+                'status' => 'required',
+                'role' => 'required'
                 ]);
                
                 if($validateUser->fails()){
@@ -69,6 +70,7 @@ class AuthController extends Controller
                     ]);
                  }
                 $role = Role::where('id', $request->role)->value('name');
+
                 $user->assignRole($role);
 
                 // $user->assignRole('agente');
@@ -77,7 +79,9 @@ class AuthController extends Controller
                     'status' => true,
                     'code' => 'USER_CREATED',
                     'message' => 'User Created Successfully!',
-                    'token' => $user ->createToken("API TOKEN")->plainTextToken],
+                    'token' => $user ->createToken("API TOKEN")->plainTextToken,
+                    'user' => $user],
+                 
                     200);
 
         }catch(\Throwable $th){
