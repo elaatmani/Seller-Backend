@@ -22,4 +22,6 @@ class Order extends Model
             'delivery',
             'note'
     ];
+
+ 
 }

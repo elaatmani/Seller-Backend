@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Public\OrderController;
+use App\Http\Controllers\Api\Public\SaleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -57,7 +58,10 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::delete('/products/delete/{id}',[ProductController::class,'delete']);
     
 
-    //Order
+    //Sales For Admin
+    Route::get('/sales',[SaleController::class,'index']);
+
+    //Orders For Agente
     Route::get('/orders',[OrderController::class,'index']);
 
 });

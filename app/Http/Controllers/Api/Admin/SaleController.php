@@ -4,21 +4,18 @@ namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\ProductAgente;
 use Illuminate\Http\Request;
 
-class OrderController extends Controller
+class SaleController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @param \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
-        if (!$request->user()->can('order_show')) {
+        if (!$request->user()->can('sale_show')) {
             return response()->json(
                 [
                     'status' => false,
@@ -28,10 +25,7 @@ class OrderController extends Controller
                 405
             );
         }
-        $product_id = ProductAgente::where('agente_id',$request->user()->id)->value('product_id');
-        $product_name = Product::find($product_id)->value('name');
-        $orders = Order::where('product_name',$product_name)->get();
-
+        $orders = Order::all();
 
         return response()->json(
             [
