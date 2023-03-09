@@ -17,15 +17,11 @@ class OrderSeeder extends Seeder
     {
         Order::create([
             'fullname' => 'ahmed',
-            'product_name' => 'iphone 12',
-            'upsell' => 'yes',
+            'product_name' => 'Test',
             'phone' => '0674710151',
             'city' => 'marrakech',
             'adresse' => 'marrakech',
             'quantity' => 12,
-            'confirmation' => 'yes',
-            'affectation' => 'yes',
-            'delivery' => 'khalid',
             'note' => 'quickly',
         ]);
     }

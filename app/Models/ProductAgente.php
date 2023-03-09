@@ -13,7 +13,4 @@ class ProductAgente extends Model
         'product_id',
         'agente_id'
     ];
-
-
-  
 }

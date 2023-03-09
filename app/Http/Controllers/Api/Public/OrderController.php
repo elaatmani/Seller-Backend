@@ -23,70 +23,156 @@ class OrderController extends Controller
                 [
                     'status' => false,
                     'code' => 'NOT_ALLOWED',
-                    'message' => 'You Dont Have Access To See Products',
+                    'message' => 'You Dont Have Access To See Orders',
                 ],
                 405
             );
         }
-        $product_id = ProductAgente::where('agente_id',$request->user()->id)->value('product_id');
-        $product_name = Product::find($product_id)->value('name');
-        $orders = Order::where('product_name',$product_name)->get();
 
+
+
+        $orders = Order::where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirmer']])->get();
+
+        if (count($orders) > 0) {
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'orders' => $orders
+                    ]
+                ],
+                200
+            );
+        }
 
         return response()->json(
             [
                 'status' => true,
                 'code' => 'SUCCESS',
-                'data' => [
-                    'orders' => $orders,
+                'data' => 'Orders Not Exist Add One !'
+            ],
+            200
+        );
+    }
+
+
+    /**
+     * Display Confirmed Orders
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function confirmedOrders(Request $request)
+    {
+        if (!$request->user()->can('order_show')) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You Dont Have Access To See Orders',
                 ],
+                405
+            );
+        }
+
+        $confirmedOrders = Order::where([['agente_id', $request->user()->id], ['confirmation', 'confirmer']])->get();
+        if (count($confirmedOrders) > 0) {
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'orders' => $confirmedOrders
+                    ]
+                ],
+                200
+            );
+        }
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => 'No Order Confirmed Yet !'
             ],
             200
         );
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Display Confirmed Orders
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function addOrder(Request $request)
     {
-        //
-    }
+        try {
+            if (!$request->user()->can('order_update')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Order Orders',
+                    ],
+                    405
+                );
+            }
+            
+           
+            $countOrderNotConfirmed = Order::where([['agente_id',$request->user()->id],['confirmation',null]])->count();
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+            if( $countOrderNotConfirmed>0){
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'message' => 'Confirme Order Not Confirmed Before Adding New One'
+                    ],
+                    200
+                );
+            }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+            $product_id = ProductAgente::where('agente_id',$request->user()->id)->value('product_id');
+            $product_name = Product::find($product_id)->value('name');
+            
+            $AddOrder = Order::where([['agente_id',null],['product_name',$product_name]])->first();
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+            if ($AddOrder) {
+                $AddOrder->agente_id = $request->user()->id;
+                $AddOrder->save();
+            }else{
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'message' => 'Orders Doesnt not Exist Now !'
+                    ],
+                    200
+                );
+            }
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'orders' => $AddOrder
+                    ]
+                ],
+                200
+            );
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
     }
 }

@@ -15,12 +15,10 @@ class ProductSeeder extends Seeder
     public function run()
     {
         Product::create([
-            'name' => 'Product 1',
+            'ref' => 'Test',
+            'name' => 'Test',
             'buying_price' => 5,
-            'quantity' => 15,
-            'size' => 'Medium',
-            'color' =>'Orange',
-            'image' => 'product.png',
+            'selling_price' => 15,
             'description' => 'Product description',
             'status' => 1
         ]);

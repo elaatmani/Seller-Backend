@@ -12,6 +12,7 @@ class Order extends Model
     protected $fillable = [
             'fullname',
             'product_name',
+            'agente_id',
             'upsell',
             'phone',
             'city',
@@ -22,6 +23,6 @@ class Order extends Model
             'delivery',
             'note'
     ];
-
- 
+    
+    
 }
