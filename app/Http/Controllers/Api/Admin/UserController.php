@@ -90,7 +90,7 @@ class UserController extends Controller
                     405
                 );
             }
-            $user = User::find($id);
+            $user = User::with('products')->find($id);
             if (isset($user)) {
                 return response()->json(
                     [
@@ -103,12 +103,12 @@ class UserController extends Controller
                                 'lastname' => $user->lastname,
                                 'phone' => $user->phone,
                                 'email' => $user->email,
-                                'photo' => $user->photo,
                                 'is_online' => $user->is_online,
                                 'status' => $user->status,
                                 'created_at' => $user->created_at,
                                 'updated_at' => $user->updated_at,
                                 'role' => $user->roles->pluck('id')->first(),
+                                'product' => $user->roles->pluck('id')->first() === 2 ? $user->products->value('id'): null,
                                 ]
                         ],
                     ],

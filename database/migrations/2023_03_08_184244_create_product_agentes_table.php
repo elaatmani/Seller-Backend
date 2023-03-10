@@ -15,9 +15,19 @@ return new class extends Migration
     {
         Schema::create('product_agentes', function (Blueprint $table) {
             $table->id();
-            $table->integer('agente_id');
-            $table->integer('product_id'); 
+            $table->unsignedBigInteger('agente_id');
+            $table->unsignedBigInteger('product_id');
             $table->timestamps();
+        
+            $table->foreign('agente_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
+
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->onDelete('cascade');
         });
     }
 

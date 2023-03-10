@@ -22,4 +22,8 @@ class Product extends Model
         return $this->hasMany('App\Models\ProductVariation');
     }
     
+    public function users()
+    {
+        return $this->hasManyThrough(User::class, ProductAgente::class, 'product_id', 'id', 'id', 'agente_id');
+    }
 }

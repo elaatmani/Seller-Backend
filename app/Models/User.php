@@ -52,6 +52,9 @@ class User extends Authenticatable
         return $this->belongsTo('Spatie\Permission\Models\Role');
     }
 
-   
+    public function products()
+    {
+        return $this->hasManyThrough(Product::class, ProductAgente::class, 'agente_id', 'id', 'id', 'product_id');
+    }
     
 }
