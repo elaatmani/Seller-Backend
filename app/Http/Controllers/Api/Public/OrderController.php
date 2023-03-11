@@ -20,6 +20,7 @@ class OrderController extends Controller
      */
     public function orderToConfirme(Request $request)
     {
+
         if (!$request->user()->can('order_show')) {
             return response()->json(
                 [
@@ -51,13 +52,210 @@ class OrderController extends Controller
         return response()->json(
             [
                 'status' => true,
-                'code' => 'SUCCESS',
+                'code' => 'NO_ORDER',
                 'data' => 'Add New One !'
             ],
             200
         );
     }
 
+
+
+
+    public function updateOrder(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->can('order_show')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Orders',
+                    ],
+                    405
+                );
+            }
+    
+            $order = Order::where('id', $id)->first();
+    
+            if ($order) {
+                $order->confirmation = $request->confirmation;
+                $order->affectation = $request->affectation;
+                $order->upsell = $request->upsell;
+                $order->save();
+    
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => 'Order Updated Successfully!'
+                    ],
+                    200
+                );
+            } else {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_FOUND',
+                        'message' => 'Order not found',
+                    ],
+                    404
+                );
+            }
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
+    
+
+      /**
+     * Update order's Confirmation .
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateConfirmation(Request $request,$id)
+    {
+        try {
+            if (!$request->user()->can('order_show')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Orders',
+                    ],
+                    405
+                );
+            }
+
+            $order = Order::where('id', $id)->first();
+
+            if ($order) {
+                $order->confirmation = $request->confirmation;
+                $order->save();
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => 'Order\'s Confirmation Updated Successfully!'
+                    ],
+                    200
+                );
+            }
+
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
+
+
+     /**
+     * Update order's Confirmation .
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateAffectation(Request $request,$id)
+    {
+        try {
+            if (!$request->user()->can('order_show')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Orders',
+                    ],
+                    405
+                );
+            }
+
+            $order = Order::where('id', $id)->first();
+
+            if ($order) {
+                $order->affectation = $request->affectation;
+                $order->save();
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => 'Order\'s Affectation Updated Successfully!'
+                    ],
+                    200
+                );
+            }
+
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
+
+    public function updateUpsell(Request $request,$id)
+    {
+        try {
+            if (!$request->user()->can('order_show')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Orders',
+                    ],
+                    405
+                );
+            }
+
+            $order = Order::where('id', $id)->first();
+
+            if ($order) {
+                $order->upsell = $request->upsell;
+                $order->save();
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => 'Order\'s Upsell Updated Successfully!'
+                    ],
+                    200
+                );
+            }
+
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
 
     /**
      * Display a listing of the resource.
@@ -67,6 +265,7 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
+
         if (!$request->user()->can('order_show')) {
             return response()->json(
                 [
@@ -106,6 +305,7 @@ class OrderController extends Controller
     }
 
 
+
     /**
      * Display Confirmed Orders
      *
@@ -114,6 +314,7 @@ class OrderController extends Controller
      */
     public function confirmedOrders(Request $request)
     {
+
         if (!$request->user()->can('order_show')) {
             return response()->json(
                 [
@@ -168,11 +369,11 @@ class OrderController extends Controller
                     405
                 );
             }
-            
-           
-            $countOrderNotConfirmed = Order::where([['agente_id',$request->user()->id],['confirmation',null]])->count();
 
-            if( $countOrderNotConfirmed>0){
+
+            $countOrderNotConfirmed = Order::where([['agente_id', $request->user()->id], ['confirmation', null]])->count();
+
+            if ($countOrderNotConfirmed > 0) {
                 return response()->json(
                     [
                         'status' => true,
@@ -183,15 +384,15 @@ class OrderController extends Controller
                 );
             }
 
-            $product_id = ProductAgente::where('agente_id',$request->user()->id)->value('product_id');
+            $product_id = ProductAgente::where('agente_id', $request->user()->id)->value('product_id');
             $product_name = Product::find($product_id)->value('name');
-            
-            $AddOrder = Order::where([['agente_id',null],['product_name',$product_name]])->first();
+
+            $AddOrder = Order::where([['agente_id', null], ['product_name', $product_name]])->first();
 
             if ($AddOrder) {
                 $AddOrder->agente_id = $request->user()->id;
                 $AddOrder->save();
-            }else{
+            } else {
                 return response()->json(
                     [
                         'status' => true,
@@ -212,7 +413,6 @@ class OrderController extends Controller
                 ],
                 200
             );
-
         } catch (\Throwable $th) {
             return response()->json(
                 [
