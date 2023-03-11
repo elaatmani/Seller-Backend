@@ -279,7 +279,7 @@ class OrderController extends Controller
 
 
 
-        $orders = Order::where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirme']])->get();
+        $orders = Order::where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirmer']])->get();
 
         if (count($orders) > 0) {
             return response()->json(
