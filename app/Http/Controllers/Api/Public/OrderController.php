@@ -31,7 +31,7 @@ class OrderController extends Controller
 
 
 
-        $orders = Order::where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirmer']])->get();
+        $orders = Order::where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirme']])->get();
 
         if (count($orders) > 0) {
             return response()->json(
@@ -127,8 +127,8 @@ class OrderController extends Controller
                 return response()->json(
                     [
                         'status' => true,
-                        'code' => 'SUCCESS',
-                        'message' => 'Confirme Order Not Confirmed Before Adding New One'
+                        'code' => 'ORDER_NOT_CONFIRMED',
+                        'message' => 'An Order Not Confirmed'
                     ],
                     200
                 );
