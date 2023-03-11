@@ -15,11 +15,11 @@ class ProductSeeder extends Seeder
     public function run()
     {
         Product::create([
-            'ref' => 'Test',
-            'name' => 'Test',
+            'ref' => 'backpack',
+            'name' => 'Backpack',
             'buying_price' => 5,
             'selling_price' => 15,
-            'description' => 'Product description',
+            'description' => 'Product Backpack',
             'status' => 1
         ]);
 
