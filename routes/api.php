@@ -67,6 +67,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     //Orders For Agente
     Route::get('/orders',[OrderController::class,'index']);
+    Route::get('/orders/toconfirmate',[OrderController::class,'orderToConfirme']);
     Route::get('/orders/confirmer',[OrderController::class,'confirmedOrders']);
     Route::get('/orders/add',[OrderController::class,'addOrder']);
 

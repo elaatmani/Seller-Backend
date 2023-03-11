@@ -10,6 +10,55 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+
+
+    /**
+     * Display order not confirmed yet.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orderToConfirme(Request $request)
+    {
+        if (!$request->user()->can('order_show')) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You Dont Have Access To See Orders',
+                ],
+                405
+            );
+        }
+
+
+
+        $order = Order::where([['agente_id', $request->user()->id], ['confirmation', null]])->get();
+
+        if (count($order) > 0) {
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'orders' => $order
+                    ]
+                ],
+                200
+            );
+        }
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => 'Add New One !'
+            ],
+            200
+        );
+    }
+
+
     /**
      * Display a listing of the resource.
      *
