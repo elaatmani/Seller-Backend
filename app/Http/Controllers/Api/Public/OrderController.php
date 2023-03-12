@@ -395,7 +395,10 @@ class OrderController extends Controller
             [
                 'status' => true,
                 'code' => 'SUCCESS',
-                'data' => 'Orders Not Exist Add One !'
+                'message' => 'Add New One !',
+                'data' => [
+                    'orders' => ''
+                ]
             ],
             200
         );
