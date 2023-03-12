@@ -82,6 +82,9 @@ class OrderController extends Controller
                 $order->confirmation = $request->confirmation;
                 $order->affectation = $request->affectation;
                 $order->upsell = $request->upsell;
+                if($request->note){
+                    $order->note = $request->note;
+                }
                 $order->save();
     
                 return response()->json(
