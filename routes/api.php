@@ -76,6 +76,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     //Orders update Confirmation Affectation Upsell
     Route::post('/orders/update/confirmation/{id}',[OrderController::class,'updateConfirmation']);
     Route::post('/orders/update/affectation/{id}',[OrderController::class,'updateAffectation']);
+    Route::post('/orders/update/delivery/{id}',[OrderController::class,'updatedelivery']);
     Route::post('/orders/update/upsell/{id}',[OrderController::class,'updateUpsell']);
     Route::post('/orders/update/note/{id}',[OrderController::class,'updateNote']);
 

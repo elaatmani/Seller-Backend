@@ -85,6 +85,9 @@ class OrderController extends Controller
                 if($request->note){
                     $order->note = $request->note;
                 }
+                if($request->delivery){
+                    $order->delivery = $request->delivery;
+                }
                 $order->save();
     
                 return response()->json(
@@ -216,6 +219,48 @@ class OrderController extends Controller
         }
     }
 
+    public function updateDelivery(Request $request,$id)
+    {
+        try {
+            if (!$request->user()->can('order_show')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Orders',
+                    ],
+                    405
+                );
+            }
+
+            $order = Order::where('id', $id)->first();
+
+            if ($order) {
+                $order->Delivery = $request->Delivery;
+                $order->save();
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => 'Order\'s Delivery Updated Successfully!'
+                    ],
+                    200
+                );
+            }
+
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
 
      /**
      * Update order's Confirmation .
