@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\InventoryController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\ProductController;
@@ -79,6 +80,17 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/orders/update/delivery/{id}',[OrderController::class,'updatedelivery']);
     Route::post('/orders/update/upsell/{id}',[OrderController::class,'updateUpsell']);
     Route::post('/orders/update/note/{id}',[OrderController::class,'updateNote']);
+
+
+    //Inventory
+        //Inventory State
+        Route::get('/inventorystates',[InventoryController::class,'inventoryState']);
+
+        //Inventory Movement
+        Route::get('/inventorymovements',[InventoryController::class,'inventoryMovement']);
+        Route::post('/inventorymovements/new',[InventoryController::class,'createInventoryMovement']);
+        Route::post('/inventorymovements/update/{id}',[InventoryController::class,'updateInventoryMovement']);
+        Route::delete('/inventorymovements/delete/{id}',[InventoryController::class,'deleteInventoryMovement']);
 
 });
 

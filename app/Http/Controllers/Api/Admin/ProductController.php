@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\InventoryState;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
 use App\Models\ProductVariation;
 
-use Revolution\Google\Sheets\Facades\Sheets;
+
 
 use Illuminate\Http\Request;
 
@@ -54,16 +55,7 @@ class ProductController extends Controller
     public function create(Request $request)
     {
         try {
-            if (!$request->user()->can('product_create')) {
-                return response()->json(
-                    [
-                        'status' => false,
-                        'code' => 'NOT_ALLOWED',
-                        'message' => 'You Dont Have Access To Create Product',
-                    ],
-                    405
-                );
-            }
+           
 
 
             //Validated
@@ -88,7 +80,7 @@ class ProductController extends Controller
                     401
                 );
             }
-
+            
             $product = Product::create([
                 'name' => $request->name,
                 'ref' => $request->ref,
@@ -98,7 +90,7 @@ class ProductController extends Controller
                 'status' => 1
             ]);
 
-
+            $quantityTotal = 0 ;
             foreach ($request->variants as  $value) {
                 ProductVariation::create([
                     'product_id' => $product->id,
@@ -107,7 +99,13 @@ class ProductController extends Controller
                     'color' => $value['color'],
                     'quantity' => $value['quantity']
                 ]);
+                $quantityTotal += $value['quantity'];
             }
+
+            InventoryState::create([
+                'product_id' => $product->id,
+                'quantity' => $quantityTotal,
+            ]);
 
             return response()->json(
                 [
