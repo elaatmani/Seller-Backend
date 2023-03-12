@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('adresse');
             $table->integer('quantity');
             $table->string('confirmation')->nullable();
-            $table->string('affectation')->nullable();
+            $table->integer('affectation')->nullable();
             $table->string('delivery')->nullable();
             $table->string('note');
             $table->timestamps();
