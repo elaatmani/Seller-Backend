@@ -34,7 +34,7 @@ class OrderController extends Controller
 
 
 
-        $order = Order::where([['agente_id', $request->user()->id], ['confirmation', null]])->get();
+        $order = Order::where([['affectation', $request->user()->id], ['confirmation', null]])->get();
 
         if (count($order) > 0) {
             return response()->json(
@@ -59,7 +59,75 @@ class OrderController extends Controller
         );
     }
 
+    /**
+     * Display order not confirmed yet.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orderToDelivery(Request $request)
+    {
 
+     
+
+
+
+        $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], ['delivery', null]])->get();
+
+        if (count($order) > 0) {
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'orders' => $order
+                    ]
+                ],
+                200
+            );
+        }
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'NO_ORDER_TO_DELIVERY',
+                'data' => 'No Order To Delivery !'
+            ],
+            200
+        );
+    }
+
+    public function orderDelivered(Request $request)
+    {
+
+       
+
+
+
+        $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], ['delivery', 'livré']])->get();
+
+        if (count($order) > 0) {
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'orders' => $order
+                    ]
+                ],
+                200
+            );
+        }
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'NO_ORDER',
+                'data' => 'No Order Delivred Yet !'
+            ],
+            200
+        );
+    }
 
 
     public function updateOrder(Request $request, $id)
@@ -75,21 +143,21 @@ class OrderController extends Controller
                     405
                 );
             }
-    
+
             $order = Order::where('id', $id)->first();
-    
+
             if ($order) {
                 $order->confirmation = $request->confirmation;
                 $order->affectation = $request->affectation;
                 $order->upsell = $request->upsell;
-                if($request->note){
+                if ($request->note) {
                     $order->note = $request->note;
                 }
-                if($request->delivery){
+                if ($request->delivery) {
                     $order->delivery = $request->delivery;
                 }
                 $order->save();
-    
+
                 return response()->json(
                     [
                         'status' => true,
@@ -119,15 +187,15 @@ class OrderController extends Controller
             );
         }
     }
-    
 
-      /**
+
+    /**
      * Update order's Confirmation .
      *
      * @param \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function updateConfirmation(Request $request,$id)
+    public function updateConfirmation(Request $request, $id)
     {
         try {
             if (!$request->user()->can('order_show')) {
@@ -156,8 +224,6 @@ class OrderController extends Controller
                     200
                 );
             }
-
-
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -170,13 +236,13 @@ class OrderController extends Controller
         }
     }
 
-      /**
+    /**
      * Update order's Confirmation .
      *
      * @param \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function updateNote(Request $request,$id)
+    public function updateNote(Request $request, $id)
     {
         try {
             if (!$request->user()->can('order_show')) {
@@ -205,8 +271,6 @@ class OrderController extends Controller
                     200
                 );
             }
-
-
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -219,7 +283,7 @@ class OrderController extends Controller
         }
     }
 
-    public function updateDelivery(Request $request,$id)
+    public function updateDelivery(Request $request, $id)
     {
         try {
             if (!$request->user()->can('order_show')) {
@@ -248,8 +312,6 @@ class OrderController extends Controller
                     200
                 );
             }
-
-
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -262,13 +324,13 @@ class OrderController extends Controller
         }
     }
 
-     /**
+    /**
      * Update order's Confirmation .
      *
      * @param \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function updateAffectation(Request $request,$id)
+    public function updateAffectation(Request $request, $id)
     {
         try {
             if (!$request->user()->can('order_show')) {
@@ -297,8 +359,6 @@ class OrderController extends Controller
                     200
                 );
             }
-
-
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -311,7 +371,7 @@ class OrderController extends Controller
         }
     }
 
-    public function updateUpsell(Request $request,$id)
+    public function updateUpsell(Request $request, $id)
     {
         try {
             if (!$request->user()->can('order_show')) {
@@ -340,8 +400,6 @@ class OrderController extends Controller
                     200
                 );
             }
-
-
         } catch (\Throwable $th) {
             return response()->json(
                 [
