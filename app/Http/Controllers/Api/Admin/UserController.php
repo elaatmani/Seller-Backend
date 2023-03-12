@@ -827,6 +827,15 @@ class UserController extends Controller
     {
         $deliveryRole = Role::where('name', 'delivery')->first();
         $deliveries = $deliveryRole->users()->get();
-        return $deliveries;
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => $deliveries
+            ],
+            200
+        );
+        
     }
 }
