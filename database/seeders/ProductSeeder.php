@@ -43,10 +43,6 @@ class ProductSeeder extends Seeder
                     'agente_id' => 2,
                     'product_id' => $productModel->id,
                 ],
-                [
-                    'agente_id' => 2,
-                    'product_id' => $productModel->id,
-                ],
             ]);
         }
     }
