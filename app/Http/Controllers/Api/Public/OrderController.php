@@ -236,7 +236,7 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
-                $order->Delivery = $request->Delivery;
+                $order->delivery = $request->delivery;
                 $order->save();
 
                 return response()->json(
