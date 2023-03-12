@@ -396,7 +396,7 @@ class OrderController extends Controller
                 return response()->json(
                     [
                         'status' => true,
-                        'code' => 'SUCCESS',
+                        'code' => 'NO_ORDERS',
                         'message' => 'Orders Doesnt not Exist Now !'
                     ],
                     200
