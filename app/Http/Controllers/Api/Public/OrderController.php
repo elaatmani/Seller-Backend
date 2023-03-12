@@ -167,6 +167,55 @@ class OrderController extends Controller
         }
     }
 
+      /**
+     * Update order's Confirmation .
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateNote(Request $request,$id)
+    {
+        try {
+            if (!$request->user()->can('order_show')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Orders',
+                    ],
+                    405
+                );
+            }
+
+            $order = Order::where('id', $id)->first();
+
+            if ($order) {
+                $order->note = $request->note;
+                $order->save();
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => 'Order\'s Note Updated Successfully!'
+                    ],
+                    200
+                );
+            }
+
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
+
 
      /**
      * Update order's Confirmation .
