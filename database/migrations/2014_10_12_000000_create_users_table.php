@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('photo')->nullable();
             $table->string('password');
             $table->tinyInteger('is_online')->default(0);
+            $table->string('city')->nullable();
             $table->tinyInteger('status');
             $table->rememberToken();
             $table->timestamps();

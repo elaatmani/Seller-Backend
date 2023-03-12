@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\City;
+use App\Models\DeliveryPlace;
 use App\Models\ProductAgente;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -69,8 +71,8 @@ class UserController extends Controller
     }
 
 
-    
-    
+
+
     /**
      * Display the specified resource.
      * @param  Request  $request
@@ -108,8 +110,8 @@ class UserController extends Controller
                                 'created_at' => $user->created_at,
                                 'updated_at' => $user->updated_at,
                                 'role' => $user->roles->pluck('id')->first(),
-                                'product' => $user->roles->pluck('id')->first() === 2 ? $user->products->value('id'): null,
-                                ]
+                                'product' => $user->roles->pluck('id')->first() === 2 ? $user->products->value('id') : null,
+                            ]
                         ],
                     ],
                     200
@@ -187,26 +189,26 @@ class UserController extends Controller
                         401
                     );
                 }
-                
-             
-               
+
+
+
                 $user->firstname = $request->firstname;
                 $user->lastname = $request->lastname;
                 $user->phone = $request->phone;
                 $user->email = $request->email;
                 if ($request->updatePassword == 'true') {
                     $user->password = Hash::make($request->password);
-                } 
+                }
                 $user->status = $request->status;
-                
-               
-                if($user->roles->first()->name != $request->role){
-                    
-                        // remove existing role
-                        $user->removeRole($user->roles->first()->name);
-                        $role = Role::where('id', $request->role)->value('name');
-                        // assign new role
-                        $user->assignRole($role);
+
+
+                if ($user->roles->first()->name != $request->role) {
+
+                    // remove existing role
+                    $user->removeRole($user->roles->first()->name);
+                    $role = Role::where('id', $request->role)->value('name');
+                    // assign new role
+                    $user->assignRole($role);
                 }
 
                 $user->save();
@@ -216,6 +218,37 @@ class UserController extends Controller
                     if ($productAgente) {
                         $productAgente->product_id = $request->product_id;
                         $productAgente->save();
+                    }
+                }
+
+                if ($request->role === 3) {
+                    $existingCityIds = DeliveryPlace::where('delivery_id', $id)->pluck('city_id');
+
+                    foreach ($request->input('deliverycity') as $city) {
+                        $deliveryPlace = DeliveryPlace::where('delivery_id', $id)
+                            ->where('city_id', $city['city_id'])
+                            ->first();
+
+                        if ($deliveryPlace) {
+                            // If the delivery place already exists, update its fee and city_id values
+                            $deliveryPlace->update(['fee' => $city['fee'], 'city_id' => $city['city_id']]);
+                        } else {
+                            // If the delivery place does not exist, create a new one
+                            DeliveryPlace::create([
+                                'delivery_id' => $id,
+                                'city_id' => $city['city_id'],
+                                'fee' => $city['fee']
+                            ]);
+                        }
+                    }
+
+                    // Delete any delivery places that are not in the $request object
+                    $cityIdsToDelete = $existingCityIds->diff(collect($request->input('deliverycity'))->pluck('city_id')->toArray());
+
+                    if (!empty($cityIdsToDelete)) {
+                        DeliveryPlace::where('delivery_id', $id)
+                            ->whereIn('city_id', $cityIdsToDelete)
+                            ->delete();
                     }
                 }
 
@@ -384,7 +417,7 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    
+
 
     /**
      * Status User Account
@@ -471,7 +504,7 @@ class UserController extends Controller
             );
         }
     }
-    
+
 
 
     /**
@@ -519,7 +552,7 @@ class UserController extends Controller
 
 
 
-      
+
     /**
      * Display the specified resource.
      * @param  Request  $request
@@ -565,7 +598,7 @@ class UserController extends Controller
         }
     }
 
-    
+
     /**
      * Create Roles
      *
@@ -607,7 +640,7 @@ class UserController extends Controller
 
             $role = Role::create(['name' => $request->name]);
             $role->givePermissionTo($request->permissions);
-            
+
             return response()->json(
                 [
                     'status' => true,
@@ -616,7 +649,6 @@ class UserController extends Controller
                 ],
                 200
             );
-
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -637,7 +669,7 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function updateRole(Request $request,$id)
+    public function updateRole(Request $request, $id)
     {
         try {
             if (!$request->user()->hasRole('admin')) {
@@ -658,7 +690,7 @@ class UserController extends Controller
             );
 
 
-                
+
             if ($validateUser->fails()) {
                 return response()->json(
                     [
@@ -671,7 +703,7 @@ class UserController extends Controller
                 );
             }
             $role = Role::findById($id);
-            if($role === 1 || $role == 2 || $role == 3){
+            if ($role === 1 || $role == 2 || $role == 3) {
                 return response()->json(
                     [
                         'status' => false,
@@ -684,7 +716,7 @@ class UserController extends Controller
             $role->update(['name' => $request->name]);
             $role->syncPermissions($request->permissions);
 
-            
+
             return response()->json(
                 [
                     'status' => true,
@@ -693,8 +725,6 @@ class UserController extends Controller
                 ],
                 200
             );
-
-
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -726,10 +756,10 @@ class UserController extends Controller
                 ], 405);
             }
 
-            
+
 
             $role = Role::findById($id);
-            if($role === 1 || $role == 2 || $role == 3){
+            if ($role === 1 || $role == 2 || $role == 3) {
                 return response()->json(
                     [
                         'status' => false,
@@ -751,7 +781,6 @@ class UserController extends Controller
                 ],
                 200
             );
-
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -764,4 +793,40 @@ class UserController extends Controller
         }
     }
 
+
+    /**
+     * Show All Cities.
+     * @param Request $request 
+     * @return \Illuminate\Http\Response
+     */
+    public function allCities(Request $request)
+    {
+        if (!$request->user()->hasRole('admin')) {
+            return response()->json([
+                'status' => false,
+                'code' => 'NOT_ALLOWED',
+                'message' => 'You Dont Have Access To See Delete Roles',
+            ], 405);
+        }
+
+        $cities  = City::all();
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => $cities
+            ],
+            200
+        );
+    }
+
+
+
+    public function delevries(Request $request)
+    {
+        $deliveryRole = Role::where('name', 'delivery')->first();
+        $deliveries = $deliveryRole->users()->get();
+        return $deliveries;
+    }
 }

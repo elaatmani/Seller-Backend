@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Models\DeliveryPlace;
 use App\Models\ProductAgente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,84 +16,107 @@ use Spatie\Permission\Models\Permission;
 class AuthController extends Controller
 {
 
-    
+
     /** 
      * Create User
      * @param Request $request
      * @return User
-    */
+     */
     public function createUser(Request $request)
     {
-        try{    
-       
-                if(!$request->user()->can('users_create')){
-                    return response()->json([
-                    'status' => false,
-                    'code' => 'NOT_ALLOWED',
-                    'message' => 'You Dont Have Access To Create User',
+        try {
+
+            if (!$request->user()->can('users_create')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Create User',
                     ],
-                    405);
-                }
-                //Validated
-                $validateUser = Validator::make($request->all(),
+                    405
+                );
+            }
+            //Validated
+            $validateUser = Validator::make(
+                $request->all(),
                 [
-                'firstname' => 'required',
-                'lastname' => 'required',
-                'phone' => 'required',
-                'email' => 'required|email|unique:users,email',
-                'password' => 'required',
-                'status' => 'required',
-                'role' => 'required'
-                ]);
-               
-                if($validateUser->fails()){
-                    return response()->json([
+                    'firstname' => 'required',
+                    'lastname' => 'required',
+                    'phone' => 'required',
+                    'email' => 'required|email|unique:users,email',
+                    'password' => 'required',
+                    'status' => 'required',
+                    'role' => 'required'
+                ]
+            );
+
+            if ($validateUser->fails()) {
+                return response()->json(
+                    [
                         'status' => false,
                         'code' => 'VALIDATION_ERROR',
                         'message' => 'validation error',
-                        'error' => $validateUser->errors()],
-                        401);
-                }
+                        'error' => $validateUser->errors()
+                    ],
+                    401
+                );
+            }
 
 
-                $user = User::create([
-                    'firstname' => $request->firstname,
-                    'lastname' => $request->lastname,
-                    'phone' => $request->phone,
-                    'email' => $request->email, 
-                    'password' => Hash::make($request->password),
-                    'status' => $request->status,
+            $user = User::create([
+                'firstname' => $request->firstname,
+                'lastname' => $request->lastname,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                // 'city' => $request->city,
+                'password' => Hash::make($request->password),
+                'status' => $request->status,
+            ]);
+
+            if (isset($request->product_id)) {
+                ProductAgente::create([
+                    'agente_id' => $user->id,
+                    'product_id' => $request->product_id
                 ]);
-                if(isset($request->product_id)){
-                    ProductAgente::create([
-                        'agente_id' => $user->id,
-                        'product_id' => $request->product_id
+            }
+
+            if ($request->has('deliverycity')) {
+                foreach ($request->deliverycity as $city) {
+                    DeliveryPlace::create([
+                        'delivery_id' => $user->id,
+                        'city_id' => $city['city_id'],
+                        'fee' => $city['fee']
                     ]);
-                 }
-                $role = Role::where('id', $request->role)->value('name');
+                }
+            }
+            $role = Role::where('id', $request->role)->value('name');
 
-                $user->assignRole($role);
+            $user->assignRole($role);
 
-                // $user->assignRole('agente');
+            // $user->assignRole('agente');
 
-                return response()->json([
+            return response()->json(
+                [
                     'status' => true,
                     'code' => 'USER_CREATED',
                     'message' => 'User Created Successfully!',
-                    'token' => $user ->createToken("API TOKEN")->plainTextToken,
-                    'user' => $user],
-                 
-                    200);
+                    'token' => $user->createToken("API TOKEN")->plainTextToken,
+                    'user' => $user
+                ],
 
-        }catch(\Throwable $th){
-            return response()->json([
-                'status' => false,
-                'code' => 'SERVER_ERROR',
-                'message' => $th->getMessage(),
-                'error' => $validateUser->errors()],
-                500);
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                    'error' => $validateUser->errors()
+                ],
+                500
+            );
         }
-        
     }
 
     /**
@@ -103,43 +127,50 @@ class AuthController extends Controller
     public function loginUser(Request $request)
     {
         try {
-           //Validated
-           $validateUser = Validator::make($request->all(),
-           [
-           'email' => 'required|email',
-           'password' => 'required'
-           ]);
-   
-           if($validateUser->fails()){
-               return response()->json([
-                   'status' => false,
-                   'message' => 'validation error',
-                   'code' => 'VALIDATION_ERROR',
-                   'error' => $validateUser->errors()],
-                   401);
-           }
+            //Validated
+            $validateUser = Validator::make(
+                $request->all(),
+                [
+                    'email' => 'required|email',
+                    'password' => 'required'
+                ]
+            );
 
-           if(!Auth::attempt($request->only(['email','password']))){
+            if ($validateUser->fails()) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'message' => 'validation error',
+                        'code' => 'VALIDATION_ERROR',
+                        'error' => $validateUser->errors()
+                    ],
+                    401
+                );
+            }
+
+            if (!Auth::attempt($request->only(['email', 'password']))) {
                 return response()->json([
                     'status' => false,
                     'code' => 'INVALID_CREDENTIALS',
                     'message' => 'Email & Password does not match with our record.',
                 ], 401);
-           }
+            }
 
-           $user = User::where([['email',$request->email],['status',1]])->first();
-           if(isset($user)){
-
-
-                 $role = Role::findOrFail($user->roles->first()->id);
-                 $groupsWithRoles = $role->getPermissionNames();
+            $user = User::where([['email', $request->email], ['status', 1]])->first();
+            if (isset($user)) {
 
 
-                return response()->json([
-                    'status' => true,
-                    'message' => 'User Logged In Successfully!',
-                    'code' => 'AUTHENTICATION_SUCCESSFUL',
-                    'data' =>[ 'token' => $user ->createToken("API TOKEN")->plainTextToken,
+                $role = Role::findOrFail($user->roles->first()->id);
+                $groupsWithRoles = $role->getPermissionNames();
+
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'message' => 'User Logged In Successfully!',
+                        'code' => 'AUTHENTICATION_SUCCESSFUL',
+                        'data' => [
+                            'token' => $user->createToken("API TOKEN")->plainTextToken,
                             'user' => [
                                 'id' => $user->id,
                                 'firstname' => $user->firstname,
@@ -152,30 +183,36 @@ class AuthController extends Controller
                                 'role' => $user->roles->first()->name,
                                 'permissions' => $groupsWithRoles
                             ]
-                                
-                              
-                ]],
-                    200);
-            }else{
-                return response()->json([
-                    'status' => false,
-                    'code' => 'NOT_ACTIVE_ERROR',
-                    'message' => 'You dont Have Access anymore!',
-                     ],
-                    405);
-            }
 
+
+                        ]
+                    ],
+                    200
+                );
+            } else {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ACTIVE_ERROR',
+                        'message' => 'You dont Have Access anymore!',
+                    ],
+                    405
+                );
+            }
         } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage(),
-                'code' => 'SERVER_ERROR',
-                'error' => $validateUser->errors()],
-                500);
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR',
+                    'error' => $validateUser->errors()
+                ],
+                500
+            );
         }
     }
 
-     /**
+    /**
      * Logout User
      * @param Request $request
      * @return User
@@ -187,20 +224,24 @@ class AuthController extends Controller
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            
-          return response()->json([
-            'status' => true,
-            'code' => 'LOGOUT_SUCCESSFUL',
-            'message' => 'User Logged Out Successfully!',
-             ],
-            200);
 
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'LOGOUT_SUCCESSFUL',
+                    'message' => 'User Logged Out Successfully!',
+                ],
+                200
+            );
         } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'code' => 'SERVER_ERROR',
-                'message' => $th->getMessage()],
-                500);
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage()
+                ],
+                500
+            );
         }
     }
 
@@ -209,17 +250,19 @@ class AuthController extends Controller
      * @param Request $request
      * @return User
      */
-    public function userPermission(Request $request){
+    public function userPermission(Request $request)
+    {
         $role = Role::findOrFail($request->user()->roles->first()->id);
         $groupsWithRoles = $role->getPermissionNames();
-        return response()->json([
-            'status' => true,
-            'code' => 'SUCCESS',
-            'data' => [
-                'permissions' => $groupsWithRoles,
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => [
+                    'permissions' => $groupsWithRoles,
+                ],
             ],
-             ],
-            200); 
+            200
+        );
     }
-
 }
