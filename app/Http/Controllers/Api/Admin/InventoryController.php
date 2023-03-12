@@ -33,7 +33,9 @@ class InventoryController extends Controller
       }
    }
 
-   public function inventoryMovement(Request $request){
+
+   public function inventoryMovement(Request $request)
+   {
       try {
          $inventoryMovement = InventoryMovement::with('product', 'delivery')->get();
          return response()->json([
@@ -52,6 +54,8 @@ class InventoryController extends Controller
          );
       }
    }
+
+
    public function createInventoryMovement(Request $request)
    {
       try {
