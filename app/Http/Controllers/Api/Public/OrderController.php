@@ -592,7 +592,9 @@ class OrderController extends Controller
                 [
                     'status' => true,
                     'code' => 'NO_ORDER_TO_DELIVERY',
-                    'data' => 'No Order To Delivery !'
+                    'data' => [
+                        'orders' => ''
+                    ]
                 ],
                 200
             );
@@ -648,7 +650,9 @@ class OrderController extends Controller
                 [
                     'status' => true,
                     'code' => 'NO_ORDER',
-                    'data' => 'No Order Delivred Yet !'
+                    'data' => [
+                        'orders' => ''
+                    ]
                 ],
                 200
             );
