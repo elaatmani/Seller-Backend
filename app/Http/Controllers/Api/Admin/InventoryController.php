@@ -11,9 +11,26 @@ use Illuminate\Support\Facades\Validator;
 class InventoryController extends Controller
 {
 
+
+   
+   /**
+    * Display Inventory States.
+    *
+    * @return \Illuminate\Http\Response
+    */
    public function inventoryState(Request $request)
    {
       try {
+         if (!$request->user()->can('show_all_inventory_states')) {
+            return response()->json(
+               [
+                  'status' => false,
+                  'code' => 'NOT_ALLOWED',
+                  'message' => 'You Dont Have Access To See Product',
+               ],
+               405
+            );
+         }
          $inventoryState = InventoryState::with('product')->get();
 
          return response()->json([
@@ -33,10 +50,26 @@ class InventoryController extends Controller
       }
    }
 
+   
 
+   /**
+    * Display Inventory Movements. 
+    *
+    * @return \Illuminate\Http\Response
+    */
    public function inventoryMovement(Request $request)
    {
       try {
+         if (!$request->user()->can('show_all_inventory_movements')) {
+            return response()->json(
+               [
+                  'status' => false,
+                  'code' => 'NOT_ALLOWED',
+                  'message' => 'You Dont Have Access To See Product',
+               ],
+               405
+            );
+         }
          $inventoryMovement = InventoryMovement::with('product', 'delivery')->get();
          return response()->json([
             'status' => true,
@@ -56,10 +89,25 @@ class InventoryController extends Controller
    }
 
 
+
+   /**
+    * Create Inventory Movement. 
+    *
+    * @return \Illuminate\Http\Response
+    */
    public function createInventoryMovement(Request $request)
    {
       try {
-
+         if (!$request->user()->can('create_inventory_movement')) {
+            return response()->json(
+               [
+                  'status' => false,
+                  'code' => 'NOT_ALLOWED',
+                  'message' => 'You Dont Have Access To See Product',
+               ],
+               405
+            );
+         }
          //Validated
          $validateInventoryMovement = Validator::make(
             $request->all(),
@@ -121,10 +169,25 @@ class InventoryController extends Controller
    }
 
 
+
+   /**
+    * Update Inventory Movement. 
+    *
+    * @return \Illuminate\Http\Response
+    */
    public function updateInventoryMovement(Request $request, $id)
    {
       try {
-
+         if (!$request->user()->can('update_inventory_movement')) {
+            return response()->json(
+               [
+                  'status' => false,
+                  'code' => 'NOT_ALLOWED',
+                  'message' => 'You Dont Have Access To See Product',
+               ],
+               405
+            );
+         }
          //Validated
          $validateInventoryMovement = Validator::make(
             $request->all(),
@@ -168,9 +231,8 @@ class InventoryController extends Controller
                      'code' => 'SUCCESS',
                      'message' => 'Inventory Updated Successfully !',
                   ], 200);
-
                }
-               
+
                return response()->json([
                   'status' => true,
                   'code' => 'ERROR_QUANTITY',
@@ -209,23 +271,38 @@ class InventoryController extends Controller
    }
 
 
+
+   /**
+    * Delete Inventory Movement. 
+    *
+    * @return \Illuminate\Http\Response
+    */
    public function deleteInventoryMovement(Request $request, $id)
    {
       try {
-
+         if (!$request->user()->can('delete_inventory_movement')) {
+            return response()->json(
+               [
+                  'status' => false,
+                  'code' => 'NOT_ALLOWED',
+                  'message' => 'You Dont Have Access To See Product',
+               ],
+               405
+            );
+         }
 
          $inventoryMovement = InventoryMovement::find($id);
          if ($inventoryMovement) {
             $inventoryState = InventoryState::where('product_id', $inventoryMovement->product_id)->get()->first();
             if ($inventoryState) {
                $totalQuantity = $inventoryState->quantity + $inventoryMovement->qty_to_delivery;
-               
+
                $inventoryState->quantity = $totalQuantity;
                $inventoryState->save();
 
 
                $inventoryMovement->delete();
-               
+
                return response()->json([
                   'status' => true,
                   'code' => 'SUCCESS',
@@ -262,6 +339,4 @@ class InventoryController extends Controller
          );
       }
    }
-
-  
 }

@@ -17,110 +17,111 @@ class AuthController extends Controller
 {
 
 
-    /** 
-     * Create User
-     * @param Request $request
-     * @return User
+   /**
+     * Update authentificated account.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
-    public function createUser(Request $request)
+    public function updateAccount(Request $request)
     {
         try {
-
-            if (!$request->user()->can('users_create')) {
-                return response()->json(
-                    [
-                        'status' => false,
-                        'code' => 'NOT_ALLOWED',
-                        'message' => 'You Dont Have Access To Create User',
-                    ],
-                    405
-                );
-            }
-            //Validated
-            $validateUser = Validator::make(
+            //validate
+            $userValidator = Validator::make(
                 $request->all(),
                 [
                     'firstname' => 'required',
                     'lastname' => 'required',
                     'phone' => 'required',
-                    'email' => 'required|email|unique:users,email',
                     'password' => 'required',
-                    'status' => 'required',
-                    'role' => 'required'
+                    'status' => 'required'
                 ]
             );
 
-            if ($validateUser->fails()) {
+            if ($userValidator->fails()) {
                 return response()->json(
                     [
                         'status' => false,
                         'code' => 'VALIDATION_ERROR',
                         'message' => 'validation error',
-                        'error' => $validateUser->errors()
+                        'error' => $userValidator->errors()
                     ],
                     401
                 );
             }
 
 
-            $user = User::create([
-                'firstname' => $request->firstname,
-                'lastname' => $request->lastname,
-                'phone' => $request->phone,
-                'email' => $request->email,
-                // 'city' => $request->city,
-                'password' => Hash::make($request->password),
-                'status' => $request->status,
-            ]);
+            $user = User::find($request->user()->id);
 
-            if (isset($request->product_id)) {
-                ProductAgente::create([
-                    'agente_id' => $user->id,
-                    'product_id' => $request->product_id
-                ]);
-            }
 
-            if ($request->has('deliverycity')) {
-                foreach ($request->deliverycity as $city) {
-                    DeliveryPlace::create([
-                        'delivery_id' => $user->id,
-                        'city_id' => $city['city_id'],
-                        'fee' => $city['fee']
-                    ]);
-                }
-            }
-            $role = Role::where('id', $request->role)->value('name');
 
-            $user->assignRole($role);
 
-            // $user->assignRole('agente');
+            $user->firstname = $request->firstname;
+            $user->lastname = $request->lastname;
+            $user->phone = $request->phone;
+            $user->password = Hash::make($request->password);
+            $user->status = $request->status;
+
+            $user->save();
 
             return response()->json(
                 [
                     'status' => true,
-                    'code' => 'USER_CREATED',
-                    'message' => 'User Created Successfully!',
-                    'token' => $user->createToken("API TOKEN")->plainTextToken,
-                    'user' => $user
+                    'code' => 'USER_UPDATED',
+                    'message' => 'User updated Successfully!'
                 ],
-
                 200
             );
         } catch (\Throwable $th) {
             return response()->json(
                 [
                     'status' => false,
-                    'code' => 'SERVER_ERROR',
                     'message' => $th->getMessage(),
-                    'error' => $validateUser->errors()
+                    'code' => 'SERVER_ERROR'
                 ],
                 500
             );
         }
     }
 
+
+
     /**
-     * Login User
+     * Display athentificated account.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function showUserAccount(Request $request)
+    {
+        try {
+            $user = $request->user();
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'USER_SHOWED',
+                    'data' => [
+                        'user' => $user,
+                    ]
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
+
+
+
+    /**
+     * Login user
      * @param Request $request
      * @return User
      */
@@ -212,8 +213,11 @@ class AuthController extends Controller
         }
     }
 
+
+
+
     /**
-     * Logout User
+     * Logout user
      * @param Request $request
      * @return User
      */
@@ -245,8 +249,11 @@ class AuthController extends Controller
         }
     }
 
+
+
+
     /**
-     * Permission User
+     * Display user permission 
      * @param Request $request
      * @return User
      */

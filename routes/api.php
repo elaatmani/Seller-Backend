@@ -32,19 +32,23 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     //Roles
     Route::get('/auth/roles',[UserController::class,'roles']);
     Route::get('/roles/{id}',[UserController::class,'showRole']);
-    Route::post('/roles/add',[UserController::class,'createRole']);
+    Route::post('/roles/new',[UserController::class,'createRole']); //front end fix
     Route::post('/roles/update/{id}',[UserController::class,'updateRole']);
     Route::delete('/roles/delete/{id}',[UserController::class,'deleteRole']);
     
+
+
     //Main AccountshowRole
-    Route::get('/user', [UserController::class,'showUserAccount']);
-    Route::post('/user/update', [UserController::class,'updateAccount']);
+    Route::get('/user', [AuthController::class,'showUserAccount']); 
+    Route::post('/user/update', [AuthController::class,'updateAccount']); 
     Route::get('/auth/permission',[AuthController::class,'userPermission']);
     
+
+
     //All Users
     Route:: get('/users',[UserController::class,'index']);
     Route:: get('/users/{id}',[UserController::class,'show']);
-    Route::post('/auth/register',[AuthController::class,'createUser']);
+    Route::post('/users/new',[UserController::class,'create']); //front end fix
     Route:: post('/users/update/{id}',[UserController::class,'update']);
     Route::delete('/users/delete/{id}',[UserController::class,'delete']);
     Route::post('/users/status/{id}',[UserController::class,'updateUserStatus']);

@@ -22,7 +22,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        if (!$request->user()->can('product_show')) {
+        if (!$request->user()->can('show_all_products')) {
             return response()->json(
                 [
                     'status' => false,
@@ -55,8 +55,17 @@ class ProductController extends Controller
     public function create(Request $request)
     {
         try {
-           
 
+            if (!$request->user()->can('create_product')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To See Products',
+                    ],
+                    405
+                );
+            }
 
             //Validated
             $validateProduct = Validator::make(
@@ -80,7 +89,7 @@ class ProductController extends Controller
                     401
                 );
             }
-            
+
             $product = Product::create([
                 'name' => $request->name,
                 'ref' => $request->ref,
@@ -90,7 +99,7 @@ class ProductController extends Controller
                 'status' => 1
             ]);
 
-            $quantityTotal = 0 ;
+            $quantityTotal = 0;
             foreach ($request->variants as  $value) {
                 ProductVariation::create([
                     'product_id' => $product->id,
@@ -136,7 +145,7 @@ class ProductController extends Controller
     public function show(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('product_show')) {
+            if (!$request->user()->can('view_product')) {
                 return response()->json(
                     [
                         'status' => false,
@@ -192,7 +201,7 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('product_update')) {
+            if (!$request->user()->can('update_product')) {
                 return response()->json(
                     [
                         'status' => false,
@@ -250,7 +259,7 @@ class ProductController extends Controller
                         $existingVariation->delete();
                     }
                 }
-                
+
                 if ($request->has('variants')) {
                     foreach ($request->input('variants') as $variant) {
                         ProductVariation::updateOrCreate(
@@ -307,7 +316,7 @@ class ProductController extends Controller
     public function delete(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('product_delete')) {
+            if (!$request->user()->can('delete_product')) {
                 return response()->json(
                     [
                         'status' => false,
@@ -370,7 +379,7 @@ class ProductController extends Controller
     //         $posts[] = array(
 
     //             'name' => $data[0],
-                
+
 
 
     //         );

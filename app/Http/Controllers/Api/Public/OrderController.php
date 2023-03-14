@@ -11,9 +11,60 @@ use Illuminate\Http\Request;
 class OrderController extends Controller
 {
 
+    /**
+     * Display a listing of orders still in confirmation.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+
+        if (!$request->user()->can('show_all_orders')) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You Dont Have Access To See Orders',
+                ],
+                405
+            );
+        }
+
+
+
+        $orders = Order::where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirmer']])->get();
+
+        if (count($orders) > 0) {
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'orders' => $orders
+                    ]
+                ],
+                200
+            );
+        }
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'message' => 'Add New One !',
+                'data' => [
+                    'orders' => ''
+                ]
+            ],
+            200
+        );
+    }
+
+
 
     /**
-     * Display order not confirmed yet.
+     * Display an order not confirmed yet.
      *
      * @param \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -21,7 +72,7 @@ class OrderController extends Controller
     public function orderToConfirme(Request $request)
     {
 
-        if (!$request->user()->can('order_show')) {
+        if (!$request->user()->can('show_all_orders')) {
             return response()->json(
                 [
                     'status' => false,
@@ -59,74 +110,21 @@ class OrderController extends Controller
         );
     }
 
+
+
+
+
     /**
-     * Display order not confirmed yet.
+     * Update an order.
      *
      * @param \Illuminate\Http\Request  $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function orderToDelivery(Request $request)
-    {
-
-
-        $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], ['delivery', null]])->get();
-
-        if (count($order) > 0) {
-            return response()->json(
-                [
-                    'status' => true,
-                    'code' => 'SUCCESS',
-                    'data' => [
-                        'orders' => $order
-                    ]
-                ],
-                200
-            );
-        }
-
-        return response()->json(
-            [
-                'status' => true,
-                'code' => 'NO_ORDER_TO_DELIVERY',
-                'data' => 'No Order To Delivery !'
-            ],
-            200
-        );
-    }
-
-    public function orderDelivered(Request $request)
-    {
-
-        $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], ['delivery', 'livré']])->get();
-
-        if (count($order) > 0) {
-            return response()->json(
-                [
-                    'status' => true,
-                    'code' => 'SUCCESS',
-                    'data' => [
-                        'orders' => $order
-                    ]
-                ],
-                200
-            );
-        }
-
-        return response()->json(
-            [
-                'status' => true,
-                'code' => 'NO_ORDER',
-                'data' => 'No Order Delivred Yet !'
-            ],
-            200
-        );
-    }
-
-
     public function updateOrder(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('order_show')) {
+            if (!$request->user()->can('update_order')) {
                 return response()->json(
                     [
                         'status' => false,
@@ -182,16 +180,18 @@ class OrderController extends Controller
     }
 
 
+
     /**
      * Update order's Confirmation .
      *
      * @param \Illuminate\Http\Request  $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function updateConfirmation(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('order_show')) {
+            if (!$request->user()->can('update_order')) {
                 return response()->json(
                     [
                         'status' => false,
@@ -229,16 +229,20 @@ class OrderController extends Controller
         }
     }
 
+
+
+
     /**
      * Update order's Confirmation .
      *
      * @param \Illuminate\Http\Request  $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function updateNote(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('order_show')) {
+            if (!$request->user()->can('update_order')) {
                 return response()->json(
                     [
                         'status' => false,
@@ -276,10 +280,19 @@ class OrderController extends Controller
         }
     }
 
+
+
+    /**
+     * Update order's Confirmation .
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
     public function updateDelivery(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('order_show')) {
+            if (!$request->user()->can('update_order')) {
                 return response()->json(
                     [
                         'status' => false,
@@ -317,16 +330,19 @@ class OrderController extends Controller
         }
     }
 
+
+
     /**
      * Update order's Confirmation .
      *
      * @param \Illuminate\Http\Request  $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function updateAffectation(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('order_show')) {
+            if (!$request->user()->can('update_order')) {
                 return response()->json(
                     [
                         'status' => false,
@@ -364,10 +380,19 @@ class OrderController extends Controller
         }
     }
 
+
+
+    /**
+     * Update order's Confirmation .
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
     public function updateUpsell(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('order_show')) {
+            if (!$request->user()->can('update_order')) {
                 return response()->json(
                     [
                         'status' => false,
@@ -405,56 +430,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @param \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
-    {
-
-        if (!$request->user()->can('order_show')) {
-            return response()->json(
-                [
-                    'status' => false,
-                    'code' => 'NOT_ALLOWED',
-                    'message' => 'You Dont Have Access To See Orders',
-                ],
-                405
-            );
-        }
-
-
-
-        $orders = Order::where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirmer']])->get();
-
-        if (count($orders) > 0) {
-            return response()->json(
-                [
-                    'status' => true,
-                    'code' => 'SUCCESS',
-                    'data' => [
-                        'orders' => $orders
-                    ]
-                ],
-                200
-            );
-        }
-
-        return response()->json(
-            [
-                'status' => true,
-                'code' => 'SUCCESS',
-                'message' => 'Add New One !',
-                'data' => [
-                    'orders' => ''
-                ]
-            ],
-            200
-        );
-    }
-
 
 
     /**
@@ -466,12 +441,12 @@ class OrderController extends Controller
     public function confirmedOrders(Request $request)
     {
 
-        if (!$request->user()->can('order_show')) {
+        if (!$request->user()->can('show_all_orders')) {
             return response()->json(
                 [
                     'status' => false,
                     'code' => 'NOT_ALLOWED',
-                    'message' => 'You Dont Have Access To See Orders',
+                    'message' => 'You Dont Have Access To See Confirmed Orders',
                 ],
                 405
             );
@@ -501,6 +476,8 @@ class OrderController extends Controller
         );
     }
 
+
+
     /**
      * Display Confirmed Orders
      *
@@ -510,12 +487,12 @@ class OrderController extends Controller
     public function addOrder(Request $request)
     {
         try {
-            if (!$request->user()->can('order_update')) {
+            if (!$request->user()->can('update_order')) {
                 return response()->json(
                     [
                         'status' => false,
                         'code' => 'NOT_ALLOWED',
-                        'message' => 'You Dont Have Access To Update Order Orders',
+                        'message' => 'You Dont Have Access To Add Order',
                     ],
                     405
                 );
@@ -536,8 +513,7 @@ class OrderController extends Controller
             }
 
             $product_id = ProductAgente::where('agente_id', $request->user()->id)->value('product_id');
-            $product_name = Product::find($product_id)->value('name');
-
+            $product_name = Product::find($product_id)->name;
             $AddOrder = Order::where([['agente_id', null], ['product_name', $product_name]])->first();
 
             if ($AddOrder) {
@@ -561,6 +537,118 @@ class OrderController extends Controller
                     'data' => [
                         'orders' => $AddOrder
                     ]
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+
+
+    /**
+     * Display order not Dlivered yet.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orderToDelivery(Request $request)
+    {
+        try {
+            if (!$request->user()->can('show_all_deliveries')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Delivery Orders',
+                    ],
+                    405
+                );
+            }
+            $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], ['delivery', null]])->get();
+
+            if (count($order) > 0) {
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => [
+                            'orders' => $order
+                        ]
+                    ],
+                    200
+                );
+            }
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'NO_ORDER_TO_DELIVERY',
+                    'data' => 'No Order To Delivery !'
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+
+
+    /**
+     * Display delivered orders.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orderDelivered(Request $request)
+    {
+        try {
+            if (!$request->user()->can('show_all_deliveries')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Delivery Orders',
+                    ],
+                    405
+                );
+            }
+            $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], ['delivery', 'livré']])->get();
+
+            if (count($order) > 0) {
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => [
+                            'orders' => $order
+                        ]
+                    ],
+                    200
+                );
+            }
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'NO_ORDER',
+                    'data' => 'No Order Delivred Yet !'
                 ],
                 200
             );
