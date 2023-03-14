@@ -34,7 +34,7 @@ class OrderController extends Controller
 
 
 
-        $order = Order::where([['affectation', $request->user()->id], ['confirmation', null]])->get();
+        $order = Order::where([['agente_id', $request->user()->id], ['confirmation', null]])->get();
 
         if (count($order) > 0) {
             return response()->json(
@@ -68,9 +68,6 @@ class OrderController extends Controller
     public function orderToDelivery(Request $request)
     {
 
-     
-
-
 
         $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], ['delivery', null]])->get();
 
@@ -99,10 +96,6 @@ class OrderController extends Controller
 
     public function orderDelivered(Request $request)
     {
-
-       
-
-
 
         $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], ['delivery', 'livré']])->get();
 
