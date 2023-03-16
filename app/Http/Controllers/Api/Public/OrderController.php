@@ -573,7 +573,10 @@ class OrderController extends Controller
                     405
                 );
             }
-            $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], ['delivery', '!=' , 'livrer']])->get();
+            $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], [function ($query) {
+                $query->where('delivery', '!=', 'livrer')
+                      ->orWhereNull('delivery');
+            }]])->get();
 
             if (count($order) > 0) {
                 return response()->json(

@@ -195,27 +195,27 @@ class UserController extends Controller
                 'status' => $request->status,
             ]);
 
-            if (isset($request->product_id)) {
+            if ($request->role === 2 && isset($request->product_id)) {
                 ProductAgente::create([
                     'agente_id' => $user->id,
                     'product_id' => $request->product_id
                 ]);
             }
 
-            if ($request->has('deliverycity')) {
-                foreach ($request->deliverycity as $city) {
-                    DeliveryPlace::create([
-                        'delivery_id' => $user->id,
-                        'city_id' => $city['city_id'],
-                        'fee' => $city['fee']
-                    ]);
-                }
-            }
-            $role = Role::where('id', $request->role)->value('name');
+            // if ($request->has('deliverycity')) {
+            //     foreach ($request->deliverycity as $city) {
+            //         DeliveryPlace::create([
+            //             'delivery_id' => $user->id,
+            //             'city_id' => $city['city_id'],
+            //             'fee' => $city['fee']
+            //         ]);
+            //     }
+            // }
 
+
+            $role = Role::where('id', $request->role)->value('name');
             $user->assignRole($role);
 
-            // $user->assignRole('agente');
 
             return response()->json(
                 [
@@ -295,7 +295,7 @@ class UserController extends Controller
                     );
                 }
 
-               
+
 
                 $user->firstname = $request->firstname;
                 $user->lastname = $request->lastname;
@@ -317,7 +317,7 @@ class UserController extends Controller
                 }
 
                 $user->save();
-                
+
                 if ($request->role === 2) {
                     ProductAgente::updateOrCreate(
                         ['agente_id' => $user->id],
@@ -407,9 +407,13 @@ class UserController extends Controller
             }
 
 
+
             $user = User::find($id);
+            
             if (isset($user)) {
-                User::where('id', $id)->delete();
+                $role =  $user->getRoleNames()->first();
+                $user->removeRole($role);
+                User::where('id', $id)->delete();  
                 return response()->json([
                     'status' => true,
                     'code' => 'USER_DELETED',
@@ -436,7 +440,7 @@ class UserController extends Controller
     }
 
 
-  
+
     /**
      * Update the specified user status.{ active | desactive }
      *
