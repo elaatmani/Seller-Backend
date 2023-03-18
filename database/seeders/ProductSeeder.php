@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\InventoryState;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -44,6 +45,7 @@ class ProductSeeder extends Seeder
                     'product_id' => $productModel->id,
                 ],
             ]);
+            InventoryState::create(['product_id'=>$productModel->id,'quantity'=>2000]);
         }
     }
 }
