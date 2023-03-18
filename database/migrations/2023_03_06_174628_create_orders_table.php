@@ -27,7 +27,7 @@ return new class extends Migration
             $table->integer('affectation')->nullable();
             $table->string('delivery')->nullable();
             $table->integer('price');
-            $table->string('note');
+            $table->string('note')->nullable();;
             $table->timestamps();
         });
     }
