@@ -318,6 +318,38 @@ class UserController extends Controller
                     $user->assignRole($role);
                 }
 
+                if ($request->role === 3) {
+                    $user->city = $request->city; 
+
+                    $existingCityIds = DeliveryPlace::where('delivery_id', $id)->pluck('city_id');
+
+                    foreach ($request->input('deliverycity') as $city) {
+                        $deliveryPlace = DeliveryPlace::where('delivery_id', $id)
+                            ->where('city_id', $city['city_id'])
+                            ->first();
+
+                        if ($deliveryPlace) {
+                            // If the delivery place already exists, update its fee and city_id values
+                            $deliveryPlace->update(['fee' => $city['fee'], 'city_id' => $city['city_id']]);
+                        } else {
+                            // If the delivery place does not exist, create a new one
+                            DeliveryPlace::create([
+                                'delivery_id' => $id,
+                                'city_id' => $city['city_id'],
+                                'fee' => $city['fee']
+                            ]);
+                        }
+                    }
+
+                    // Delete any delivery places that are not in the $request object
+                    $cityIdsToDelete = $existingCityIds->diff(collect($request->input('deliverycity'))->pluck('city_id')->toArray());
+
+                    if (!empty($cityIdsToDelete)) {
+                        DeliveryPlace::where('delivery_id', $id)
+                            ->whereIn('city_id', $cityIdsToDelete)
+                            ->delete();
+                    }
+                }
                 $user->save();
 
                 if ($request->role === 2) {
@@ -327,36 +359,7 @@ class UserController extends Controller
                     );
                 }
 
-                // if ($request->role === 3) {
-                //     $existingCityIds = DeliveryPlace::where('delivery_id', $id)->pluck('city_id');
 
-                //     foreach ($request->input('deliverycity') as $city) {
-                //         $deliveryPlace = DeliveryPlace::where('delivery_id', $id)
-                //             ->where('city_id', $city['city_id'])
-                //             ->first();
-
-                //         if ($deliveryPlace) {
-                //             // If the delivery place already exists, update its fee and city_id values
-                //             $deliveryPlace->update(['fee' => $city['fee'], 'city_id' => $city['city_id']]);
-                //         } else {
-                //             // If the delivery place does not exist, create a new one
-                //             DeliveryPlace::create([
-                //                 'delivery_id' => $id,
-                //                 'city_id' => $city['city_id'],
-                //                 'fee' => $city['fee']
-                //             ]);
-                //         }
-                //     }
-
-                //     // Delete any delivery places that are not in the $request object
-                //     $cityIdsToDelete = $existingCityIds->diff(collect($request->input('deliverycity'))->pluck('city_id')->toArray());
-
-                //     if (!empty($cityIdsToDelete)) {
-                //         DeliveryPlace::where('delivery_id', $id)
-                //             ->whereIn('city_id', $cityIdsToDelete)
-                //             ->delete();
-                //     }
-                // }
 
                 return response()->json(
                     [
@@ -411,11 +414,11 @@ class UserController extends Controller
 
 
             $user = User::find($id);
-            
+
             if (isset($user)) {
                 $role =  $user->getRoleNames()->first();
                 $user->removeRole($role);
-                User::where('id', $id)->delete();  
+                User::where('id', $id)->delete();
                 return response()->json([
                     'status' => true,
                     'code' => 'USER_DELETED',
