@@ -190,10 +190,10 @@ class UserController extends Controller
                 'lastname' => $request->lastname,
                 'phone' => $request->phone,
                 'email' => $request->email,
-                // 'city' => $request->city,
                 'password' => Hash::make($request->password),
                 'status' => $request->status,
             ]);
+
 
             if ($request->role === 2 && isset($request->product_id)) {
                 ProductAgente::create([
@@ -202,15 +202,17 @@ class UserController extends Controller
                 ]);
             }
 
-            // if ($request->has('deliverycity')) {
-            //     foreach ($request->deliverycity as $city) {
-            //         DeliveryPlace::create([
-            //             'delivery_id' => $user->id,
-            //             'city_id' => $city['city_id'],
-            //             'fee' => $city['fee']
-            //         ]);
-            //     }
-            // }
+            if ($request->role === 3 && isset($request->product_id)) {
+                $user->city = $request->city;
+                $user->save();
+                foreach ($request->deliverycity as $city) {
+                    DeliveryPlace::create([
+                        'delivery_id' => $user->id,
+                        'city_id' => $city['city_id'],
+                        'fee' => $city['fee']
+                    ]);
+                }
+            }
 
 
             $role = Role::where('id', $request->role)->value('name');
