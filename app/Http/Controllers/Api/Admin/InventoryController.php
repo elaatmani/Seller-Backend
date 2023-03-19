@@ -12,7 +12,7 @@ class InventoryController extends Controller
 {
 
 
-   
+
    /**
     * Display Inventory States.
     *
@@ -50,10 +50,10 @@ class InventoryController extends Controller
       }
    }
 
-   
+
 
    /**
-    * Display Inventory Movements. 
+    * Display Inventory Movements.
     *
     * @return \Illuminate\Http\Response
     */
@@ -91,7 +91,7 @@ class InventoryController extends Controller
 
 
    /**
-    * Create Inventory Movement. 
+    * Create Inventory Movement.
     *
     * @return \Illuminate\Http\Response
     */
@@ -171,7 +171,7 @@ class InventoryController extends Controller
 
 
    /**
-    * Update Inventory Movement. 
+    * Update Inventory Movement.
     *
     * @return \Illuminate\Http\Response
     */
@@ -273,7 +273,7 @@ class InventoryController extends Controller
 
 
    /**
-    * Delete Inventory Movement. 
+    * Delete Inventory Movement.
     *
     * @return \Illuminate\Http\Response
     */
@@ -339,4 +339,67 @@ class InventoryController extends Controller
          );
       }
    }
+
+   /**
+    * Delete Inventory Movement.
+    *
+    * @return \Illuminate\Http\Response
+    */
+    public function showInventoryMovement(Request $request, $id)
+    {
+       try {
+          if (!$request->user()->can('view_inventory_movement')) {
+             return response()->json(
+                [
+                   'status' => false,
+                   'code' => 'NOT_ALLOWED',
+                   'message' => 'You Dont Have Access To See Product',
+                ],
+                405
+             );
+          }
+
+          $inventoryMovement = InventoryMovement::where('id', $id)->with('product', 'delivery')->get()->first();
+
+          if ($inventoryMovement) {
+
+            return response()->json([
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => [
+                'movement' => $inventoryMovement
+                ]
+            ], 200);
+            }
+
+        return response()->json(
+        [
+            'status' => false,
+            'code' => 'NOT_FOUND',
+            'message' => 'Inventory State Not Exist',
+        ],
+        404
+        );
+
+
+          return response()->json(
+             [
+                'status' => false,
+                'code' => 'NOT_FOUND',
+                'message' => 'Inventory Movement Not Exist',
+             ],
+             404
+          );
+
+       } catch (\Throwable $th) {
+          return response()->json(
+             [
+                'status' => false,
+                'message' => $th->getMessage(),
+                'code' => 'SERVER_ERROR'
+             ],
+             500
+          );
+       }
+}
 }

@@ -28,21 +28,21 @@ Route::post('/auth/login',[AuthController::class,'loginUser']);
 
 //Sanctum Use
 Route::group(['middleware' => ['auth:sanctum']], function(){
-    
+
     //Roles
     Route::get('/auth/roles',[UserController::class,'roles']);
     Route::get('/roles/{id}',[UserController::class,'showRole']);
     Route::post('/roles/new',[UserController::class,'createRole']); //front end fix
     Route::post('/roles/update/{id}',[UserController::class,'updateRole']);
     Route::delete('/roles/delete/{id}',[UserController::class,'deleteRole']);
-    
+
 
 
     //Main AccountshowRole
-    Route::get('/user', [AuthController::class,'showUserAccount']); 
-    Route::post('/user/update', [AuthController::class,'updateAccount']); 
+    Route::get('/user', [AuthController::class,'showUserAccount']);
+    Route::post('/user/update', [AuthController::class,'updateAccount']);
     Route::get('/auth/permission',[AuthController::class,'userPermission']);
-    
+
 
 
     //All Users
@@ -54,16 +54,16 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/users/status/{id}',[UserController::class,'updateUserStatus']);
     Route::get('/cities',[UserController::class,'allCities']);
     Route::get('/delevries',[UserController::class,'delevries']);
- 
-    
-    
+
+
+
     //Product
     Route::get('/products',[ProductController::class,'index']);
     Route::get('/products/{id}',[ProductController::class,'show']);
     Route::post('/products/new', [ProductController::class,'create']);
     Route::post('/products/update/{id}',[ProductController::class,'update']);
     Route::delete('/products/delete/{id}',[ProductController::class,'delete']);
-    
+
 
 
     //Sales For Admin
@@ -100,6 +100,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         Route::post('/inventorymovements/new',[InventoryController::class,'createInventoryMovement']);
         Route::post('/inventorymovements/update/{id}',[InventoryController::class,'updateInventoryMovement']);
         Route::delete('/inventorymovements/delete/{id}',[InventoryController::class,'deleteInventoryMovement']);
+        Route::get('/inventorymovements/{id}',[InventoryController::class,'showInventoryMovement']);
 
 });
 
