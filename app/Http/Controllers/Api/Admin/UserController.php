@@ -202,7 +202,7 @@ class UserController extends Controller
                 ]);
             }
 
-            if ($request->role === 3 && isset($request->product_id)) {
+            if ($request->role === 3) {
                 $user->city = $request->city;
                 $user->save();
                 foreach ($request->deliverycity as $city) {
@@ -820,7 +820,7 @@ class UserController extends Controller
             ], 405);
         }
 
-        $cities  = City::all();
+        $cities = City::orderBy('name')->get();
 
         return response()->json(
             [
