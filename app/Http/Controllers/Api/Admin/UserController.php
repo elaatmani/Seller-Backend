@@ -81,6 +81,7 @@ class UserController extends Controller
      */
     public function show(Request $request, $id)
     {
+       
         try {
             if (!$request->user()->can('view_user')) {
                 return response()->json(
@@ -92,7 +93,8 @@ class UserController extends Controller
                     405
                 );
             }
-            $user = User::with('products')->find($id);
+            $user = User::with(['products','deliveryPlaces.city','city'])->find($id);
+
             if (isset($user)) {
                 return response()->json(
                     [
@@ -111,6 +113,8 @@ class UserController extends Controller
                                 'updated_at' => $user->updated_at,
                                 'role' => $user->roles->pluck('id')->first(),
                                 'product' => $user->roles->pluck('id')->first() === 2 ? $user->products->value('id') : null,
+                                'deliveryPlaces' => $user->deliveryPlaces,
+                                'city' => $user->City ? $user->City->name : null
                             ]
                         ],
                     ],

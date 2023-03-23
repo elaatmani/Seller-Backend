@@ -57,4 +57,15 @@ class User extends Authenticatable
         return $this->hasManyThrough(Product::class, ProductAgente::class, 'agente_id', 'id', 'id', 'product_id');
     }
     
+    
+
+    public function deliveryPlaces()
+    {
+        return $this->hasMany(DeliveryPlace::class, 'delivery_id');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'city');
+    }
 }

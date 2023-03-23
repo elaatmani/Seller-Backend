@@ -14,4 +14,16 @@ class DeliveryPlace extends Model
         'city_id',
         'fee'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'delivery_id');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
+   
 }
