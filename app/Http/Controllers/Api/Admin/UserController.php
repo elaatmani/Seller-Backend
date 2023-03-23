@@ -308,18 +308,23 @@ class UserController extends Controller
                 }
                 $user->status = $request->status;
 
+                if ($user->roles->first()) {
+                    
+                    if ($user->roles->first()->name != $request->role) {
 
-                if ($user->roles->first()->name != $request->role) {
-
-                    // remove existing role
-                    $user->removeRole($user->roles->first()->name);
+                        // remove existing role
+                        $user->removeRole($user->roles->first()->name);
+                        $role = Role::where('id', $request->role)->value('name');
+                        // assign new role
+                        $user->assignRole($role);
+                    }
+                }else{
                     $role = Role::where('id', $request->role)->value('name');
-                    // assign new role
+                    
                     $user->assignRole($role);
                 }
-
                 if ($request->role === 3) {
-                    $user->city = $request->city; 
+                    $user->city = $request->city;
 
                     $existingCityIds = DeliveryPlace::where('delivery_id', $id)->pluck('city_id');
 
@@ -416,8 +421,11 @@ class UserController extends Controller
             $user = User::find($id);
 
             if (isset($user)) {
+
                 $role =  $user->getRoleNames()->first();
-                $user->removeRole($role);
+                if ($role) {
+                    $user->removeRole($role);
+                }
                 User::where('id', $id)->delete();
                 return response()->json([
                     'status' => true,
