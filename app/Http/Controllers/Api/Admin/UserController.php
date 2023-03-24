@@ -81,7 +81,7 @@ class UserController extends Controller
      */
     public function show(Request $request, $id)
     {
-       
+
         try {
             if (!$request->user()->can('view_user')) {
                 return response()->json(
@@ -114,7 +114,7 @@ class UserController extends Controller
                                 'role' => $user->roles->pluck('id')->first(),
                                 'product' => $user->roles->pluck('id')->first() === 2 ? $user->products->value('id') : null,
                                 'deliveryPlaces' => $user->deliveryPlaces,
-                                'city' => $user->City ? $user->City->name : null
+                                'city' => $user->City ? $user->City : null
                             ]
                         ],
                     ],
@@ -143,7 +143,7 @@ class UserController extends Controller
 
 
 
-    /** 
+    /**
      * Create the user
      * @param Request $request
      * @return User
@@ -313,7 +313,7 @@ class UserController extends Controller
                 $user->status = $request->status;
 
                 if ($user->roles->first()) {
-                    
+
                     if ($user->roles->first()->name != $request->role) {
 
                         // remove existing role
@@ -324,7 +324,7 @@ class UserController extends Controller
                     }
                 }else{
                     $role = Role::where('id', $request->role)->value('name');
-                    
+
                     $user->assignRole($role);
                 }
                 if ($request->role === 3) {
@@ -402,7 +402,7 @@ class UserController extends Controller
 
     /**
      * Remove the specified user.
-     * @param Request $request 
+     * @param Request $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -759,7 +759,7 @@ class UserController extends Controller
 
     /**
      * Remove the specified role.
-     * @param \Illuminate\Http\Request $request 
+     * @param \Illuminate\Http\Request $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -819,7 +819,7 @@ class UserController extends Controller
 
     /**
      * Show All Cities.
-     * @param  \Illuminate\Http\Request $request 
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function allCities(Request $request)
@@ -847,7 +847,7 @@ class UserController extends Controller
 
     /**
      * Show all cities.
-     * @param  \Illuminate\Http\Request $request 
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function delevries(Request $request)
