@@ -864,6 +864,136 @@ class UserController extends Controller
             200
         );
     }
+
+    /**
+     * Display the specified user.
+     * @param  Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function profile(Request $request)
+    {
+
+        try {
+
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'USER_SUCCESS',
+                        'data' => [
+                            'user' =>  $request->user()
+                        ],
+                    ],
+                    200
+                );
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
+
+
+    /**
+     * Update the specified user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateProfile(Request $request)
+    {
+        try {
+
+            $user = User::find($request->user()->id);
+
+            if (isset($user)) {
+
+                //validate
+                $userValidator = Validator::make(
+                    $request->all(),
+                    [
+                        'firstname' => 'required',
+                        'lastname' => 'required',
+                        'phone' => 'required',
+                    ]
+                );
+
+                if ($userValidator->fails()) {
+                    return response()->json(
+                        [
+                            'status' => false,
+                            'code' => 'VALIDATION_ERROR',
+                            'message' => 'validation error',
+                            'error' => $userValidator->errors()
+                        ],
+                        401
+                    );
+                }
+
+                $user->firstname = $request->firstname;
+                $user->lastname = $request->lastname;
+                $user->phone = $request->phone;
+                if ($request->updatePassword == 'true') {
+                    $user->password = Hash::make($request->password);
+                }
+
+                $user->save();
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'USER_UPDATED',
+                        'message' => 'Profile updated Successfully!',
+                    ],
+                    200
+                );
+            }
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'NOT_FOUND',
+                    'message' => 'User Does Not Exist'
+                ],
+                404
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
+
+
+      /**
+     * Show Online Users.
+     * @return \Illuminate\Http\Response
+     */
+    public function onlineUsers()
+    {
+       $usersOnline = User::whereBetween('last_action',[now()->subMinutes(1) , now()])->get();
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => $usersOnline
+            ],
+            200
+        );
+    }
 }
 
 

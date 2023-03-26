@@ -48,7 +48,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     //All Users
     Route:: get('/users',[UserController::class,'index']);
     Route:: get('/users/profile',[UserController::class,'profile']);
-    Route::post('/users/new',[UserController::class,'create']); //front end fix
+    Route::post('/users/new',[UserController::class,'create']);
     Route:: post('/users/update/{id}',[UserController::class,'update']);
     Route:: post('/users/profile',[UserController::class,'updateProfile']);
     Route::delete('/users/delete/{id}',[UserController::class,'delete']);
