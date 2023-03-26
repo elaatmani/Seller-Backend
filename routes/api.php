@@ -54,6 +54,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/users/status/{id}',[UserController::class,'updateUserStatus']);
     Route::get('/cities',[UserController::class,'allCities']);
     Route::get('/delevries',[UserController::class,'delevries']);
+    Route::get('/online',[UserController::class,'onlineUsers']);
 
 
 

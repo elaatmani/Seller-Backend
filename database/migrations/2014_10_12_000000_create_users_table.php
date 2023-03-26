@@ -24,12 +24,11 @@ return new class extends Migration
             $table->tinyInteger('is_online')->default(0);
             $table->string('city')->nullable();
             $table->tinyInteger('status');
+            $table->timestamp('last_action')->nullable();
             $table->rememberToken();
             $table->timestamps();
 
-            $table->foreign('city')
-                ->references('id')
-                ->on('cities');
+          
         });
     }
 
