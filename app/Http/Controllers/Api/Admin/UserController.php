@@ -864,26 +864,6 @@ class UserController extends Controller
             200
         );
     }
-
-
-
-      /**
-     * Show Online Users.
-     * @return \Illuminate\Http\Response
-     */
-    public function onlineUsers()
-    {
-       $usersOnline = User::whereBetween('last_action',[now()->subMinutes(1) , now()])->get();
-
-        return response()->json(
-            [
-                'status' => true,
-                'code' => 'SUCCESS',
-                'data' => $usersOnline
-            ],
-            200
-        );
-    }
 }
 
 

@@ -47,11 +47,13 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     //All Users
     Route:: get('/users',[UserController::class,'index']);
-    Route:: get('/users/{id}',[UserController::class,'show']);
+    Route:: get('/users/profile',[UserController::class,'profile']);
     Route::post('/users/new',[UserController::class,'create']); //front end fix
     Route:: post('/users/update/{id}',[UserController::class,'update']);
+    Route:: post('/users/profile',[UserController::class,'updateProfile']);
     Route::delete('/users/delete/{id}',[UserController::class,'delete']);
     Route::post('/users/status/{id}',[UserController::class,'updateUserStatus']);
+    Route:: get('/users/{id}',[UserController::class,'show']);
     Route::get('/cities',[UserController::class,'allCities']);
     Route::get('/delevries',[UserController::class,'delevries']);
     Route::get('/online',[UserController::class,'onlineUsers']);
