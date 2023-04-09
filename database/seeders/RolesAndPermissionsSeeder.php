@@ -60,6 +60,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         //Orders
         Permission::create(['name' => 'show_all_orders', 'description' => 'View all orders']);
+        Permission::create(['name' => 'view_order', 'description' => 'View a specific order']);  
         Permission::create(['name' => 'update_order', 'description' => 'Update an order']);
         Permission::create(['name' => 'access_to_orders', 'description' => 'Access to order management']);
 
@@ -108,6 +109,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view_sale',
                 'update_sale',
                 'update_order',
+                'view_order',
                 'delete_sale',
                 'access_to_sales',
             ]);

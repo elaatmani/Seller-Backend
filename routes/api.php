@@ -80,6 +80,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/orders/confirmer',[OrderController::class,'confirmedOrders']);
     Route::get('/orders/add',[OrderController::class,'addOrder']);
     Route::post('/orders/update/{id}',[OrderController::class,'updateOrder']);
+    Route::get('/orders/show/{id}',[OrderController::class,'showOrder']);
 
     //Orders For Delivery
     Route::get('/orders/todelivery',[OrderController::class,'orderToDelivery']);

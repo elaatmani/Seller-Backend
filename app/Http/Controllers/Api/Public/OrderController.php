@@ -138,15 +138,23 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
+                $order->fullname = $request->fullname;
+                $order->product_name = $request->product_name;
+                $order->upsell = $request->upsell;
+                $order->phone = $request->phone;
+                $order->city = $request->city;
+                $order->adresse = $request->adresse;
+                $order->quantity = $request->quantity;
                 $order->confirmation = $request->confirmation;
                 $order->affectation = $request->affectation;
-                $order->upsell = $request->upsell;
-                if ($request->note) {
-                    $order->note = $request->note;
-                }
                 if ($request->delivery) {
                     $order->delivery = $request->delivery;
                 }
+                $order->price = $request->price; 
+                if ($request->note) {
+                    $order->note = $request->note;
+                }
+                
                 $order->save();
 
                 return response()->json(
@@ -179,6 +187,60 @@ class OrderController extends Controller
         }
     }
 
+
+     /**
+     * Show an order.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showOrder(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->can('view_order')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Orders',
+                    ],
+                    405
+                );
+            }
+
+            $order = Order::where('id', $id)->get();
+
+            if ($order) {
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => $order
+                    ],
+                    200
+                );
+            } else {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_FOUND',
+                        'message' => 'Order not found',
+                    ],
+                    404
+                );
+            }
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
 
 
     /**
