@@ -50,6 +50,7 @@ class UserController extends Controller
                             'email' => $user->email,
                             'photo' => $user->photo,
                             'is_online' => $user->is_online,
+                            'last_action' => $user->last_action,
                             'status' => $user->status,
                             'created_at' => $user->created_at,
                             'updated_at' => $user->updated_at,
