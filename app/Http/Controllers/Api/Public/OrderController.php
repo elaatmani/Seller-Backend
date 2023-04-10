@@ -573,10 +573,10 @@ class OrderController extends Controller
                     200
                 );
             }
-
-            $product_id = ProductAgente::where('agente_id', $request->user()->id)->value('product_id');
-            $product_name = Product::find($product_id)->name;
-            $AddOrder = Order::where([['agente_id', null], ['product_name', $product_name]])->first();
+            
+            $product_ids = ProductAgente::where('agente_id', $request->user()->id)->pluck('product_id');
+            $product_names = Product::whereIn('id', $product_ids)->pluck('name');
+            $AddOrder = Order::whereNull('agente_id')->whereIn('product_name', $product_names)->get()->first();
 
             if ($AddOrder) {
                 $AddOrder->agente_id = $request->user()->id;
