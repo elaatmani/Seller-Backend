@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\DeliveryPlace;
+use App\Models\Product;
 use App\Models\ProductAgente;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -94,7 +95,7 @@ class UserController extends Controller
                     405
                 );
             }
-            $user = User::with(['products','deliveryPlaces.city','city'])->find($id);
+            $user = User::with(['products', 'deliveryPlaces.city', 'city'])->find($id);
 
             if (isset($user)) {
                 return response()->json(
@@ -199,12 +200,24 @@ class UserController extends Controller
                 'status' => $request->status,
             ]);
 
-
+          
             if ($request->role === 2 && isset($request->product_id)) {
-                ProductAgente::create([
-                    'agente_id' => $user->id,
-                    'product_id' => $request->product_id
-                ]);
+                if ($request->product_id[0] != 0) {
+                    foreach ($request->product_id as $product_id) {
+                        ProductAgente::create([
+                            'agente_id' => $user->id,
+                            'product_id' => $product_id
+                        ]);
+                    }
+                } else {
+                    $products = Product::all();
+                    foreach ($products as $product) {
+                        ProductAgente::create([
+                            'agente_id' => $user->id,
+                            'product_id' => $product->id
+                        ]);
+                    }
+                }
             }
 
             if ($request->role === 3) {
@@ -323,7 +336,7 @@ class UserController extends Controller
                         // assign new role
                         $user->assignRole($role);
                     }
-                }else{
+                } else {
                     $role = Role::where('id', $request->role)->value('name');
 
                     $user->assignRole($role);
@@ -368,7 +381,7 @@ class UserController extends Controller
                         ['product_id' => $request->product_id]
                     );
                 }
-
+                
 
 
                 return response()->json(
@@ -878,17 +891,16 @@ class UserController extends Controller
         try {
 
 
-                return response()->json(
-                    [
-                        'status' => true,
-                        'code' => 'USER_SUCCESS',
-                        'data' => [
-                            'user' =>  $request->user()
-                        ],
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'USER_SUCCESS',
+                    'data' => [
+                        'user' =>  $request->user()
                     ],
-                    200
-                );
-
+                ],
+                200
+            );
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -978,13 +990,13 @@ class UserController extends Controller
     }
 
 
-      /**
+    /**
      * Show Online Users.
      * @return \Illuminate\Http\Response
      */
     public function onlineUsers()
     {
-       $usersOnline = User::whereBetween('last_action',[now()->subMinutes(1) , now()])->get();
+        $usersOnline = User::whereBetween('last_action', [now()->subMinutes(1), now()])->get();
 
         return response()->json(
             [
@@ -996,10 +1008,3 @@ class UserController extends Controller
         );
     }
 }
-
-
-
-
-
-
-
