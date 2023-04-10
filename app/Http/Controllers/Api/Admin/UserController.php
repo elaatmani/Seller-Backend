@@ -200,26 +200,26 @@ class UserController extends Controller
                 'status' => $request->status,
             ]);
 
-          
+
             if ($request->role === 2 && isset($request->product_id)) {
-                if ($request->product_id[0] != 0) {
-                    foreach ($request->product_id as $product_id) {
-                        ProductAgente::create([
-                            'agente_id' => $user->id,
-                            'product_id' => $product_id
-                        ]);
-                    }
-                } else {
+                $productIds = is_array($request->product_id) ? $request->product_id : [$request->product_id];
+                $numProducts = count($productIds);
+
+                if ($numProducts === 1 && $productIds[0] === 0) {
                     $products = Product::all();
-                    foreach ($products as $product) {
-                        ProductAgente::create([
-                            'agente_id' => $user->id,
-                            'product_id' => $product->id
-                        ]);
-                    }
+                    $productIds = $products->pluck('id')->toArray();
+                }
+
+                // Add new product assignments
+                foreach ($productIds as $productId) {
+                    ProductAgente::updateOrCreate([
+                        'agente_id' => $user->id,
+                        'product_id' => $productId
+                    ]);
                 }
             }
 
+            
             if ($request->role === 3) {
                 $user->city = $request->city;
                 $user->save();
@@ -375,13 +375,33 @@ class UserController extends Controller
                 }
                 $user->save();
 
-                if ($request->role === 2) {
-                    ProductAgente::updateOrCreate(
-                        ['agente_id' => $user->id],
-                        ['product_id' => $request->product_id]
-                    );
+
+
+                if ($request->role === 2 && isset($request->product_id)) {
+                    $productIds = is_array($request->product_id) ? $request->product_id : [$request->product_id];
+                    $numProducts = count($productIds);
+
+                    if ($numProducts === 1 && $productIds[0] === 0) {
+                        $products = Product::all();
+                        $productIds = $products->pluck('id')->toArray();
+                    }
+
+                    // Get current product IDs assigned to the user
+                    $currentProductIds = ProductAgente::where('agente_id', $user->id)->pluck('product_id')->toArray();
+
+                    // Delete product assignments that are not in the new list
+                    $deleteProductIds = array_diff($currentProductIds, $productIds);
+                    ProductAgente::where('agente_id', $user->id)->whereIn('product_id', $deleteProductIds)->delete();
+
+                    // Add new product assignments
+                    foreach ($productIds as $productId) {
+                        ProductAgente::updateOrCreate([
+                            'agente_id' => $user->id,
+                            'product_id' => $productId
+                        ]);
+                    }
                 }
-                
+
 
 
                 return response()->json(
