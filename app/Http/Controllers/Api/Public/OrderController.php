@@ -150,11 +150,11 @@ class OrderController extends Controller
                 if ($request->delivery) {
                     $order->delivery = $request->delivery;
                 }
-                $order->price = $request->price; 
+                $order->price = $request->price;
                 if ($request->note) {
                     $order->note = $request->note;
                 }
-                
+
                 $order->save();
 
                 return response()->json(
@@ -188,7 +188,72 @@ class OrderController extends Controller
     }
 
 
-     /**
+
+    /**
+     * Update an order.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateConfirmationAndNote(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->can('update_order')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Orders',
+                    ],
+                    405
+                );
+            }
+
+            $order = Order::where('id', $id)->first();
+
+            if ($order) {
+
+                $order->confirmation = $request->confirmation;
+
+
+                $order->note = $request->note;
+
+
+                $order->save();
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => 'Confirmation And Note Updated Successfully!'
+                    ],
+                    200
+                );
+            } else {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_FOUND',
+                        'message' => 'Order not found',
+                    ],
+                    404
+                );
+            }
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
+
+
+    /**
      * Show an order.
      *
      * @param \Illuminate\Http\Request  $request
@@ -573,7 +638,7 @@ class OrderController extends Controller
                     200
                 );
             }
-            
+
             $product_ids = ProductAgente::where('agente_id', $request->user()->id)->pluck('product_id');
             $product_names = Product::whereIn('id', $product_ids)->pluck('name');
             $AddOrder = Order::whereNull('agente_id')->whereIn('product_name', $product_names)->get()->first();
@@ -637,7 +702,7 @@ class OrderController extends Controller
             }
             $order = Order::where([['affectation', $request->user()->id], ['confirmation', 'confirmer'], [function ($query) {
                 $query->where('delivery', '!=', 'livrer')
-                      ->orWhereNull('delivery');
+                    ->orWhereNull('delivery');
             }]])->get();
 
             if (count($order) > 0) {
