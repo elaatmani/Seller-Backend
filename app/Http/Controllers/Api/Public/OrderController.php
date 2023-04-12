@@ -407,7 +407,53 @@ class OrderController extends Controller
         }
     }
 
+  /**
+     * Update order's Delivery Note .
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateDeliveryNote(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->can('update_order')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Orders',
+                    ],
+                    405
+                );
+            }
 
+            $order = Order::where('id', $id)->first();
+
+            if ($order) {
+                $order->note = $request->note_d;
+                $order->save();
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => 'Order\'s Note Updated Successfully!'
+                    ],
+                    200
+                );
+            }
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
+    }
 
     /**
      * Update order's Confirmation .

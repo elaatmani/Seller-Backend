@@ -21,7 +21,8 @@ class Order extends Model
             'confirmation',
             'affectation',
             'delivery',
-            'note'
+            'note',
+            'note_d'
     ];
     
     
