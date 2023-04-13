@@ -857,14 +857,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function allCities(Request $request)
-    {
-        if (!$request->user()->hasRole('admin')) {
-            return response()->json([
-                'status' => false,
-                'code' => 'NOT_ALLOWED',
-                'message' => 'You Dont Have Access To See Delete Roles',
-            ], 405);
-        }
+    { 
 
         $cities = City::orderBy('name')->get();
 
