@@ -18,6 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('delivery_id');
             $table->integer('qty_to_delivery');
+            $table->boolean('is_received')->default(0);
+            $table->string('note')->nullable();
             $table->timestamps();
 
 

@@ -66,6 +66,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         //Delivery
         Permission::create(['name' => 'show_all_deliveries', 'description' => 'View all deliveries']);
+        Permission::create(['name' => 'show_delivery_inventory_movement', 'description' => 'View attached inventory movement']);
         Permission::create(['name' => 'access_to_delivery', 'description' => 'Access to delivery']);
 
 
@@ -129,7 +130,9 @@ class RolesAndPermissionsSeeder extends Seeder
             $role->givePermissionTo([
                 'show_all_deliveries',
                 'access_to_delivery',
-                'update_order'
+                'update_order',
+                'update_inventory_movement',
+                'show_delivery_inventory_movement'
             ]);
 
 

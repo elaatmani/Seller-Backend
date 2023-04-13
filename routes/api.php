@@ -32,7 +32,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     //Roles
     Route::get('/auth/roles',[UserController::class,'roles']);
     Route::get('/roles/{id}',[UserController::class,'showRole']);
-    Route::post('/roles/new',[UserController::class,'createRole']); //front end fix
+    Route::post('/roles/new',[UserController::class,'createRole']); 
     Route::post('/roles/update/{id}',[UserController::class,'updateRole']);
     Route::delete('/roles/delete/{id}',[UserController::class,'deleteRole']);
 
@@ -109,6 +109,15 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         Route::delete('/inventorymovements/delete/{id}',[InventoryController::class,'deleteInventoryMovement']);
         Route::get('/inventorymovements/{id}',[InventoryController::class,'showInventoryMovement']);
 
+        //Inventory Movement For Delivery
+        Route::get('/delivery/inventorymovements',[InventoryController::class,'showInventoryMovementToDelivery']);
+        
+        //Is_Received
+        Route::post('/delivery/inventorymovements/update/isreceived/{id}',[InventoryController::class,'updateReceivedInventoryMovement']);
+        Route::post('/delivery/inventorymovements/update/note/{id}',[InventoryController::class,'updateNoteInventoryMovement']);
+ 
+        
+        
 });
 
 //User Logout
