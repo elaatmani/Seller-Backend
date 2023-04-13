@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderHistory;
 use App\Models\Product;
 use App\Models\ProductAgente;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -213,12 +216,18 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
-
+                DB::beginTransaction();
                 $order->confirmation = $request->confirmation;
-
-
                 $order->note = $request->note;
 
+                $orderHistory = new OrderHistory();
+                $orderHistory->order_id = $id;
+                $orderHistory->user_id = $request->user()->id;
+                $orderHistory->type = 'confirmation';
+                $orderHistory->historique = $request->confirmation;
+                $orderHistory->note = 'Updated Status of Confirmation';
+                $orderHistory->save();
+                DB::commit();
 
                 $order->save();
 
@@ -332,8 +341,19 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
+                DB::beginTransaction();
                 $order->confirmation = $request->confirmation;
-                $order->save();
+                $order->save();  
+
+                $orderHistory = new OrderHistory();
+                $orderHistory->order_id = $id;
+                $orderHistory->user_id = $request->user()->id;
+                $orderHistory->type = 'confirmation';
+                $orderHistory->historique = $request->confirmation;
+                $orderHistory->note = 'Updated Status of Confirmation';
+                $orderHistory->save();
+                DB::commit();
+
 
                 return response()->json(
                     [
@@ -383,9 +403,22 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
+                // DB::beginTransaction();
                 $order->note = $request->note;
                 $order->save();
 
+             
+
+                // $orderHistory = new OrderHistory();
+                // $orderHistory->order_id = $id;
+                // $orderHistory->user_id = $request->user()->id;
+                // $orderHistory->historique = $request->note;
+                // $orderHistory->note = 'Updated The Agente Note';
+                // $orderHistory->save();
+                DB::commit();
+
+
+                
                 return response()->json(
                     [
                         'status' => true,
@@ -407,7 +440,10 @@ class OrderController extends Controller
         }
     }
 
-  /**
+
+
+
+    /**
      * Update order's Delivery Note .
      *
      * @param \Illuminate\Http\Request  $request
@@ -431,9 +467,18 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
+                // DB::beginTransaction();
                 $order->note = $request->note_d;
                 $order->save();
 
+
+                // $orderHistory = new OrderHistory();
+                // $orderHistory->order_id = $id;
+                // $orderHistory->user_id = $request->user()->id;
+                // $orderHistory->historique = $request->note_d;
+                // $orderHistory->note = 'Updated Status of Affectation';
+                // $orderHistory->save();
+                DB::commit();
                 return response()->json(
                     [
                         'status' => true,
@@ -454,6 +499,8 @@ class OrderController extends Controller
             );
         }
     }
+
+
 
     /**
      * Update order's Confirmation .
@@ -479,9 +526,20 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
+                
+                DB::beginTransaction();
                 $order->delivery = $request->delivery;
                 $order->save();
+                
 
+                $orderHistory = new OrderHistory();
+                $orderHistory->order_id = $id;
+                $orderHistory->user_id = $request->user()->id;
+                $orderHistory->type = 'delivery';
+                $orderHistory->historique = $request->delivery;
+                $orderHistory->note = 'Updated Status of Delivery';
+                $orderHistory->save();
+                DB::commit();
                 return response()->json(
                     [
                         'status' => true,
@@ -529,9 +587,22 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
+                DB::beginTransaction();
                 $order->affectation = $request->affectation;
                 $order->save();
+                
+                $deliveryUser = User::find($request->affectation);
+                $delivery = $deliveryUser->firstname . ' ' . $deliveryUser->lastname;
+                
 
+                $orderHistory = new OrderHistory();
+                $orderHistory->order_id = $id;
+                $orderHistory->user_id = $request->user()->id;
+                $orderHistory->type = 'affectation';
+                $orderHistory->historique = $delivery;
+                $orderHistory->note = 'Updated Status of Affectation';
+                $orderHistory->save();
+                DB::commit();
                 return response()->json(
                     [
                         'status' => true,
@@ -579,9 +650,19 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
+                DB::beginTransaction();
                 $order->upsell = $request->upsell;
                 $order->save();
 
+
+                $orderHistory = new OrderHistory();
+                $orderHistory->order_id = $id;
+                $orderHistory->user_id = $request->user()->id;
+                $orderHistory->historique = $request->upsell;
+                $orderHistory->type = 'upsell';
+                $orderHistory->note = 'Updated Status of Upsell';
+                $orderHistory->save();
+                DB::commit();
                 return response()->json(
                     [
                         'status' => true,
@@ -690,8 +771,17 @@ class OrderController extends Controller
             $AddOrder = Order::whereNull('agente_id')->whereIn('product_name', $product_names)->get()->first();
 
             if ($AddOrder) {
+                DB::beginTransaction();
                 $AddOrder->agente_id = $request->user()->id;
                 $AddOrder->save();
+
+                $orderHistory = new OrderHistory();
+                $orderHistory->order_id = $AddOrder->id;
+                $orderHistory->user_id = $request->user()->id;
+                $orderHistory->type = 'responsibility';
+                $orderHistory->note = 'Got the Order';
+                $orderHistory->save();
+                DB::commit();
             } else {
                 return response()->json(
                     [
@@ -843,4 +933,60 @@ class OrderController extends Controller
             );
         }
     }
+
+
+     /**
+     * Display delivered orders.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orderHistory(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->can('view_order')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Delivery Orders',
+                    ],
+                    405
+                );
+            }
+            $orderHistory = OrderHistory::where('order_id',$id)->with('orders','users')->get();
+
+            if (count($orderHistory) > 0) {
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => [
+                            'orders' => $orderHistory,
+                        ]
+                    ],
+                    200
+                );
+            }
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'NO_ORDER',
+                    'message' => 'ORDER_NOT_FOUND'
+                ],
+                404
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+    
 }

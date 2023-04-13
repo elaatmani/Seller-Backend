@@ -69,4 +69,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(City::class, 'city');
     }
+
+    public function order_histories()
+    {
+        return $this->hasMany(OrderHistory::class);
+    }
+
 }
