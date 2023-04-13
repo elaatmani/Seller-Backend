@@ -20,10 +20,10 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'view_user', 'description' => 'View a specific user']);
         Permission::create(['name' => 'create_user', 'description' => 'Create a new user']);
         Permission::create(['name' => 'update_user', 'description' => 'Update a user']);
-        Permission::create(['name' => 'update_user_status', 'description' => 'Update a user status' ]);
+        Permission::create(['name' => 'update_user_status', 'description' => 'Update a user status']);
         Permission::create(['name' => 'delete_user', 'description' => 'Delete a user']);
         Permission::create(['name' => 'access_to_users', 'description' => 'Access to user management']);
-        
+
 
         //Roles
         Permission::create(['name' => 'show_all_roles', 'description' => 'View all roles']);
@@ -33,7 +33,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'delete_role', 'description' => 'Delete a role']);
         Permission::create(['name' => 'access_to_roles', 'description' => 'Access to role management']);
 
-        
+
         //Products
         Permission::create(['name' => 'show_all_products', 'description' => 'View all products']);
         Permission::create(['name' => 'view_product', 'description' => 'View a specific product']);
@@ -60,7 +60,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         //Orders
         Permission::create(['name' => 'show_all_orders', 'description' => 'View all orders']);
-        Permission::create(['name' => 'view_order', 'description' => 'View a specific order']);  
+        Permission::create(['name' => 'view_order', 'description' => 'View a specific order']);
         Permission::create(['name' => 'update_order', 'description' => 'Update an order']);
         Permission::create(['name' => 'access_to_orders', 'description' => 'Access to order management']);
 
@@ -73,67 +73,71 @@ class RolesAndPermissionsSeeder extends Seeder
         // create roles and assign created permissions NEW
 
 
-            // for admin
-            $role = Role::create(['name' => 'admin']);
-            $role->givePermissionTo([
-                'show_all_users',
-                'view_user',
-                'create_user',
-                'update_user',
-                'delete_user',
-                'update_user_status',
-                'access_to_users',
+        // for admin
+        $role = Role::create(['name' => 'admin']);
+        $role->givePermissionTo([
+            'show_all_users',
+            'view_user',
+            'create_user',
+            'update_user',
+            'delete_user',
+            'update_user_status',
+            'access_to_users',
 
-                'show_all_roles',
-                'view_role',
-                'create_role',
-                'update_role',
-                'delete_role',
-                'access_to_roles',
+            'show_all_roles',
+            'view_role',
+            'create_role',
+            'update_role',
+            'delete_role',
+            'access_to_roles',
 
-                'show_all_products',
-                'view_product',
-                'create_product',
-                'update_product',
-                'delete_product',
-                'access_to_products',
+            'show_all_products',
+            'view_product',
+            'create_product',
+            'update_product',
+            'delete_product',
+            'access_to_products',
 
-                'show_all_inventory_states',
-                'show_all_inventory_movements',
-                'view_inventory_movement',
-                'create_inventory_movement',
-                'update_inventory_movement',
-                'delete_inventory_movement',
-                'access_to_inventory',
+            'show_all_inventory_states',
+            'show_all_inventory_movements',
+            'view_inventory_movement',
+            'create_inventory_movement',
+            'update_inventory_movement',
+            'delete_inventory_movement',
+            'access_to_inventory',
 
-                'show_all_sales',
-                'view_sale',
-                'update_sale',
-                'update_order',
-                'view_order',
-                'delete_sale',
-                'access_to_sales',
-            ]);
-
-
-            //for agente
-            $role = Role::create(['name' => 'agente']);
-            $role->givePermissionTo([
-                'show_all_orders',
-                'update_order',
-                'access_to_orders'
-            ]);
+            'show_all_sales',
+            'view_sale',
+            'update_sale',
+            'update_order',
+            'view_order',
+            'delete_sale',
+            'access_to_sales',
+        ]);
 
 
-            // // for delivery
-            $role = Role::create(['name' => 'delivery']);
-            $role->givePermissionTo([
-                'show_all_deliveries',
-                'access_to_delivery',
-                'update_order',
-                'update_inventory_movement',
-                'show_delivery_inventory_movement'
-            ]);
+        //for agente
+        $role = Role::create(['name' => 'agente']);
+        $role->givePermissionTo([
+            'show_all_orders',
+            'update_order',
+            'access_to_orders'
+        ]);
+
+
+        // // for delivery
+        $role = Role::create(['name' => 'delivery']);
+        $role->givePermissionTo([
+            'show_all_deliveries',
+            'access_to_delivery',
+            'update_order',
+
+            'show_all_inventory_movements',
+            
+            'update_inventory_movement',
+            'access_to_inventory',
+            'show_delivery_inventory_movement'
+        ]);
 
 
 

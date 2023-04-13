@@ -20,13 +20,14 @@ class InventoryController extends Controller
     */
    public function inventoryState(Request $request)
    {
+
       try {
          if (!$request->user()->can('show_all_inventory_states')) {
             return response()->json(
                [
                   'status' => false,
                   'code' => 'NOT_ALLOWED',
-                  'message' => 'You Dont Have Access To See Product',
+                  'message' => 'You Dont Have Access To See Inventory States',
                ],
                405
             );
@@ -59,18 +60,23 @@ class InventoryController extends Controller
     */
    public function inventoryMovement(Request $request)
    {
+      
       try {
          if (!$request->user()->can('show_all_inventory_movements')) {
             return response()->json(
                [
                   'status' => false,
                   'code' => 'NOT_ALLOWED',
-                  'message' => 'You Dont Have Access To See Product',
+                  'message' => 'You Dont Have Access To See Inventory Movements',
                ],
                405
             );
          }
-         $inventoryMovement = InventoryMovement::with('product', 'delivery')->get();
+         if ($request->user()->roles->first()->id == 1) {
+            $inventoryMovement = InventoryMovement::with('product', 'delivery')->get();
+         } else {
+           $inventoryMovement =  InventoryMovement::where('delivery_id', $request->user()->id)->with('product','delivery')->get();
+         }
          return response()->json([
             'status' => true,
             'code' => 'SHOW_ALL_INVENTORY_MOVEMENTS',
@@ -406,69 +412,69 @@ class InventoryController extends Controller
 
 
 
-   /**
-    * Show Inventory Movement.
-    *
-    * @return \Illuminate\Http\Response
-    */
-   public function showInventoryMovementToDelivery(Request $request)
-   {
+   // /**
+   //  * Show Inventory Movement.
+   //  *
+   //  * @return \Illuminate\Http\Response
+   //  */
+   // public function showInventoryMovementToDelivery(Request $request)
+   // {
 
-      try {
+   //    try {
 
-         if (!$request->user()->can('show_delivery_inventory_movement')) {
-            return response()->json(
-               [
-                  'status' => false,
-                  'code' => 'NOT_ALLOWED',
-                  'message' => 'You Dont Have Access To See Product',
-               ],
-               405
-            );
-         }
+   //       if (!$request->user()->can('show_delivery_inventory_movement')) {
+   //          return response()->json(
+   //             [
+   //                'status' => false,
+   //                'code' => 'NOT_ALLOWED',
+   //                'message' => 'You Dont Have Access To See Product',
+   //             ],
+   //             405
+   //          );
+   //       }
 
-         $inventoryMovementForDelivery = InventoryMovement::where('delivery_id', $request->user()->id)->with('product')->get();
+   //       $inventoryMovementForDelivery = InventoryMovement::where('delivery_id', $request->user()->id)->with('product')->get();
 
-         if ($inventoryMovementForDelivery) {
+   //       if ($inventoryMovementForDelivery) {
 
-            return response()->json([
-               'status' => true,
-               'code' => 'SUCCESS',
-               'data' => [
-                  'movement' => $inventoryMovementForDelivery
-               ]
-            ], 200);
-         }
+   //          return response()->json([
+   //             'status' => true,
+   //             'code' => 'SUCCESS',
+   //             'data' => [
+   //                'movement' => $inventoryMovementForDelivery
+   //             ]
+   //          ], 200);
+   //       }
 
-         return response()->json(
-            [
-               'status' => false,
-               'code' => 'NOT_FOUND',
-               'message' => 'Inventory State Not Exist',
-            ],
-            404
-         );
+   //       return response()->json(
+   //          [
+   //             'status' => false,
+   //             'code' => 'NOT_FOUND',
+   //             'message' => 'Inventory State Not Exist',
+   //          ],
+   //          404
+   //       );
 
 
-         return response()->json(
-            [
-               'status' => false,
-               'code' => 'NOT_FOUND',
-               'message' => 'Inventory Movement Not Exist',
-            ],
-            404
-         );
-      } catch (\Throwable $th) {
-         return response()->json(
-            [
-               'status' => false,
-               'message' => $th->getMessage(),
-               'code' => 'SERVER_ERROR'
-            ],
-            500
-         );
-      }
-   }
+   //       return response()->json(
+   //          [
+   //             'status' => false,
+   //             'code' => 'NOT_FOUND',
+   //             'message' => 'Inventory Movement Not Exist',
+   //          ],
+   //          404
+   //       );
+   //    } catch (\Throwable $th) {
+   //       return response()->json(
+   //          [
+   //             'status' => false,
+   //             'message' => $th->getMessage(),
+   //             'code' => 'SERVER_ERROR'
+   //          ],
+   //          500
+   //       );
+   //    }
+   // }
 
 
 
@@ -528,15 +534,15 @@ class InventoryController extends Controller
 
 
 
-    /**
+   /**
     * Update Note Inventory Movement.
     *
     * @return \Illuminate\Http\Response
     */
-    public function updateNoteInventoryMovement(Request $request, $id)
-    {
- 
-       try {
+   public function updateNoteInventoryMovement(Request $request, $id)
+   {
+
+      try {
          if (!$request->user()->can('update_inventory_movement')) {
             return response()->json(
                [
@@ -547,41 +553,38 @@ class InventoryController extends Controller
                405
             );
          }
- 
-          $inventoryDeliveryNote = InventoryMovement::where('id', $id)->get()->first();
- 
- 
- 
-          if ($inventoryDeliveryNote) {
-             $inventoryDeliveryNote->note = $request->note;
-             $inventoryDeliveryNote->save();
-             return response()->json([
-                'status' => true,
-                'code' => 'SUCCESS',
-                'message' => 'Note Updated Successfully !'
-             ], 200);
-          }
- 
-          return response()->json(
-             [
-                'status' => false,
-                'code' => 'NOT_FOUND',
-                'message' => 'Inventory State Not Exist',
-             ],
-             404
-          );
-       } catch (\Throwable $th) {
-          return response()->json(
-             [
-                'status' => false,
-                'message' => $th->getMessage(),
-                'code' => 'SERVER_ERROR'
-             ],
-             500
-          );
-       }
-    }
+
+         $inventoryDeliveryNote = InventoryMovement::where('id', $id)->get()->first();
 
 
 
+         if ($inventoryDeliveryNote) {
+            $inventoryDeliveryNote->note = $request->note;
+            $inventoryDeliveryNote->save();
+            return response()->json([
+               'status' => true,
+               'code' => 'SUCCESS',
+               'message' => 'Note Updated Successfully !'
+            ], 200);
+         }
+
+         return response()->json(
+            [
+               'status' => false,
+               'code' => 'NOT_FOUND',
+               'message' => 'Inventory State Not Exist',
+            ],
+            404
+         );
+      } catch (\Throwable $th) {
+         return response()->json(
+            [
+               'status' => false,
+               'message' => $th->getMessage(),
+               'code' => 'SERVER_ERROR'
+            ],
+            500
+         );
+      }
+   }
 }
