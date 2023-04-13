@@ -72,10 +72,11 @@ class InventoryController extends Controller
                405
             );
          }
-         if ($request->user()->roles->first()->id == 1) {
-            $inventoryMovement = InventoryMovement::with('product', 'delivery')->get();
+         if ($request->user()->roles->first()->id === 3) {
+            $inventoryMovement =  InventoryMovement::where('delivery_id', $request->user()->id)->with('product','delivery')->get();
+          
          } else {
-           $inventoryMovement =  InventoryMovement::where('delivery_id', $request->user()->id)->with('product','delivery')->get();
+            $inventoryMovement = InventoryMovement::with('product', 'delivery')->get();
          }
          return response()->json([
             'status' => true,
