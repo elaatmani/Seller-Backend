@@ -114,7 +114,7 @@ class UserController extends Controller
                                 'created_at' => $user->created_at,
                                 'updated_at' => $user->updated_at,
                                 'role' => $user->roles->pluck('id')->first(),
-                                'product' => $user->roles->pluck('id')->first() === 2 ? $user->products->value('id') : null,
+                                'product' => $user->roles->pluck('id')->first() === 2 ? $user->products->pluck('id') : null,
                                 'deliveryPlaces' => $user->deliveryPlaces,
                                 'city' => $user->City ? $user->City : null
                             ]
