@@ -555,14 +555,13 @@ class InventoryController extends Controller
             );
          }
 
-         $inventoryDelivery = InventoryMovement::where('id', $id)->get()->first();
+         $inventoryDeliveryNote = InventoryMovement::where('id', $id)->get()->first();
 
 
 
-         if ($inventoryDelivery) {
-            $inventoryDelivery->note = $request->note;
-            $inventoryDelivery->is_received = $request->is_received;
-            $inventoryDelivery->save();
+         if ($inventoryDeliveryNote) {
+            $inventoryDeliveryNote->note = $request->note;
+            $inventoryDeliveryNote->save();
             return response()->json([
                'status' => true,
                'code' => 'SUCCESS',
@@ -606,13 +605,15 @@ class InventoryController extends Controller
             );
          }
 
-         $inventoryDeliveryNote = InventoryMovement::where('id', $id)->get()->first();
+         $inventoryDelivery = InventoryMovement::where('id', $id)->get()->first();
 
 
 
-         if ($inventoryDeliveryNote) {
-            $inventoryDeliveryNote->note = $request->note;
-            $inventoryDeliveryNote->save();
+         if ($inventoryDelivery) {
+            $inventoryDelivery->note = $request->note;
+            $inventoryDelivery->is_received = $request->is_received;
+
+            $inventoryDelivery->save();
             return response()->json([
                'status' => true,
                'code' => 'SUCCESS',
