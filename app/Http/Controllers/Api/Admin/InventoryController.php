@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\InventoryMovement;
+use App\Models\InventoryMovementVariation;
 use App\Models\InventoryState;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class InventoryController extends Controller
@@ -32,7 +34,46 @@ class InventoryController extends Controller
                405
             );
          }
-         $inventoryState = InventoryState::with('product')->get();
+         $inventoryState = InventoryState::with('product', 'inventoryStateVariations')->get();
+
+         return response()->json([
+            'status' => true,
+            'code' => 'SHOW_ALL_INVENTORY_STATES',
+            'data' => $inventoryState
+         ], 200);
+      } catch (\Throwable $th) {
+         return response()->json(
+            [
+               'status' => false,
+               'message' => $th->getMessage(),
+               'code' => 'SERVER_ERROR'
+            ],
+            500
+         );
+      }
+   }
+
+
+   /**
+    * Display Inventory States.
+    *
+    * @return \Illuminate\Http\Response
+    */
+   public function showInventoryState(Request $request, $id)
+   {
+
+      try {
+         if (!$request->user()->can('show_all_inventory_states')) {
+            return response()->json(
+               [
+                  'status' => false,
+                  'code' => 'NOT_ALLOWED',
+                  'message' => 'You Dont Have Access To See Inventory States',
+               ],
+               405
+            );
+         }
+         $inventoryState = InventoryState::where('id', $id)->with('product', 'inventoryStateVariations')->get();
 
          return response()->json([
             'status' => true,
@@ -60,7 +101,7 @@ class InventoryController extends Controller
     */
    public function inventoryMovement(Request $request)
    {
-      
+
       try {
          if (!$request->user()->can('show_all_inventory_movements')) {
             return response()->json(
@@ -73,8 +114,7 @@ class InventoryController extends Controller
             );
          }
          if ($request->user()->roles->first()->id === 3) {
-            $inventoryMovement =  InventoryMovement::where('delivery_id', $request->user()->id)->with('product','delivery.city')->get();
-          
+            $inventoryMovement =  InventoryMovement::where('delivery_id', $request->user()->id)->with('product', 'delivery.city')->get();
          } else {
             $inventoryMovement = InventoryMovement::with('product', 'delivery.city')->get();
          }
@@ -83,6 +123,69 @@ class InventoryController extends Controller
             'code' => 'SHOW_ALL_INVENTORY_MOVEMENTS',
             'data' => $inventoryMovement
          ], 200);
+      } catch (\Throwable $th) {
+         return response()->json(
+            [
+               'status' => false,
+               'message' => $th->getMessage(),
+               'code' => 'SERVER_ERROR'
+            ],
+            500
+         );
+      }
+   }
+
+
+   /**
+    * Show Inventory Movement.
+    *
+    * @return \Illuminate\Http\Response
+    */
+   public function showInventoryMovement(Request $request, $id)
+   {
+      try {
+         if (!$request->user()->can('view_inventory_movement')) {
+            return response()->json(
+               [
+                  'status' => false,
+                  'code' => 'NOT_ALLOWED',
+                  'message' => 'You Dont Have Access To See Product',
+               ],
+               405
+            );
+         }
+
+         $inventoryMovement = InventoryMovement::where('id', $id)->with('product', 'delivery.city')->get()->first();
+
+         if ($inventoryMovement) {
+
+            return response()->json([
+               'status' => true,
+               'code' => 'SUCCESS',
+               'data' => [
+                  'movement' => $inventoryMovement
+               ]
+            ], 200);
+         }
+
+         return response()->json(
+            [
+               'status' => false,
+               'code' => 'NOT_FOUND',
+               'message' => 'Inventory State Not Exist',
+            ],
+            404
+         );
+
+
+         return response()->json(
+            [
+               'status' => false,
+               'code' => 'NOT_FOUND',
+               'message' => 'Inventory Movement Not Exist',
+            ],
+            404
+         );
       } catch (\Throwable $th) {
          return response()->json(
             [
@@ -121,7 +224,6 @@ class InventoryController extends Controller
             [
                'product_id' => 'required|integer',
                'delivery_id' => 'required|integer',
-               'quantity' => 'required|integer',
             ]
          );
 
@@ -140,16 +242,27 @@ class InventoryController extends Controller
 
          if ($inventoryState) {
             if ($inventoryState->quantity >= $request->quantity) {
-               InventoryMovement::create([
+
+               DB::beginTransaction();
+               $inventoryMovement = InventoryMovement::create([
                   'product_id' => $request->product_id,
                   'delivery_id' => $request->delivery_id,
-                  'qty_to_delivery' => $request->quantity,
                ]);
+
+               foreach ($request->variants as $variant) {
+
+                  InventoryMovementVariation::create([
+                     'inventory_movement_id' => $inventoryMovement->id,
+                     'size' => $variant['size'],
+                     'color' => $variant['color'],
+                     'quantity' => $variant['quantity'],
+                  ]);
+               }
 
                $currentTotal = $inventoryState->quantity - $request->quantity;
                $inventoryState->quantity = $currentTotal;
                $inventoryState->save();
-
+               DB::commit();
                return response()->json([
                   'status' => true,
                   'code' => 'SUCCESS',
@@ -349,71 +462,11 @@ class InventoryController extends Controller
 
 
 
-   /**
-    * Delete Inventory Movement.
-    *
-    * @return \Illuminate\Http\Response
-    */
-   public function showInventoryMovement(Request $request, $id)
-   {
-      try {
-         if (!$request->user()->can('view_inventory_movement')) {
-            return response()->json(
-               [
-                  'status' => false,
-                  'code' => 'NOT_ALLOWED',
-                  'message' => 'You Dont Have Access To See Product',
-               ],
-               405
-            );
-         }
-
-         $inventoryMovement = InventoryMovement::where('id', $id)->with('product', 'delivery.city')->get()->first();
-
-         if ($inventoryMovement) {
-
-            return response()->json([
-               'status' => true,
-               'code' => 'SUCCESS',
-               'data' => [
-                  'movement' => $inventoryMovement
-               ]
-            ], 200);
-         }
-
-         return response()->json(
-            [
-               'status' => false,
-               'code' => 'NOT_FOUND',
-               'message' => 'Inventory State Not Exist',
-            ],
-            404
-         );
-
-
-         return response()->json(
-            [
-               'status' => false,
-               'code' => 'NOT_FOUND',
-               'message' => 'Inventory Movement Not Exist',
-            ],
-            404
-         );
-      } catch (\Throwable $th) {
-         return response()->json(
-            [
-               'status' => false,
-               'message' => $th->getMessage(),
-               'code' => 'SERVER_ERROR'
-            ],
-            500
-         );
-      }
-   }
 
 
 
- 
+
+
 
 
 
@@ -532,12 +585,13 @@ class InventoryController extends Controller
 
 
 
-/**
+   /**
     * Update Note and Recieved Inventory Movement.
     *
     * @return \Illuminate\Http\Response
     */
-   public function updateReceivedNoteInventoryMovement(Request $request, $id){
+   public function updateReceivedNoteInventoryMovement(Request $request, $id)
+   {
       try {
          if (!$request->user()->can('confirmation_inventory_movement')) {
             return response()->json(

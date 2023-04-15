@@ -18,4 +18,8 @@ class InventoryState extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function inventoryStateVariations(){
+        return $this->hasMany(InventoryStateVariation::class);
+    }
 }

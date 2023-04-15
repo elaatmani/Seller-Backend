@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\InventoryMovement;
 use App\Models\InventoryState;
+use App\Models\InventoryStateVariation;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
 use App\Models\ProductVariation;
@@ -72,7 +73,7 @@ class ProductController extends Controller
             $messages = [
                 'ref.unique' => 'The Product Already Exist!'
             ];
-            
+
             $validateProduct = Validator::make(
                 $request->all(),
                 [
@@ -115,10 +116,20 @@ class ProductController extends Controller
                 $quantityTotal += $value['quantity'];
             }
 
-            InventoryState::create([
+            $inventoryState = InventoryState::create([
                 'product_id' => $product->id,
                 'quantity' => $quantityTotal,
             ]);
+
+            foreach ($request->variants as  $value) {
+                InventoryStateVariation::create([
+                    'inventory_state_id' => $inventoryState->id,
+                    'size'  => $value['size'],
+                    'color' => $value['color'],
+                    'quantity' => $value['quantity']
+                ]);
+            }
+
             DB::commit();
             return response()->json(
                 [
@@ -270,6 +281,7 @@ class ProductController extends Controller
 
                 $existingVariations = ProductVariation::where('product_id', $id)->get();
                 $inventoryState = InventoryState::where('product_id', $id)->first();
+                $existingVariations2 = InventoryStateVariation::where('inventory_state_id', $inventoryState->id)->get();
                 $inventoryMovement = InventoryMovement::where('product_id', $id)->sum('qty_to_delivery');
 
 
@@ -285,6 +297,16 @@ class ProductController extends Controller
                     }
                 }
 
+                if ($existingVariations2->count() > 0) {
+                    foreach ($existingVariations2 as $existingVariation) {
+                        // Check if the size and color of the existing variation is not present in the $request object
+                        if (!collect($request->input('variants'))->where('size', $existingVariation->size)->where('color', $existingVariation->color)->count()) {
+                            // If the variation size and color does not exist in the $request object, add the quantity to the existing variation quantity variable
+                            // Delete the variation
+                            $existingVariation->delete();
+                        }
+                    }
+                }
 
 
 
@@ -314,8 +336,28 @@ class ProductController extends Controller
                                 ]
                             );
                         }
+
+
                         $inventoryState->quantity = $quantityUpdated;
                         $inventoryState->save();
+
+
+
+                        foreach ($request->input('variants') as $variant) {
+                            InventoryStateVariation::updateOrCreate(
+                                [
+                                    'inventory_state_id' => $inventoryState->id,
+                                    'size' => $variant['size'],
+                                    'color' => $variant['color'],
+                                ],
+                                [
+                                    'inventory_state_id' => $inventoryState->id,
+                                    'size' => $variant['size'],
+                                    'color' => $variant['color'],
+                                    'quantity' => $variant['quantity'],
+                                ]
+                            );
+                        }
 
                         return response()->json(
                             [
