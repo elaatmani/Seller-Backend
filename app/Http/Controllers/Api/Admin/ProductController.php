@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\InventoryMovement;
 use App\Models\InventoryState;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Product;
@@ -250,40 +251,75 @@ class ProductController extends Controller
 
                 $product->save();
 
-                $existingVariations = ProductVariation::where('product_id', $id)->get();
 
-                foreach ($existingVariations as $existingVariation) {
-                    // Check if the ID of the existing variation is not present in the $request object
-                    if (!collect($request->input('variants'))->pluck('id')->contains($existingVariation->id)) {
-                        // If the variation ID does not exist in the $request object, delete the variation
-                        $existingVariation->delete();
+                $existingVariations = ProductVariation::where('product_id', $id)->get();
+                $inventoryState = InventoryState::where('product_id', $id)->first();
+                $inventoryMovement = InventoryMovement::where('product_id', $id)->sum('qty_to_delivery');
+
+
+
+                if ($existingVariations->count() > 0) {
+                    foreach ($existingVariations as $existingVariation) {
+                        // Check if the size and color of the existing variation is not present in the $request object
+                        if (!collect($request->input('variants'))->where('size', $existingVariation->size)->where('color', $existingVariation->color)->count()) {
+                            // If the variation size and color does not exist in the $request object, add the quantity to the existing variation quantity variable
+                            // Delete the variation
+                            $existingVariation->delete();
+                        }
                     }
                 }
 
-                if ($request->has('variants')) {
-                    foreach ($request->input('variants') as $variant) {
-                        ProductVariation::updateOrCreate(
-                            ['id' => $variant['id']],
+
+
+
+                if (count($request->variants) > 0) {
+
+                    $quantityUpdated = 0;
+                    foreach ($request->variants as $variant) {
+                        $quantityUpdated += $variant['quantity'];
+                    }
+
+                    if ($inventoryMovement <= $quantityUpdated) {
+
+
+                        foreach ($request->input('variants') as $variant) {
+                            ProductVariation::updateOrCreate(
+                                [
+                                    'product_id' => $id,
+                                    'size' => $variant['size'],
+                                    'color' => $variant['color'],
+                                ],
+                                [
+                                    'product_id' => $id,
+                                    'product_ref' => $product->ref,
+                                    'size' => $variant['size'],
+                                    'color' => $variant['color'],
+                                    'quantity' => $variant['quantity'],
+                                ]
+                            );
+                        }
+                        $inventoryState->quantity = $quantityUpdated;
+                        $inventoryState->save();
+
+                        return response()->json(
                             [
-                                'product_id' => $id,
-                                'product_ref' => $product->ref,
-                                'size' => $variant['size'],
-                                'color' => $variant['color'],
-                                'quantity' => $variant['quantity'],
-                            ]
+                                'status' => true,
+                                'code' => 'PRODUCT_UPDATED',
+                                'message' => 'Product Updated Successfully!',
+                            ],
+                            200
+                        );
+                    } else {
+                        return response()->json(
+                            [
+                                'status' => true,
+                                'code' => 'PRODUCT_NOT_UPDATED',
+                                'message' => 'MIN value to Add ' . $inventoryMovement,
+                            ],
+                            200
                         );
                     }
                 }
-
-
-                return response()->json(
-                    [
-                        'status' => true,
-                        'code' => 'PRODUCT_UPDATED',
-                        'message' => 'Product Updated Successfully!',
-                    ],
-                    200
-                );
             } else {
                 return response()->json(
                     [

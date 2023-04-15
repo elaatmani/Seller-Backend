@@ -27,4 +27,9 @@ class InventoryMovement extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function inventoryMovementVariations(){
+        return $this->hasMany(InventoryMovementVariation::class);
+    }
+
 }
