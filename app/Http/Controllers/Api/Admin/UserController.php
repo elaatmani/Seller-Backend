@@ -566,9 +566,8 @@ class UserController extends Controller
                 );
             }
             $roles = Role::with(['permissions' => function ($query) {
-                $query->select('name');
+                $query->select('name','description');
             }])->get(['id', 'name']);
-
             return response()->json(
                 [
                     'status' => true,
