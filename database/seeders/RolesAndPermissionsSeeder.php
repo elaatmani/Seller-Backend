@@ -48,6 +48,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'view_inventory_movement', 'description' => 'View a specific inventory movement']);
         Permission::create(['name' => 'create_inventory_movement', 'description' => 'Create a new inventory movement']);
         Permission::create(['name' => 'update_inventory_movement', 'description' => 'Update an inventory movement']);
+        Permission::create(['name' => 'confirmation_inventory_movement', 'description' => 'Confirmation an inventory movement']);
         Permission::create(['name' => 'delete_inventory_movement', 'description' => 'Delete an inventory movement']);
         Permission::create(['name' => 'access_to_inventory', 'description' => 'Access to inventory management']);
 
@@ -103,6 +104,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_inventory_movement',
             'create_inventory_movement',
             'update_inventory_movement',
+            'confirmation_inventory_movement',
             'delete_inventory_movement',
             'access_to_inventory',
 
@@ -130,7 +132,8 @@ class RolesAndPermissionsSeeder extends Seeder
         $role->givePermissionTo([
             'show_all_deliveries',
             'access_to_delivery',
-            'update_order',
+            'confirmation_inventory_movement',
+            // 'update_order',
 
             'show_all_inventory_movements',
             

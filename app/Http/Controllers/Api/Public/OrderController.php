@@ -973,9 +973,12 @@ class OrderController extends Controller
                 [
                     'status' => true,
                     'code' => 'NO_ORDER',
-                    'message' => 'ORDER_NOT_FOUND'
+                    'message' => 'ORDER_NOT_FOUND',
+                    'data' => [
+                        'orders' => [],
+                    ]
                 ],
-                404
+                200
             );
         } catch (\Throwable $th) {
             return response()->json(

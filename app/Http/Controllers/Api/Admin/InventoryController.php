@@ -413,69 +413,7 @@ class InventoryController extends Controller
 
 
 
-   // /**
-   //  * Show Inventory Movement.
-   //  *
-   //  * @return \Illuminate\Http\Response
-   //  */
-   // public function showInventoryMovementToDelivery(Request $request)
-   // {
-
-   //    try {
-
-   //       if (!$request->user()->can('show_delivery_inventory_movement')) {
-   //          return response()->json(
-   //             [
-   //                'status' => false,
-   //                'code' => 'NOT_ALLOWED',
-   //                'message' => 'You Dont Have Access To See Product',
-   //             ],
-   //             405
-   //          );
-   //       }
-
-   //       $inventoryMovementForDelivery = InventoryMovement::where('delivery_id', $request->user()->id)->with('product')->get();
-
-   //       if ($inventoryMovementForDelivery) {
-
-   //          return response()->json([
-   //             'status' => true,
-   //             'code' => 'SUCCESS',
-   //             'data' => [
-   //                'movement' => $inventoryMovementForDelivery
-   //             ]
-   //          ], 200);
-   //       }
-
-   //       return response()->json(
-   //          [
-   //             'status' => false,
-   //             'code' => 'NOT_FOUND',
-   //             'message' => 'Inventory State Not Exist',
-   //          ],
-   //          404
-   //       );
-
-
-   //       return response()->json(
-   //          [
-   //             'status' => false,
-   //             'code' => 'NOT_FOUND',
-   //             'message' => 'Inventory Movement Not Exist',
-   //          ],
-   //          404
-   //       );
-   //    } catch (\Throwable $th) {
-   //       return response()->json(
-   //          [
-   //             'status' => false,
-   //             'message' => $th->getMessage(),
-   //             'code' => 'SERVER_ERROR'
-   //          ],
-   //          500
-   //       );
-   //    }
-   // }
+ 
 
 
 
@@ -489,7 +427,7 @@ class InventoryController extends Controller
 
       try {
 
-         if (!$request->user()->can('update_inventory_movement')) {
+         if (!$request->user()->can('confirmation_inventory_movement')) {
             return response()->json(
                [
                   'status' => false,
@@ -544,7 +482,7 @@ class InventoryController extends Controller
    {
 
       try {
-         if (!$request->user()->can('update_inventory_movement')) {
+         if (!$request->user()->can('confirmation_inventory_movement')) {
             return response()->json(
                [
                   'status' => false,
@@ -592,9 +530,16 @@ class InventoryController extends Controller
 
 
 
+
+
+/**
+    * Update Note and Recieved Inventory Movement.
+    *
+    * @return \Illuminate\Http\Response
+    */
    public function updateReceivedNoteInventoryMovement(Request $request, $id){
       try {
-         if (!$request->user()->can('update_inventory_movement')) {
+         if (!$request->user()->can('confirmation_inventory_movement')) {
             return response()->json(
                [
                   'status' => false,
