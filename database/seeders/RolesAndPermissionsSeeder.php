@@ -137,7 +137,6 @@ class RolesAndPermissionsSeeder extends Seeder
 
             'show_all_inventory_movements',
             
-            // 'update_inventory_movement',
             'access_to_inventory',
             'show_delivery_inventory_movement'
         ]);
