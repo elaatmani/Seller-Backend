@@ -117,6 +117,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         //Is_Received
         Route::post('/delivery/inventorymovements/update/isreceived/{id}',[InventoryController::class,'updateReceivedInventoryMovement']);
         Route::post('/delivery/inventorymovements/update/note/{id}',[InventoryController::class,'updateNoteInventoryMovement']);
+        Route::post('/delivery/inventorymovements/update/{id}',[InventoryController::class,'updateReceivedNoteInventoryMovement']);
+        
  
         
         

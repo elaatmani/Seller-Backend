@@ -555,6 +555,57 @@ class InventoryController extends Controller
             );
          }
 
+         $inventoryDelivery = InventoryMovement::where('id', $id)->get()->first();
+
+
+
+         if ($inventoryDelivery) {
+            $inventoryDelivery->note = $request->note;
+            $inventoryDelivery->is_received = $request->is_received;
+            $inventoryDelivery->save();
+            return response()->json([
+               'status' => true,
+               'code' => 'SUCCESS',
+               'message' => 'Note Updated Successfully !'
+            ], 200);
+         }
+
+         return response()->json(
+            [
+               'status' => false,
+               'code' => 'NOT_FOUND',
+               'message' => 'Inventory State Not Exist',
+            ],
+            404
+         );
+      } catch (\Throwable $th) {
+         return response()->json(
+            [
+               'status' => false,
+               'message' => $th->getMessage(),
+               'code' => 'SERVER_ERROR'
+            ],
+            500
+         );
+      }
+   }
+
+
+
+
+   public function updateReceivedNoteInventoryMovement(Request $request, $id){
+      try {
+         if (!$request->user()->can('update_inventory_movement')) {
+            return response()->json(
+               [
+                  'status' => false,
+                  'code' => 'NOT_ALLOWED',
+                  'message' => 'You Dont Have Access To See Product',
+               ],
+               405
+            );
+         }
+
          $inventoryDeliveryNote = InventoryMovement::where('id', $id)->get()->first();
 
 
