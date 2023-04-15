@@ -110,9 +110,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         Route::post('/inventorymovements/update/{id}',[InventoryController::class,'updateInventoryMovement']);
         Route::delete('/inventorymovements/delete/{id}',[InventoryController::class,'deleteInventoryMovement']);
         Route::get('/inventorymovements/{id}',[InventoryController::class,'showInventoryMovement']);
-
-        // //Inventory Movement For Delivery
-        // Route::get('/delivery/inventorymovements',[InventoryController::class,'showInventoryMovementToDelivery']);
         
         //Is_Received
         Route::post('/delivery/inventorymovements/update/isreceived/{id}',[InventoryController::class,'updateReceivedInventoryMovement']);

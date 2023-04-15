@@ -12,7 +12,7 @@ use App\Models\ProductVariation;
 
 
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -69,6 +69,10 @@ class ProductController extends Controller
             }
 
             //Validated
+            $messages = [
+                'ref.unique' => 'The Product Already Exist!'
+            ];
+            
             $validateProduct = Validator::make(
                 $request->all(),
                 [
@@ -78,19 +82,18 @@ class ProductController extends Controller
                     'selling_price' => 'required|integer',
                 ]
             );
-
             if ($validateProduct->fails()) {
-                return response()->json(
-                    [
-                        'status' => false,
-                        'code' => 'VALIDATION_ERROR',
-                        'message' => 'validation error',
-                        'error' => $validateProduct->errors()
-                    ],
-                    401
-                );
+                $errors = $validateProduct->errors();
+                $response = [
+                    'status' => false, 'code' => 'VALIDATION_ERROR', 'message' => 'Validation error', 'errors' => []
+                ];
+                if ($errors->has('ref')) {
+                    $response['errors']['ref'] = $messages['ref.unique'];
+                }
+                return response()->json($response, 200);
             }
 
+            DB::beginTransaction();
             $product = Product::create([
                 'name' => $request->name,
                 'ref' => $request->ref,
@@ -116,7 +119,7 @@ class ProductController extends Controller
                 'product_id' => $product->id,
                 'quantity' => $quantityTotal,
             ]);
-
+            DB::commit();
             return response()->json(
                 [
                     'status' => true,
@@ -126,6 +129,19 @@ class ProductController extends Controller
                 200
             );
         } catch (\Throwable $th) {
+
+            // rollback transaction on error
+            DB::rollBack();
+
+            // check if the error is due to duplicate reference
+            if (strpos($th->getMessage(), 'Duplicate entry') !== false) {
+                return response()->json([
+                    'status' => true,
+                    'code' => 'REFERENCE_DUPLICATED',
+                    'message' => 'Product Reference already exists!',
+                ], 200);
+            }
+
             return response()->json(
                 [
                     'status' => false,
@@ -279,7 +295,7 @@ class ProductController extends Controller
                         $quantityUpdated += $variant['quantity'];
                     }
 
-                    if ($inventoryMovement <= $quantityUpdated) {
+                    if ($inventoryMovement < $quantityUpdated) {
 
 
                         foreach ($request->input('variants') as $variant) {
@@ -314,7 +330,7 @@ class ProductController extends Controller
                             [
                                 'status' => true,
                                 'code' => 'PRODUCT_NOT_UPDATED',
-                                'message' => 'MIN value to Add ' . $inventoryMovement,
+                                'message' => 'MIN Qty to Add ' . $inventoryMovement + 1,
                             ],
                             200
                         );
