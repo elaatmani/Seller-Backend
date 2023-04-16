@@ -115,9 +115,9 @@ class InventoryController extends Controller
             );
          }
          if ($request->user()->roles->first()->id === 3) {
-            $inventoryMovement =  InventoryMovement::where('delivery_id', $request->user()->id)->with('product', 'delivery.city','inventoryMovementVariations')->get();
+            $inventoryMovement =  InventoryMovement::where('delivery_id', $request->user()->id)->with('product', 'delivery.city', 'inventoryMovementVariations')->get();
          } else {
-            $inventoryMovement = InventoryMovement::with('product', 'delivery.city')->get();
+            $inventoryMovement = InventoryMovement::with('product', 'delivery.city','inventoryMovementVariations')->get();
          }
          return response()->json([
             'status' => true,
@@ -157,7 +157,7 @@ class InventoryController extends Controller
             );
          }
 
-         $inventoryMovement = InventoryMovement::where('id', $id)->with('product', 'delivery.city','inventoryMovementVariations')->get()->first();
+         $inventoryMovement = InventoryMovement::where('id', $id)->with('product', 'delivery.city', 'inventoryMovementVariations')->get()->first();
 
          if ($inventoryMovement) {
 
@@ -477,10 +477,10 @@ class InventoryController extends Controller
 
          $inventoryMovement = InventoryMovement::find($id);
          if ($inventoryMovement) {
-            $inventoryMovementVariations = InventoryMovementVariation::where('inventory_movement_id', $inventoryMovement->id)->get(); 
-            $inventoryState = InventoryState::where('product_id', $inventoryMovement->product_id)->first(); 
+            $inventoryMovementVariations = InventoryMovementVariation::where('inventory_movement_id', $inventoryMovement->id)->get();
+            $inventoryState = InventoryState::where('product_id', $inventoryMovement->product_id)->first();
 
-            foreach ($inventoryMovementVariations as $variant){
+            foreach ($inventoryMovementVariations as $variant) {
                $inventoryStateVariations = InventoryStateVariation::where([
                   'inventory_state_id' => $inventoryState->id,
                   'size' => $variant['size'],
@@ -488,26 +488,26 @@ class InventoryController extends Controller
                ])->first();
 
                $inventoryStateVariations->quantity += $variant['quantity'];
+               $inventoryStateVariations->save();
             }
+            $inventoryMovement->delete();
 
-               
 
-               return response()->json([
-                  'status' => true,
-                  'code' => 'SUCCESS',
-                  'message' => 'Inventory Deleted Successfully !',
-               ], 200);
-            
-
-            return response()->json(
-               [
-                  'status' => false,
-                  'code' => 'NOT_FOUND',
-                  'message' => 'Inventory State Not Exist',
-               ],
-               404
-            );
+            return response()->json([
+               'status' => true,
+               'code' => 'SUCCESS',
+               'message' => 'Inventory Deleted Successfully !',
+            ], 200);
          }
+         return response()->json(
+            [
+               'status' => false,
+               'code' => 'NOT_FOUND',
+               'message' => 'Inventory State Not Exist',
+            ],
+            404
+         );
+
 
          return response()->json(
             [
