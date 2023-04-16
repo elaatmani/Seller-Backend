@@ -292,176 +292,7 @@ class InventoryController extends Controller
 
 
 
-   // /**
-   //  * Update Inventory Movement.
-   //  *
-   //  * @return \Illuminate\Http\Response
-   //  */
-   // public function updateInventoryMovement(Request $request, $id)
-   // {
-   //    try {
-   //       if (!$request->user()->can('update_inventory_movement')) {
-   //          return response()->json(
-   //             [
-   //                'status' => false,
-   //                'code' => 'NOT_ALLOWED',
-   //                'message' => 'You Dont Have Access To See Product',
-   //             ],
-   //             405
-   //          );
-   //       }
-   //       //Validated
-   //       $validateInventoryMovement = Validator::make(
-   //          $request->all(),
-   //          [
-   //             'product_id' => 'required|integer',
-   //             'delivery_id' => 'required|integer',
-   //             // 'quantity' => 'required|integer',
-   //          ]
-   //       );
 
-   //       if ($validateInventoryMovement->fails()) {
-   //          return response()->json(
-   //             [
-   //                'status' => false,
-   //                'code' => 'VALIDATION_ERROR',
-   //                'message' => 'validation error',
-   //                'error' => $validateInventoryMovement->errors()
-   //             ],
-   //             401
-   //          );
-   //       }
-
-   //       $inventoryMovement = InventoryMovement::find($id);
-
-   //       if ($inventoryMovement) {
-   //          $existingVariations = InventoryMovementVariation::where('inventory_movement_id', $inventoryMovement->id)->get();
-   //          if ($existingVariations->count() > 0) {
-   //             foreach ($existingVariations as $existingVariation) {
-   //                // Check if the size and color of the existing variation is not present in the $request object
-   //                if (!collect($request->input('variants'))->where('size', $existingVariation->size)->where('color', $existingVariation->color)->where('quantity', $existingVariation->quantity)->count()) {
-   //                   // If the variation size and color does not exist in the $request object, add the quantity to the existing variation quantity variable
-   //                   // Delete the variation
-   //                   $existingVariation->delete();
-   //                }
-   //             }
-   //          }
-
-
-
-   //          $inventoryState = InventoryState::where('product_id', $inventoryMovement->product_id)->get()->first();
-
-   //          if ($inventoryState) {
-   //             $inventoryStateVariations = InventoryStateVariation::where('inventory_state_id', $inventoryState->id)->get();
-
-
-   //             foreach ($inventoryStateVariations as $variant) {
-   //             }
-
-
-   //             foreach ($request->input('variants') as $variant) {
-   //                foreach ($request->input('variants') as $variant) {
-   //                   $existingVariant = InventoryStateVariation::where([
-   //                      'product_id' => $inventoryMovement->product_id,
-   //                      'size' => $variant['size'],
-   //                      'color' => $variant['color']
-   //                   ])->first();
-
-   //                   if ($existingVariant && $variant['quantity'] >= $existingVariant->quantity) {
-   //                      InventoryStateVariation::where([
-   //                         'product_id' => $inventoryMovement->product_id,
-   //                         'size' => $variant['size'],
-   //                         'color' => $variant['color']
-   //                      ])->update([
-   //                         'quantity' => $variant['quantity']
-   //                      ]);
-   //                   }
-   //                }
-
-
-   //                InventoryMovementVariation::updateOrCreate(
-   //                   [
-   //                      'inventory_movement_id', $inventoryMovement->id,
-   //                      'size' => $variant['size'],
-   //                      'color' => $variant['color'],
-   //                   ],
-   //                   [
-   //                      'size' => $variant['size'],
-   //                      'color' => $variant['color'],
-   //                      'quantity' => $variant['quantity'],
-   //                   ]
-   //                );
-   //             }
-   //          }
-   //          return response()->json(
-   //             [
-   //                'status' => false,
-   //                'code' => 'NOT_FOUND',
-   //                'message' => 'Inventory State Not Exist',
-   //             ],
-   //             404
-   //          );
-   //       }
-
-
-   //       // if ($inventoryMovement) {
-
-   //       //    $inventoryState = InventoryState::where('product_id', $inventoryMovement->product_id)->get()->first();
-   //       //    if ($inventoryState) {
-   //       //       $totalQuantity = $inventoryState->quantity + $inventoryMovement->qty_to_delivery;
-   //       //       if ($totalQuantity >= $request->quantity) {
-   //       //          $currentTotal = $totalQuantity - $request->quantity;
-
-   //       //          $inventoryMovement->product_id = $request->product_id;
-   //       //          $inventoryMovement->delivery_id = $request->delivery_id;
-   //       //          $inventoryMovement->save();
-
-   //       //          $inventoryState->quantity = $currentTotal;
-   //       //          $inventoryState->save();
-
-   //       //          return response()->json([
-   //       //             'status' => true,
-   //       //             'code' => 'SUCCESS',
-   //       //             'message' => 'Inventory Updated Successfully !',
-   //       //          ], 200);
-   //       //       }
-
-   //       //       return response()->json([
-   //       //          'status' => true,
-   //       //          'code' => 'ERROR_QUANTITY',
-   //       //          'message' => 'Max quantity is ' . $totalQuantity,
-   //       //       ], 200);
-   //       //    }
-
-   //       //    return response()->json(
-   //       //       [
-   //       //          'status' => false,
-   //       //          'code' => 'NOT_FOUND',
-   //       //          'message' => 'Inventory State Not Exist',
-   //       //       ],
-   //       //       404
-   //       //    );
-   //       // }
-
-   //       return response()->json(
-   //          [
-   //             'status' => false,
-   //             'code' => 'NOT_FOUND',
-   //             'message' => 'Inventory Movement Not Exist',
-   //          ],
-   //          404
-   //       );
-   //    } catch (\Throwable $th) {
-   //       return response()->json(
-   //          [
-   //             'status' => false,
-   //             'message' => $th->getMessage(),
-   //             'code' => 'SERVER_ERROR'
-   //          ],
-   //          500
-   //       );
-   //    }
-   // }
 
 
 
@@ -510,11 +341,21 @@ class InventoryController extends Controller
                });
 
             if (!$foundVariation) {
+
+               $inventoryState = InventoryState::where('product_id', $validatedData['product_id'])->first();
+               $inventoryStateVariations = InventoryStateVariation::where([
+                  'inventory_state_id' => $inventoryState->id,
+                  'size' => $existingVariation['size'],
+                  'color' => $existingVariation['color']
+               ])->first();
+               $inventoryStateVariations->quantity += $existingVariation->quantity;
+               $inventoryStateVariations->save();
                $existingVariation->delete();
             }
          }
 
          $inventoryState = InventoryState::where('product_id', $validatedData['product_id'])->first();
+
 
          if (!$inventoryState) {
             return response()->json(
@@ -526,55 +367,70 @@ class InventoryController extends Controller
                404
             );
          }
-       
-         $isValid = true;
-         
+
          foreach ($validatedData['variants'] as $variant) {
             $existingVariant = InventoryStateVariation::where([
                'inventory_state_id' => $inventoryState->id,
                'size' => $variant['size'],
                'color' => $variant['color']
             ])->first();
-           
-            
-            if ($variant['quantity'] > $existingVariant->quantity) {
-               $isValid = false;
-               break;
-            }
-         }
-         
-         if ($isValid) {
-            foreach ($validatedData['variants'] as $variant) {
-               InventoryStateVariation::where([
-                  'inventory_state_id' => $inventoryState->id,
-                  'size' => $variant['size'],
-                  'color' => $variant['color']
-               ])->update([
-                  'quantity' => $variant['quantity']
-               ]);
 
+            $existingVariantMovement = InventoryMovementVariation::where([
+               'inventory_movement_id' => $inventoryMovement->id,
+               'size' => $variant['size'],
+               'color' => $variant['color']
+            ])->first();
 
-               InventoryMovementVariation::updateOrCreate(
+            if ($existingVariant->size && $existingVariantMovement->size) {
+               $stockeQuantity = $existingVariant->quantity + $existingVariantMovement->quantity;
+               if ($stockeQuantity < $variant['quantity']) {
+                  return response()->json(
+                     [
+                        'status' => true,
+                        'code' => 'QUANTITY',
+                        'message' => 'MAX quantity is ' . $stockeQuantity,
+                     ],
+                     200
+                  );
+               }
+            } else {
+               return response()->json(
                   [
-                     'inventory_movement_id' => $inventoryMovement->id,
-                     'size' => $variant['size'],
-                     'color' => $variant['color'],
+                     'status' => true,
+                     'code' => 'FAILED',
+                     'message' => 'Movement Variation Not Found !',
                   ],
-                  [
-                     'quantity' => $variant['quantity'],
-                  ]
+                  200
                );
             }
-         } else {
-            return response()->json(
-               [
-                  'status' => true,
-                  'code' => 'QUANTITY',
-                  'message' => 'MAX quantity is!',
-               ],
-               200
-            );
          }
+
+
+         foreach ($validatedData['variants'] as $variant) {
+
+            if ($variant['quantity'] <= $existingVariantMovement->quantity) {
+               $calcule = $existingVariantMovement->quantity - $variant['quantity'];
+
+               $existingVariantMovement->quantity = $variant['quantity'];
+               $existingVariantMovement->save();
+
+
+               $existingVariant->quantity = $existingVariant->quantity +  $calcule;
+               $existingVariant->save();
+            } else {
+               $calcule =  $variant['quantity'] -  $existingVariantMovement->quantity;
+
+               $existingVariantMovement->quantity = $variant['quantity'];
+               $existingVariantMovement->save();
+
+
+               $existingVariant->quantity = $existingVariant->quantity - $calcule;
+               $existingVariant->save();
+            }
+         }
+
+
+
 
          return response()->json(
             [
@@ -595,6 +451,9 @@ class InventoryController extends Controller
          );
       }
    }
+
+
+
 
 
    /**
