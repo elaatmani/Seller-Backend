@@ -478,9 +478,12 @@ class InventoryController extends Controller
          $inventoryMovement = InventoryMovement::find($id);
          if ($inventoryMovement) {
             $inventoryMovementVariations = InventoryMovementVariation::where('inventory_movement_id', $inventoryMovement->id)->get();
+           
             $inventoryState = InventoryState::where('product_id', $inventoryMovement->product_id)->first();
+           
 
             foreach ($inventoryMovementVariations as $variant) {
+               
                $inventoryStateVariations = InventoryStateVariation::where([
                   'inventory_state_id' => $inventoryState->id,
                   'size' => $variant['size'],
@@ -489,6 +492,8 @@ class InventoryController extends Controller
 
                $inventoryStateVariations->quantity += $variant['quantity'];
                $inventoryStateVariations->save();
+
+               
             }
             $inventoryMovement->delete();
 
