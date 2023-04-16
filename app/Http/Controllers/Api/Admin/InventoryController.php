@@ -115,7 +115,7 @@ class InventoryController extends Controller
             );
          }
          if ($request->user()->roles->first()->id === 3) {
-            $inventoryMovement =  InventoryMovement::where('delivery_id', $request->user()->id)->with('product', 'delivery.city')->get();
+            $inventoryMovement =  InventoryMovement::where('delivery_id', $request->user()->id)->with('product', 'delivery.city','inventoryMovementVariations')->get();
          } else {
             $inventoryMovement = InventoryMovement::with('product', 'delivery.city')->get();
          }
@@ -157,7 +157,7 @@ class InventoryController extends Controller
             );
          }
 
-         $inventoryMovement = InventoryMovement::where('id', $id)->with('product', 'delivery.city')->get()->first();
+         $inventoryMovement = InventoryMovement::where('id', $id)->with('product', 'delivery.city','inventoryMovementVariations')->get()->first();
 
          if ($inventoryMovement) {
 
@@ -469,7 +469,7 @@ class InventoryController extends Controller
                [
                   'status' => false,
                   'code' => 'NOT_ALLOWED',
-                  'message' => 'You Dont Have Access To See Product',
+                  'message' => 'You Dont Have Access To Inventory Movement',
                ],
                405
             );
@@ -477,22 +477,27 @@ class InventoryController extends Controller
 
          $inventoryMovement = InventoryMovement::find($id);
          if ($inventoryMovement) {
-            $inventoryState = InventoryState::where('product_id', $inventoryMovement->product_id)->get()->first();
-            if ($inventoryState) {
-               $totalQuantity = $inventoryState->quantity + $inventoryMovement->qty_to_delivery;
+            $inventoryMovementVariations = InventoryMovementVariation::where('inventory_movement_id', $inventoryMovement->id)->get(); 
+            $inventoryState = InventoryState::where('product_id', $inventoryMovement->product_id)->first(); 
 
-               $inventoryState->quantity = $totalQuantity;
-               $inventoryState->save();
+            foreach ($inventoryMovementVariations as $variant){
+               $inventoryStateVariations = InventoryStateVariation::where([
+                  'inventory_state_id' => $inventoryState->id,
+                  'size' => $variant['size'],
+                  'color' => $variant['color']
+               ])->first();
 
+               $inventoryStateVariations->quantity += $variant['quantity'];
+            }
 
-               $inventoryMovement->delete();
+               
 
                return response()->json([
                   'status' => true,
                   'code' => 'SUCCESS',
                   'message' => 'Inventory Deleted Successfully !',
                ], 200);
-            }
+            
 
             return response()->json(
                [
