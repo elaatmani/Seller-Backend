@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Helpers\ProductHelper;
 use App\Http\Controllers\Controller;
 use App\Models\InventoryMovement;
-use App\Models\InventoryMovementVariation;
-use App\Models\InventoryState;
-use App\Models\InventoryStateVariation;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -35,12 +34,13 @@ class InventoryController extends Controller
                405
             );
          }
-         $inventoryState = InventoryState::with('product', 'inventoryStateVariations')->get();
+        //  $inventoryState = InventoryState::with('product', 'inventoryStateVariations')->get();
+        $products = Product::all()->map(fn($product) => ProductHelper::with_state($product));
 
          return response()->json([
             'status' => true,
             'code' => 'SHOW_ALL_INVENTORY_STATES',
-            'data' => $inventoryState
+            'data' => $products
          ], 200);
       } catch (\Throwable $th) {
          return response()->json(
@@ -226,6 +226,8 @@ class InventoryController extends Controller
             [
                'product_id' => 'required|integer',
                'delivery_id' => 'required|integer',
+               'variations' => 'required',
+               'variations.*' => 'required'
             ]
          );
 
@@ -240,44 +242,49 @@ class InventoryController extends Controller
                401
             );
          }
-         $inventoryState = InventoryState::where('product_id', $request->product_id)->get()->first();
 
-         if ($inventoryState) {
-            if ($inventoryState->quantity >= $request->quantity) {
+         $product = Product::find($request->product_id);
 
-               DB::beginTransaction();
-               $inventoryMovement = InventoryMovement::create([
-                  'product_id' => $request->product_id,
-                  'delivery_id' => $request->delivery_id,
-               ]);
-               $quantity = 0;
-               foreach ($request->variants as $variant) {
-                  InventoryMovementVariation::create([
-                     'inventory_movement_id' => $inventoryMovement->id,
-                     'size' => $variant['size'],
-                     'color' => $variant['color'],
-                     'quantity' => $variant['quantity'],
-                  ]);
-                  $quantity += $variant['quantity'];
-               }
-
-               $currentTotal = $inventoryState->quantity - $quantity;
-               $inventoryState->quantity = $currentTotal;
-               $inventoryState->save();
-               DB::commit();
-               return response()->json([
-                  'status' => true,
-                  'code' => 'SUCCESS',
-                  'message' => 'Inventory Movement Added Successfully!'
-               ], 200);
-            } else {
-               return response()->json([
-                  'status' => true,
-                  'code' => 'ERROR_QUANTITY',
-                  'message' => 'Max quantity is ' . $inventoryState->quantity,
-               ], 200);
-            }
+         if(!isset($product)) {
+            return response()->json([
+                'status' => false,
+                  'code' => 'NOT_FOUND',
+                  'message' => 'PRODUCT NOT FOUND',
+            ],404);
          }
+
+         DB::beginTransaction();
+         $product = ProductHelper::with_state($product);
+
+
+         foreach ($request->variations as $variation) {
+            //  return response()->json($variation['id']);
+
+            InventoryMovement::create([
+                'product_id' => $product->id,
+                'delivery_id' => $request->delivery_id,
+                'product_variation_id' => $variation['id'],
+                'quantity' => $variation['quantity']
+            ]);
+         }
+
+         DB::commit();
+
+         return response()->json([
+             'status' => true,
+             'code' => 'SUCCESS',
+             'message' => 'Inventory Movement Added Successfully!'
+         ], 200);
+
+
+
+            // return response()->json([
+            //     'status' => true,
+            //     'code' => 'ERROR_QUANTITY',
+            //     'message' => 'Max quantity is ' . $inventoryState->quantity,
+            // ], 200);
+
+
       } catch (\Throwable $th) {
          return response()->json(
             [
@@ -478,12 +485,12 @@ class InventoryController extends Controller
          $inventoryMovement = InventoryMovement::find($id);
          if ($inventoryMovement) {
             $inventoryMovementVariations = InventoryMovementVariation::where('inventory_movement_id', $inventoryMovement->id)->get();
-           
+
             $inventoryState = InventoryState::where('product_id', $inventoryMovement->product_id)->first();
-           
+
 
             foreach ($inventoryMovementVariations as $variant) {
-               
+
                $inventoryStateVariations = InventoryStateVariation::where([
                   'inventory_state_id' => $inventoryState->id,
                   'size' => $variant['size'],
@@ -493,7 +500,7 @@ class InventoryController extends Controller
                $inventoryStateVariations->quantity += $variant['quantity'];
                $inventoryStateVariations->save();
 
-               
+
             }
             $inventoryMovement->delete();
 

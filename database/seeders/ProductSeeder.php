@@ -18,34 +18,34 @@ class ProductSeeder extends Seeder
     {
 
 
-        $products = [
-            [
-                'ref' => 'backpack',
-                'name' => 'Backpack',
-                'buying_price' => 5,
-                'selling_price' => 15,
-                'description' => 'Product Backpack',
-                'status' => 1
-            ],
-            [
-                'ref' => 'iphone',
-                'name' => 'Iphone',
-                'buying_price' => 5,
-                'selling_price' => 15,
-                'description' => 'Product Iphone',
-                'status' => 1 
-            ]
-        ];
+        // $products = [
+        //     [
+        //         'ref' => 'backpack',
+        //         'name' => 'Backpack',
+        //         'buying_price' => 5,
+        //         'selling_price' => 15,
+        //         'description' => 'Product Backpack',
+        //         'status' => 1
+        //     ],
+        //     [
+        //         'ref' => 'iphone',
+        //         'name' => 'Iphone',
+        //         'buying_price' => 5,
+        //         'selling_price' => 15,
+        //         'description' => 'Product Iphone',
+        //         'status' => 1
+        //     ]
+        // ];
 
-        foreach ($products as $product) {
-            $productModel = Product::create($product);
-            DB::table('product_agentes')->insert([
-                [
-                    'agente_id' => 2,
-                    'product_id' => $productModel->id,
-                ],
-            ]);
-            InventoryState::create(['product_id'=>$productModel->id,'quantity'=>2000]);
-        }
+        // foreach ($products as $product) {
+        //     $productModel = Product::create($product);
+        //     DB::table('product_agentes')->insert([
+        //         [
+        //             'agente_id' => 2,
+        //             'product_id' => $productModel->id,
+        //         ],
+        //     ]);
+        //     InventoryState::create(['product_id'=>$productModel->id,'quantity'=>2000]);
+        // }
     }
 }

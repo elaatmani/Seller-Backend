@@ -16,13 +16,16 @@ return new class extends Migration
         Schema::create('inventory_movements', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('product_variation_id');
             $table->unsignedBigInteger('delivery_id');
+            $table->bigInteger('quantity')->default(0);
             $table->boolean('is_received')->default(0);
             $table->string('note')->nullable();
             $table->timestamps();
 
 
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->foreign('product_variation_id')->references('id')->on('product_variations')->onDelete('cascade');
             $table->foreign('delivery_id')->references('id')->on('users')->onDelete('cascade');
         });
     }

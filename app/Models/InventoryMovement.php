@@ -13,7 +13,8 @@ class InventoryMovement extends Model
     protected $fillable = [
         'product_id',
         'delivery_id',
-        'qty_to_delivery',
+        'product_variation_id',
+        'quantity',
         'is_received',
         'note'
     ];

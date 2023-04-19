@@ -116,20 +116,6 @@ class ProductController extends Controller
                 $quantityTotal += $value['quantity'];
             }
 
-            $inventoryState = InventoryState::create([
-                'product_id' => $product->id,
-                'quantity' => $quantityTotal,
-            ]);
-
-            foreach ($request->variants as  $value) {
-                InventoryStateVariation::create([
-                    'inventory_state_id' => $inventoryState->id,
-                    'size'  => $value['size'],
-                    'color' => $value['color'],
-                    'quantity' => $value['quantity']
-                ]);
-            }
-
             DB::commit();
             return response()->json(
                 [
