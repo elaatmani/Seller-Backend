@@ -30,9 +30,12 @@ class ProductHelper {
         //    {id: 1, product_id: 1, product_variation_id: 1, quantity: 10, is_received: true, delivery: 2},
         //    {id: 2, product_id: 1, product_variation_id: 2, quantity: 10, is_received: true, delivery: 2} #
         // ]
-
+        $total_quantity = 0;
         // loop through product variations to calculate the available quantity
         foreach ($product_variations as $variation) {
+
+            // calculate total quantity for a product
+            $total_quantity += $variation->quantity;
 
             // for each variation we get all it's movements
             $variation_movements = $product_movements->where('product_variation_id', $variation->id)->all();
@@ -50,11 +53,12 @@ class ProductHelper {
                 $hold_quantity += $movement->is_received ? 0 : $movement->quantity;
             }
 
-            $variation->quantity = $quantity; // 20
+            $variation->available_quantity = $quantity; // 20
             $variation->on_hold = $hold_quantity; // 20
         }
 
         $product->variations = $product_variations;
+        $product->total_quantity = $total_quantity;
 
         return $product;
     }
