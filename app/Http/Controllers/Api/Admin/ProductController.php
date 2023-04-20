@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Helpers\ProductHelper;
 use App\Http\Controllers\Controller;
 use App\Models\InventoryMovement;
 use App\Models\InventoryState;
@@ -34,7 +35,7 @@ class ProductController extends Controller
                 405
             );
         }
-        $products = Product::with('variations')->get();
+        $products = Product::with('variations')->get()->map(fn($product) => ProductHelper::with_state($product));
 
         return response()->json(
             [
@@ -105,7 +106,7 @@ class ProductController extends Controller
             ]);
 
             $quantityTotal = 0;
-            foreach ($request->variants as  $value) {
+            foreach ($request->variations as  $value) {
                 ProductVariation::create([
                     'product_id' => $product->id,
                     'product_ref' => $product->ref,
@@ -172,6 +173,7 @@ class ProductController extends Controller
 
             $product = Product::with('variations')->find($id);
             if (isset($product)) {
+                $product = ProductHelper::with_state($product);
                 return response()->json(
                     [
                         'status' => true,
@@ -230,141 +232,7 @@ class ProductController extends Controller
 
 
 
-            if (isset($product)) {
-                //Validated
-                $productValidator = Validator::make(
-                    $request->all(),
-                    [
-                        'name' => 'required',
-                        'ref' => 'required|unique:products,ref,' . $product->id,
-                        'buying_price' => 'required|integer',
-                        'selling_price' => 'required|integer',
-                    ]
-                );
-
-                if ($productValidator->fails()) {
-                    return response()->json(
-                        [
-                            'status' => false,
-                            'code' => 'VALIDATION_ERROR',
-                            'message' => 'validation error',
-                            'error' => $productValidator->errors()
-                        ],
-                        401
-                    );
-                }
-
-
-                $product->name = $request->name;
-                $product->ref = $request->ref;
-                $product->buying_price = $request->buying_price;
-                $product->selling_price = $request->selling_price;
-                $product->description = $request->description;
-                $product->status = 1;
-
-                $product->save();
-
-
-                $existingVariations = ProductVariation::where('product_id', $id)->get();
-                $inventoryState = InventoryState::where('product_id', $id)->first();
-                $existingVariations2 = InventoryStateVariation::where('inventory_state_id', $inventoryState->id)->get();
-                $inventoryMovement = InventoryMovement::where('product_id', $id)->sum('qty_to_delivery');
-
-
-
-                if ($existingVariations->count() > 0) {
-                    foreach ($existingVariations as $existingVariation) {
-                        // Check if the size and color of the existing variation is not present in the $request object
-                        if (!collect($request->input('variants'))->where('size', $existingVariation->size)->where('color', $existingVariation->color)->count()) {
-                            // If the variation size and color does not exist in the $request object, add the quantity to the existing variation quantity variable
-                            // Delete the variation
-                            $existingVariation->delete();
-                        }
-                    }
-                }
-
-                if ($existingVariations2->count() > 0) {
-                    foreach ($existingVariations2 as $existingVariation) {
-                        // Check if the size and color of the existing variation is not present in the $request object
-                        if (!collect($request->input('variants'))->where('size', $existingVariation->size)->where('color', $existingVariation->color)->count()) {
-                            // If the variation size and color does not exist in the $request object, add the quantity to the existing variation quantity variable
-                            // Delete the variation
-                            $existingVariation->delete();
-                        }
-                    }
-                }
-
-
-
-                if (count($request->variants) > 0) {
-
-                    $quantityUpdated = 0;
-                    foreach ($request->variants as $variant) {
-                        $quantityUpdated += $variant['quantity'];
-                    }
-
-                    if ($inventoryMovement < $quantityUpdated) {
-
-
-                        foreach ($request->input('variants') as $variant) {
-                            ProductVariation::updateOrCreate(
-                                [
-                                    'product_id' => $id,
-                                    'size' => $variant['size'],
-                                    'color' => $variant['color'],
-                                ],
-                                [
-                                    'product_id' => $id,
-                                    'product_ref' => $product->ref,
-                                    'size' => $variant['size'],
-                                    'color' => $variant['color'],
-                                    'quantity' => $variant['quantity'],
-                                ]
-                            );
-                        }
-
-
-                        $inventoryState->quantity = $quantityUpdated;
-                        $inventoryState->save();
-
-
-
-                        foreach ($request->input('variants') as $variant) {
-                            InventoryStateVariation::updateOrCreate(
-                                [
-                                    'inventory_state_id' => $inventoryState->id,
-                                    'size' => $variant['size'],
-                                    'color' => $variant['color'],
-                                ],
-                                [
-                                    'inventory_state_id' => $inventoryState->id,
-                                    'size' => $variant['size'],
-                                    'color' => $variant['color'],
-                                    'quantity' => $variant['quantity'],
-                                ]
-                            );
-                        }
-
-                        return response()->json(
-                            [
-                                'status' => true,
-                                'code' => 'PRODUCT_UPDATED',
-                                'message' => 'Product Updated Successfully!',
-                            ],
-                            200
-                        );
-                    } else {
-                        return response()->json(
-                            [
-                                'status' => true,
-                                'code' => 'PRODUCT_NOT_UPDATED',
-                                'message' => 'MIN Qty to Add ' . $inventoryMovement + 1,
-                            ],
-                            200
-                        );
-                    }
-                }
-            } else {
+            if (!isset($product)) {
                 return response()->json(
                     [
                         'status' => false,
@@ -374,7 +242,124 @@ class ProductController extends Controller
                     404
                 );
             }
+
+            //Validated
+            $productValidator = Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required',
+                    'ref' => 'required|unique:products,ref,' . $product->id,
+                    'buying_price' => 'required|integer',
+                    'selling_price' => 'required|integer',
+                ]
+            );
+
+            if ($productValidator->fails()) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'VALIDATION_ERROR',
+                        'message' => 'validation error',
+                        'error' => $productValidator->errors()
+                    ],
+                    401
+                );
+            }
+
+
+            $product->name = $request->name;
+            $product->ref = $request->ref;
+            $product->buying_price = $request->buying_price;
+            $product->selling_price = $request->selling_price;
+            $product->description = $request->description;
+            $product->status = 1;
+
+            $product->save();
+
+            DB::beginTransaction();
+            // all variations
+            $all_variations = collect($request->variations);
+
+            // old variations
+            $old_variations = $product->variations;
+
+            // select only new added variation from request
+            $new_variations = array_values($all_variations->whereNotIn('id', $old_variations->pluck('id'))->all());
+
+            // 1 - handle deleted variations
+            $deleted_variations = array_values($old_variations->whereNotIn('id', $all_variations->pluck('id'))->all());
+
+            foreach ($deleted_variations as $v) {
+                if($v->quantity != $v->available_quantity) {
+                    return response()->json([
+                        [
+                            'status' => false,
+                            'code' => 'QUANTITY_ERROR',
+                            'message' => "Variation '$v->size / $v->color' can't be deleted. Already in movements"
+                        ],
+                        401
+                    ]);
+                }
+                $v->delete();
+            }
+
+            // get product with it's current state
+            $product = ProductHelper::with_state(Product::findOrFail($product->id));
+
+
+            // 2 - handle update existing variations
+            // loop through variations with their state
+            foreach($product->variations as $v) {
+                // get the actual variation
+                $variation = ProductVariation::find($v->id);
+                // get the same variation but from the request
+                $updated_variation = $all_variations->where('id', $v->id)->first();
+
+                // update the old variation with new values
+                $variation->size = $updated_variation['size'];
+                $variation->color = $updated_variation['color'];
+
+                // check if the new quantity is great or equal to the old quantity so it doesn't make problems
+                if((int) $updated_variation['quantity'] < $v->available_quantity ) {
+                    return response()->json(
+                        [
+                            'status' => false,
+                            'code' => 'QUANTITY_ERROR',
+                            'message' => "Quantity of variation '$v->size / $v->color' should be greaters than ". $v->available_quantity
+                        ],
+                        401
+                    );
+                }
+
+                $variation->quantity = (int) $updated_variation['quantity'];
+                $variation->save();
+            }
+
+
+            // 3 - handle new variations
+            foreach($new_variations as $v) {
+                ProductVariation::create([
+                    'product_id' => $product->id,
+                    'product_ref' => $product->ref,
+                    'size' => $v['size'],
+                    'color' => $v['color'],
+                    'quantity' => (int) $v['quantity']
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'PRODUCT_UPDATED',
+                    'message' => 'Product Updated Successfully!',
+                    'data' => ProductHelper::with_state(Product::find($product->id))
+                ],
+                200
+            );
         } catch (\Throwable $th) {
+            DB::rollback();
             return response()->json(
                 [
                     'status' => false,
