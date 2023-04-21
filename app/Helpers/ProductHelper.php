@@ -3,33 +3,19 @@
 namespace App\Helpers;
 use App\Models\Product;
 use App\Models\InventoryMovement;
+use App\Models\InventoryMovementVariation;
 
 class ProductHelper {
 
     // Product::with_state($id);
 
     static public function with_state($product) {
-        // calculate_quantity($id)
-
-        // find the product
-        // $product = Product::find($id); // id: 1
-
         // get all variations
         $product_variations = $product->variations;
-        // [
-        //    { id:1, size: 'M', color: 'red', quantity: 50 },
-        //    { id:2, size: 'M', color: 'blue', quantity: 40 } #
-        // ]
-        // Quantity Total: 90
 
         // get all product movements
-        $product_movements = InventoryMovement::where('product_id', $product->id)->get();
-        // [
-        //    {id: 1, product_id: 1, product_variation_id: 1, quantity: 20, is_received: false, delivery: 1},
-        //    {id: 2, product_id: 1, product_variation_id: 2, quantity: 30, is_received: true, delivery: 1}, #
-        //    {id: 1, product_id: 1, product_variation_id: 1, quantity: 10, is_received: true, delivery: 2},
-        //    {id: 2, product_id: 1, product_variation_id: 2, quantity: 10, is_received: true, delivery: 2} #
-        // ]
+        // $product_movements = InventoryMovement::where('product_id', $product->id)->get();
+
         $total_quantity = 0;
         // loop through product variations to calculate the available quantity
         foreach ($product_variations as $variation) {
@@ -37,8 +23,9 @@ class ProductHelper {
             // calculate total quantity for a product
             $total_quantity += $variation->quantity;
 
+
             // for each variation we get all it's movements
-            $variation_movements = $product_movements->where('product_variation_id', $variation->id)->all();
+            $variation_movements = InventoryMovementVariation::where('product_variation_id', $variation->id)->get();
 
             // 50 -> 20
             $quantity = $variation->quantity;
@@ -50,7 +37,7 @@ class ProductHelper {
 
                 // adding the on hold quantity
                 // 0 + 20 = 20;
-                $hold_quantity += $movement->is_received ? 0 : $movement->quantity;
+                $hold_quantity += $movement->inventory_movement->is_received ? 0 : $movement->quantity;
             }
 
             $variation->available_quantity = $quantity; // 20

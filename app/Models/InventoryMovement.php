@@ -13,8 +13,6 @@ class InventoryMovement extends Model
     protected $fillable = [
         'product_id',
         'delivery_id',
-        'product_variation_id',
-        'quantity',
         'is_received',
         'note'
     ];
@@ -29,8 +27,8 @@ class InventoryMovement extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function inventoryMovementVariations(){
-        return $this->hasMany(InventoryMovementVariation::class);
+    public function inventory_movement_variations(){
+        return $this->hasMany(InventoryMovementVariation::class, 'inventory_movement_id');
     }
 
 }

@@ -297,7 +297,7 @@ class ProductController extends Controller
                             'code' => 'QUANTITY_ERROR',
                             'message' => "Variation '$v->size / $v->color' can't be deleted. Already in movements"
                         ],
-                        401
+                        200
                     ]);
                 }
                 $v->delete();
@@ -327,7 +327,7 @@ class ProductController extends Controller
                             'code' => 'QUANTITY_ERROR',
                             'message' => "Quantity of variation '$v->size / $v->color' should be greaters than ". $v->available_quantity
                         ],
-                        401
+                        200
                     );
                 }
 
