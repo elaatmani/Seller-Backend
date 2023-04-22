@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Models\Product;
+use Illuminate\Http\Request;
 use App\Helpers\ProductHelper;
-use App\Http\Controllers\Controller;
-use App\Models\InventoryMovement;
 use App\Models\InventoryState;
+use App\Models\ProductVariation;
+use App\Models\InventoryMovement;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+
+
+
 use App\Models\InventoryStateVariation;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Product;
-use App\Models\ProductVariation;
-
-
-
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\InventoryMovementVariation;
 
 class ProductController extends Controller
 {
@@ -290,7 +291,8 @@ class ProductController extends Controller
             $deleted_variations = array_values($old_variations->whereNotIn('id', $all_variations->pluck('id'))->all());
 
             foreach ($deleted_variations as $v) {
-                if($v->quantity != $v->available_quantity) {
+                $exists = InventoryMovementVariation::where('product_variation_id', $v->id)->first();
+                if(isset($exists)) {
                     return response()->json([
                         [
                             'status' => false,
@@ -319,13 +321,23 @@ class ProductController extends Controller
                 $variation->size = $updated_variation['size'];
                 $variation->color = $updated_variation['color'];
 
+                // return response()->json([
+                //     'updated' => $updated_variation['quantity'],
+                //     'available' => $v->available_quantity,
+                //     'quantity' => $v->quantity,
+                //     'calc' => ($updated_variation['quantity'] - $v->quantity)
+
+                // ]);
+
+                $used_quantity = $v->quantity - $v->available_quantity;
+
                 // check if the new quantity is great or equal to the old quantity so it doesn't make problems
-                if((int) $updated_variation['quantity'] < $v->available_quantity ) {
+                if(($updated_variation['quantity'] != $v->quantity) && ((int) $updated_variation['quantity'] < $used_quantity )) {
                     return response()->json(
                         [
                             'status' => false,
                             'code' => 'QUANTITY_ERROR',
-                            'message' => "Quantity of variation '$v->size / $v->color' should be greaters than ". $v->available_quantity
+                            'message' => "Quantity of variation '$v->size / $v->color' should be greater than ". $used_quantity
                         ],
                         200
                     );
