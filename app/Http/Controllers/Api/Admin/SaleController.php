@@ -53,16 +53,16 @@ class SaleController extends Controller
     {
         try {
 
-            // if (!$request->user()->can('create_sale')) {
-            //     return response()->json(
-            //         [
-            //             'status' => false,
-            //             'code' => 'NOT_ALLOWED',
-            //             'message' => 'You Dont Have Access To See Products',
-            //         ],
-            //         405
-            //     );
-            // }
+            if (!$request->user()->can('create_sale')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Create Sale',
+                    ],
+                    405
+                );
+            }
 
 
             //Validated
