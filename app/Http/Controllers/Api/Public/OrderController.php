@@ -219,6 +219,12 @@ class OrderController extends Controller
                 DB::beginTransaction();
                 $order->confirmation = $request->confirmation;
                 $order->note = $request->note;
+                if ($request->confirmation === 'reporter') {
+                    $order->reported_agente_date = $request->reported_agente_date;
+                    $order->reported_agente_note = $request->reported_agente_note;
+                }
+                $order->save();
+
 
                 $orderHistory = new OrderHistory();
                 $orderHistory->order_id = $id;
@@ -229,7 +235,6 @@ class OrderController extends Controller
                 $orderHistory->save();
                 DB::commit();
 
-                $order->save();
 
                 return response()->json(
                     [
@@ -343,7 +348,11 @@ class OrderController extends Controller
             if ($order) {
                 DB::beginTransaction();
                 $order->confirmation = $request->confirmation;
-                $order->save();  
+                if ($request->confirmation === 'reporter') {
+                    $order->reported_agente_date = $request->reported_agente_date;
+                    $order->reported_agente_note = $request->reported_agente_note;
+                }
+                $order->save();
 
                 $orderHistory = new OrderHistory();
                 $orderHistory->order_id = $id;
@@ -407,7 +416,7 @@ class OrderController extends Controller
                 $order->note = $request->note;
                 $order->save();
 
-             
+
 
                 // $orderHistory = new OrderHistory();
                 // $orderHistory->order_id = $id;
@@ -418,7 +427,7 @@ class OrderController extends Controller
                 DB::commit();
 
 
-                
+
                 return response()->json(
                     [
                         'status' => true,
@@ -526,9 +535,13 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
-                
+
                 DB::beginTransaction();
                 $order->delivery = $request->delivery;
+                if($request->delivery === 'reporter'){
+                    $order->reported_delivery_date = $request->reported_delivery_date;
+                    $order->reported_delivery_note = $request->reported_delivery_note;
+                }
                 $order->save();
                 
 
@@ -590,10 +603,10 @@ class OrderController extends Controller
                 DB::beginTransaction();
                 $order->affectation = $request->affectation;
                 $order->save();
-                
+
                 $deliveryUser = User::find($request->affectation);
                 $delivery = $deliveryUser->firstname . ' ' . $deliveryUser->lastname;
-                
+
 
                 $orderHistory = new OrderHistory();
                 $orderHistory->order_id = $id;
@@ -935,7 +948,7 @@ class OrderController extends Controller
     }
 
 
-     /**
+    /**
      * Display delivered orders.
      *
      * @param \Illuminate\Http\Request  $request
@@ -954,7 +967,7 @@ class OrderController extends Controller
                     405
                 );
             }
-            $orderHistory = OrderHistory::where('order_id',$id)->with('orders','users')->get();
+            $orderHistory = OrderHistory::where('order_id', $id)->with('orders', 'users')->get();
 
             if (count($orderHistory) > 0) {
                 return response()->json(
@@ -991,5 +1004,4 @@ class OrderController extends Controller
             );
         }
     }
-    
 }

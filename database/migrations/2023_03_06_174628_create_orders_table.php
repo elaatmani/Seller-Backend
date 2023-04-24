@@ -29,6 +29,10 @@ return new class extends Migration
             $table->integer('price');
             $table->string('note')->nullable();
             $table->string('note_d')->nullable();
+            $table->string('reported_agente_note')->nullable();
+            $table->string('reported_delivery_note')->nullable();
+            $table->date('reported_agente_date')->nullable();
+            $table->date('reported_delivery_date')->nullable();
             $table->timestamps();
         });
     }

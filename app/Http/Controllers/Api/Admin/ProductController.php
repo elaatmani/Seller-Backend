@@ -5,15 +5,12 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Helpers\ProductHelper;
-use App\Models\InventoryState;
 use App\Models\ProductVariation;
-use App\Models\InventoryMovement;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
 
 
-use App\Models\InventoryStateVariation;
 use Illuminate\Support\Facades\Validator;
 use App\Models\InventoryMovementVariation;
 
