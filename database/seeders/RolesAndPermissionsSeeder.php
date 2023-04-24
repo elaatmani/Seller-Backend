@@ -54,6 +54,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         //Sales
         Permission::create(['name' => 'show_all_sales', 'description' => 'View all sales']);
+        Permission::create(['name' => 'create_sale', 'description' => 'Create a new sale']);
         Permission::create(['name' => 'view_sale', 'description' => 'View a specific sale']);
         Permission::create(['name' => 'update_sale', 'description' => 'Update a sale']);
         Permission::create(['name' => 'delete_sale', 'description' => 'Delete a sale']);
@@ -110,6 +111,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
             'show_all_sales',
             'view_sale',
+            'create_sale',
             'update_sale',
             'update_order',
             'view_order',
