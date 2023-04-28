@@ -15,6 +15,12 @@ class InventoryMovementVariation extends Model
         'quantity',
     ];
 
+    protected $casts = [
+        'inventory_movement_id' => 'integer',
+        'product_variation_id' => 'integer',
+        'quantity' => 'integer',
+    ];
+
     public function inventory_movement() {
         return $this->belongsTo(InventoryMovement::class);
     }
