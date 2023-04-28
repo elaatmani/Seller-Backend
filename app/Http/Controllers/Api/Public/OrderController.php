@@ -781,7 +781,11 @@ class OrderController extends Controller
 
             $product_ids = ProductAgente::where('agente_id', $request->user()->id)->pluck('product_id');
             $product_names = Product::whereIn('id', $product_ids)->pluck('name');
-            $AddOrder = Order::whereNull('agente_id')->whereIn('product_name', $product_names)->get()->first();
+            $AddOrder = Order::whereNull('agente_id')
+                ->whereIn('product_name', $product_names)
+                ->whereNull('confirmation')
+                ->get()
+                ->first();
 
             if ($AddOrder) {
                 DB::beginTransaction();

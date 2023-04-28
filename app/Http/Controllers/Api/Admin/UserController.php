@@ -891,6 +891,27 @@ class UserController extends Controller
         );
     }
 
+
+    /**
+     * Show all agents.
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function agents(Request $request)
+    {
+        $agenteRole = Role::where('name', 'agente')->first();
+        $agents = $agenteRole->users()->get();
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => $agents
+            ],
+            200
+        );
+    }
+
     /**
      * Display the specified user.
      * @param  Request  $request
