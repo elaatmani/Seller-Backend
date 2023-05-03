@@ -80,6 +80,7 @@ class ProductController extends Controller
                     'ref' => 'required|unique:products,ref',
                     'buying_price' => 'required|integer',
                     'selling_price' => 'required|integer',
+                   
                 ]
             );
             if ($validateProduct->fails()) {
@@ -110,7 +111,8 @@ class ProductController extends Controller
                     'product_ref' => $product->ref,
                     'size'  => $value['size'],
                     'color' => $value['color'],
-                    'quantity' => $value['quantity']
+                    'quantity' => $value['quantity'],
+                    'stockAlert' => $value['stockAlert']
                 ]);
                 $quantityTotal += $value['quantity'];
             }
@@ -317,15 +319,7 @@ class ProductController extends Controller
                 // update the old variation with new values
                 $variation->size = $updated_variation['size'];
                 $variation->color = $updated_variation['color'];
-
-                // return response()->json([
-                //     'updated' => $updated_variation['quantity'],
-                //     'available' => $v->available_quantity,
-                //     'quantity' => $v->quantity,
-                //     'calc' => ($updated_variation['quantity'] - $v->quantity)
-
-                // ]);
-
+                $variation->stockAlert = $updated_variation['stockAlert'];
                 $used_quantity = $v->quantity - $v->available_quantity;
 
                 // check if the new quantity is great or equal to the old quantity so it doesn't make problems
@@ -352,7 +346,8 @@ class ProductController extends Controller
                     'product_ref' => $product->ref,
                     'size' => $v['size'],
                     'color' => $v['color'],
-                    'quantity' => (int) $v['quantity']
+                    'quantity' => (int) $v['quantity'],
+                    'stockAlert' => (int) $v['stockAlert']
                 ]);
             }
 
@@ -433,7 +428,54 @@ class ProductController extends Controller
 
 
 
+    public function alert(Request $request){
+ 
+        try {
+            if (!$request->user()->can('view_product')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To See Product',
+                    ],
+                    405
+                );
+            }
 
+            $product = Product::get();
+      
+            if (isset($product)) {
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => [
+                            'products' => $product,
+                        ],
+                    ],
+                    200
+                );
+            } else {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_FOUND',
+                        'message' => 'Product Norezarazerazet Exist',
+                    ],
+                    404
+                );
+            }
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage()
+                ],
+                500
+            );
+        }
+    }
 
 
 

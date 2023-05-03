@@ -16,6 +16,11 @@ class ProductVariation extends Model
         'quantity',
         'size',
         'color',
-        'image'
+        'stockAlert'
     ];
+
+    public function products(){
+        $this->belongsTo(Product::class,'product_id');
+    }
+    
 }
