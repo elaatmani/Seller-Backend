@@ -427,7 +427,12 @@ class ProductController extends Controller
 
 
 
-
+/**
+     * Remove the specified resource from storage.
+     *
+     * @param  Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function alert(Request $request){
  
         try {
@@ -442,29 +447,23 @@ class ProductController extends Controller
                 );
             }
 
-            $product = Product::get();
-      
-            if (isset($product)) {
+            $products = Product::whereHas('variations', function ($query) {
+                $query->where('quantity', '<=', DB::raw('stockAlert'));
+            })->with('variations')->get();
+            
+ 
                 return response()->json(
                     [
                         'status' => true,
                         'code' => 'SUCCESS',
                         'data' => [
-                            'products' => $product,
+                            'productStockAlert' => $products,
                         ],
+                        'message' => 'You don\'n have enough Stock'
                     ],
                     200
                 );
-            } else {
-                return response()->json(
-                    [
-                        'status' => false,
-                        'code' => 'NOT_FOUND',
-                        'message' => 'Product Norezarazerazet Exist',
-                    ],
-                    404
-                );
-            }
+           
         } catch (\Throwable $th) {
             return response()->json(
                 [
