@@ -15,6 +15,12 @@ class DeliveryPlace extends Model
         'fee'
     ];
 
+    protected $casts = [
+        'delivery_id' => 'integer',
+        'city_id' => 'integer',
+        'fee' => 'integer',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'delivery_id');

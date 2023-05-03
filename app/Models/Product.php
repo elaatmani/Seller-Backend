@@ -18,6 +18,15 @@ class Product extends Model
         'description'
     ];
 
+
+    protected $casts = [
+        'name' => 'string',
+        'ref' => 'string',
+        'selling_price' => 'integer',
+        'buying_price' => 'integer',
+        'description' => 'string'
+    ];
+
     public function variations(){
         return $this->hasMany('App\Models\ProductVariation');
     }

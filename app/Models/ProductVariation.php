@@ -19,6 +19,15 @@ class ProductVariation extends Model
         'stockAlert'
     ];
 
+    protected $casts = [
+        'product_id' => 'integer',
+        'product_ref' => 'string',
+        'quantity' => 'integer',
+        'size' => 'string',
+        'color' => 'string',
+        'stockAlert' => 'integer'
+    ];
+
     public function products(){
         $this->belongsTo(Product::class,'product_id');
     }
