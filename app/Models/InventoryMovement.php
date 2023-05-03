@@ -17,6 +17,12 @@ class InventoryMovement extends Model
         'note'
     ];
 
+    protected $casts = [
+        'delivery_id' => 'integer',
+        'product_id' => 'integer',
+        'is_received' => 'integer',
+    ];
+
     public function delivery()
     {
         return $this->belongsTo(User::class);
