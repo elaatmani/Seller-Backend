@@ -23,9 +23,16 @@ class NotificationController extends Controller
             })->with('variations')->get();
             
             $reportedSale = Order::where(function ($query) {
-                $query->where('confirmation','=','reporter')
-                      ->orWhere('delivery', '=', 'reporter');
+                $query->where([
+                        ['confirmation', '=', 'reporter'],
+                        ['reported_agente_date', '=', now()->toDateString()] // add condition for current date
+                    ])
+                    ->orWhere([
+                        ['delivery', '=', 'reporter'],
+                        ['reported_delivery_date', '=', now()->toDateString()] // add condition for current date
+                    ]);
             })->get();
+            
             
             $reportedOrderAgente = Order::where('confirmation','reporter')->get();
 
