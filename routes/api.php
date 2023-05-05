@@ -75,7 +75,9 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/products/update/{id}',[ProductController::class,'update']);
     Route::delete('/products/delete/{id}',[ProductController::class,'delete']);
     
-    Route::get('/product/stockAlert',[ProductController::class,'alert']);
+   //Notification
+   Route::get('/products',[ProductController::class,'notifications']);
+   
 
 
     //Sales For Admin

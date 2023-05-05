@@ -427,54 +427,7 @@ class ProductController extends Controller
 
 
 
-/**
-     * Remove the specified resource from storage.
-     *
-     * @param  Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function alert(Request $request){
- 
-        try {
-            if (!$request->user()->can('view_product')) {
-                return response()->json(
-                    [
-                        'status' => false,
-                        'code' => 'NOT_ALLOWED',
-                        'message' => 'You Dont Have Access To See Product',
-                    ],
-                    405
-                );
-            }
 
-            $products = Product::whereHas('variations', function ($query) {
-                $query->where('quantity', '<=', DB::raw('stockAlert'));
-            })->with('variations')->get();
-            
- 
-                return response()->json(
-                    [
-                        'status' => true,
-                        'code' => 'SUCCESS',
-                        'data' => [
-                            'productStockAlert' => $products,
-                        ],
-                        'message' => 'You don\'n have enough Stock'
-                    ],
-                    200
-                );
-           
-        } catch (\Throwable $th) {
-            return response()->json(
-                [
-                    'status' => false,
-                    'code' => 'SERVER_ERROR',
-                    'message' => $th->getMessage()
-                ],
-                500
-            );
-        }
-    }
 
 
 
