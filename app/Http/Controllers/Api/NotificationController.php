@@ -34,9 +34,15 @@ class NotificationController extends Controller
             })->get();
             
             
-            $reportedOrderAgente = Order::where('confirmation','reporter')->get();
+            $reportedOrderAgente = Order::where([
+                ['confirmation', '=', 'reporter'],
+                ['reported_agente_date', '=', now()->toDateString()] // add condition for current date
+            ])->get();
 
-            $reportedOrderDelivery = Order::where('delivery','reporter')->get();
+            $reportedOrderDelivery = Order::where([
+                ['delivery', '=', 'reporter'],
+                ['reported_delivery_date', '=', now()->toDateString()] // add condition for current date
+            ])->get();
 
                 return response()->json(
                     [
