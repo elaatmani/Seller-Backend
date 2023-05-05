@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\SaleController;
+use App\Http\Controllers\Api\Admin\ShopController;
 use App\Http\Controllers\Api\Public\OrderController;
 
 use Illuminate\Support\Facades\Route;
@@ -59,6 +60,12 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/agents',[UserController::class,'agents']);
     Route::get('/online',[UserController::class,'onlineUsers']);
 
+    //Shop
+    Route::get('/shops',[ShopController::class,'index']);
+    Route::get('/shops/{id}',[ShopController::class,'show']);
+    Route::post('/shops/new', [ShopController::class,'store']);
+    Route::post('/shops/update/{id}',[ShopController::class,'update']);
+    Route::delete('/shops/delete/{id}',[ShopController::class,'destroy']);
 
 
     //Product

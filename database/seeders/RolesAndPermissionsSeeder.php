@@ -14,9 +14,9 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions New
-         //Account
-         Permission::create(['name' => 'update_account', 'description' => 'Update account infos']);
-         Permission::create(['name' => 'access_to_account', 'description' => 'Access to account infos']);
+            //Account
+            Permission::create(['name' => 'update_account', 'description' => 'Update account infos']);
+            Permission::create(['name' => 'access_to_account', 'description' => 'Access to account infos']);
 
         //Users
         Permission::create(['name' => 'show_all_users', 'description' => 'View all users']);
@@ -27,7 +27,13 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'delete_user', 'description' => 'Delete a user']);
         Permission::create(['name' => 'access_to_users', 'description' => 'Access to user management']);
 
-       
+        //Shops
+        Permission::create(['name' => 'show_all_shops', 'description' => 'View all shops']);
+        Permission::create(['name' => 'view_shop', 'description' => 'View a specific shop']);
+        Permission::create(['name' => 'create_shop', 'description' => 'Create a new shop']);
+        Permission::create(['name' => 'update_shop', 'description' => 'Update a shop']);
+        Permission::create(['name' => 'delete_shop', 'description' => 'Delete a shop']);
+        Permission::create(['name' => 'access_to_shop', 'description' => 'Access to shop managment']);
 
         //Roles
         Permission::create(['name' => 'show_all_roles', 'description' => 'View all roles']);
@@ -92,7 +98,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete_user',
             'update_user_status',
             'access_to_users',
-
+            
+            'show_all_shops',
+            'view_shop',
+            'create_shop',
+            'update_shop',
+            'delete_shop',
+            'access_to_shop',
+            
             'show_all_roles',
             'view_role',
             'create_role',
