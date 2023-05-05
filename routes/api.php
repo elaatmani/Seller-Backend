@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\SaleController;
 use App\Http\Controllers\Api\Admin\ShopController;
 use App\Http\Controllers\Api\Public\OrderController;
+use App\Http\Controllers\Api\NotificationController;
+
 
 use Illuminate\Support\Facades\Route;
 
@@ -76,7 +78,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::delete('/products/delete/{id}',[ProductController::class,'delete']);
     
    //Notification
-   Route::get('/products',[ProductController::class,'notifications']);
+   Route::get('/notifications',[NotificationController::class,'notifications']);
    
 
 

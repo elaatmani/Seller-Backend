@@ -16,26 +16,32 @@ class NotificationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function adminNotification(){
+    public function notifications(){
         try {
             $stockAlert = Product::whereHas('variations', function ($query) {
                 $query->where('quantity', '<=', DB::raw('stockAlert'));
             })->with('variations')->get();
             
             $reportedSale = Order::where(function ($query) {
-                $query->whereNotNull('confirmation_reported')
-                      ->orWhereNotNull('delivery_reported');
+                $query->where('confirmation','=','reporter')
+                      ->orWhere('delivery', '=', 'reporter');
             })->get();
- 
+            
+            $reportedOrderAgente = Order::where('confirmation','reporter')->get();
+
+            $reportedOrderDelivery = Order::where('delivery','reporter')->get();
+
                 return response()->json(
                     [
                         'status' => true,
                         'code' => 'SUCCESS',
                         'data' => [
                             'productStockAlert' => $stockAlert,
-                            'reportedSale' => $reportedSale
+                            'reportedSale' => $reportedSale,
+                            'reportedOrderAgente' => $reportedOrderAgente,
+                            'reportedOrderDelivery' => $reportedOrderDelivery
+
                         ],
-                        'message' => 'You don\'n have enough Stock'
                     ],
                     200
                 );
