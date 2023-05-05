@@ -40,7 +40,6 @@ class NotificationController extends Controller
                             'reportedSale' => $reportedSale,
                             'reportedOrderAgente' => $reportedOrderAgente,
                             'reportedOrderDelivery' => $reportedOrderDelivery
-
                         ],
                     ],
                     200
