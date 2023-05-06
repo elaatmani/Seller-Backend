@@ -223,6 +223,10 @@ class OrderController extends Controller
                     $order->reported_agente_date = $request->reported_agente_date;
                     $order->reported_agente_note = $request->reported_agente_note;
                 }
+
+                if ($request->confirmation === 'confirmer') {
+                    $order->delivery = 'dispatch';
+                }
                 $order->save();
 
 
@@ -351,6 +355,10 @@ class OrderController extends Controller
                 if ($request->confirmation === 'reporter') {
                     $order->reported_agente_date = $request->reported_agente_date;
                     $order->reported_agente_note = $request->reported_agente_note;
+                }
+
+                if($request->confirmation === 'confirmer') {
+                    $order->delivery = 'dispatch';
                 }
                 $order->save();
 
@@ -537,7 +545,7 @@ class OrderController extends Controller
             if ($order) {
 
                 DB::beginTransaction();
-               
+
                 if($order->confirmation === 'confirmer' && $request->delivery === 'livrer'){
                     $order->delivery = 'expidier';
                 }else{
@@ -548,7 +556,7 @@ class OrderController extends Controller
                     $order->reported_delivery_note = $request->reported_delivery_note;
                 }
                 $order->save();
-                
+
 
                 $orderHistory = new OrderHistory();
                 $orderHistory->order_id = $id;
