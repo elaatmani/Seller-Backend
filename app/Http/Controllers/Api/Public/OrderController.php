@@ -224,9 +224,7 @@ class OrderController extends Controller
                     $order->reported_agente_note = $request->reported_agente_note;
                 }
 
-                if ($request->confirmation === 'confirmer') {
-                    $order->delivery = 'dispatch';
-                }
+               
                 $order->save();
 
 
@@ -357,9 +355,7 @@ class OrderController extends Controller
                     $order->reported_agente_note = $request->reported_agente_note;
                 }
 
-                if($request->confirmation === 'confirmer') {
-                    $order->delivery = 'dispatch';
-                }
+              
                 $order->save();
 
                 $orderHistory = new OrderHistory();
@@ -615,17 +611,20 @@ class OrderController extends Controller
             if ($order) {
                 DB::beginTransaction();
                 $order->affectation = $request->affectation;
-                $order->save();
-
-                $deliveryUser = User::find($request->affectation);
-                $delivery = $deliveryUser->firstname . ' ' . $deliveryUser->lastname;
-
-
                 $orderHistory = new OrderHistory();
                 $orderHistory->order_id = $id;
                 $orderHistory->user_id = $request->user()->id;
                 $orderHistory->type = 'affectation';
-                $orderHistory->historique = $delivery;
+                if($request->affectation != null){
+                    $order->delivery = 'dispatch';
+
+                    $deliveryUser = User::find($request->affectation);
+                    $delivery = $deliveryUser->firstname . ' ' . $deliveryUser->lastname;
+                    $orderHistory->historique = $delivery;
+                }else{
+                    $order->delivery = null;
+                }
+                $order->save();
                 $orderHistory->note = 'Updated Status of Affectation';
                 $orderHistory->save();
                 DB::commit();
