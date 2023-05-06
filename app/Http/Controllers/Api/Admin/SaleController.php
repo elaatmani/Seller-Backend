@@ -125,4 +125,63 @@ class SaleController extends Controller
             );
         }
     }
+
+
+     /**
+     * Reset orders.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function saleReset(Request $request)
+    {
+        try {
+            if (!$request->user()->can('reset_sale')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Reset Orders',
+                    ],
+                    405
+                );
+            }
+    
+            $orderIds = $request->input('ids');
+            $orders = Order::whereIn('id', $orderIds)->get();
+            foreach ($orders as $order) {
+                $order->agente_id = null;
+                $order->upsell = null;
+                $order->confirmation = null;
+                $order->affectation = null;
+                $order->note = null;
+                $order->note_d = null;
+                $order->delivery = null;
+                $order->reported_agente_date = null;
+                $order->reported_agente_note = null;
+                $order->reported_delivery_date = null;
+                $order->reported_delivery_note = null;
+                $order->save();
+            }
+    
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'message' => 'Orders Reset Successfully',
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+    
 }
