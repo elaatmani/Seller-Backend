@@ -64,11 +64,17 @@ class RolesAndPermissionsSeeder extends Seeder
 
         //Sales
         Permission::create(['name' => 'show_all_sales', 'description' => 'View all sales']);
-        Permission::create(['name' => 'create_sale', 'description' => 'Create a new sale']);
         Permission::create(['name' => 'view_sale', 'description' => 'View a specific sale']);
+        Permission::create(['name' => 'create_sale', 'description' => 'Create a new sale']);
+        Permission::create(['name' => 'reset_sale', 'description' => 'Resetting a specific sale']);
         Permission::create(['name' => 'update_sale', 'description' => 'Update a sale']);
         Permission::create(['name' => 'delete_sale', 'description' => 'Delete a sale']);
         Permission::create(['name' => 'access_to_sales', 'description' => 'Access to sales management']);
+
+        //Expidation
+        Permission::create(['name' => 'show_all_expidations', 'description' => 'View all expidations']);
+        Permission::create(['name' => 'handle_expidation', 'description' => 'Create a ticket']);
+
 
         //Orders
         Permission::create(['name' => 'show_all_orders', 'description' => 'View all orders']);
@@ -134,9 +140,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'create_sale',
             'update_sale',
             'update_order',
+            'reset_sale',
             'view_order',
             'delete_sale',
             'access_to_sales',
+
+            'show_all_expidations',
+            'handle_expidation'
         ]);
 
 
