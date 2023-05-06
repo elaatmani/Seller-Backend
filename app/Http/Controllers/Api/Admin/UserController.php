@@ -55,6 +55,7 @@ class UserController extends Controller
                             'status' => $user->status,
                             'created_at' => $user->created_at,
                             'updated_at' => $user->updated_at,
+                            'role' => $user->roles->first(),
                             'role_name' => $user->roles->pluck('name')->first(),
                         ];
                     })
@@ -219,7 +220,7 @@ class UserController extends Controller
                 }
             }
 
-            
+
             if ($request->role === 3) {
                 $user->city = $request->city;
                 $user->save();
@@ -856,7 +857,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function allCities(Request $request)
-    { 
+    {
 
         $cities = City::orderBy('name')->get();
 
