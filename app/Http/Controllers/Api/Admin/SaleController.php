@@ -146,7 +146,7 @@ class SaleController extends Controller
                     405
                 );
             }
-    
+
             $orderIds = $request->input('ids');
             $orders = Order::whereIn('id', $orderIds)->get();
             foreach ($orders as $order) {
@@ -163,7 +163,7 @@ class SaleController extends Controller
                 $order->reported_delivery_note = null;
                 $order->save();
             }
-    
+
             return response()->json(
                 [
                     'status' => true,
@@ -183,5 +183,5 @@ class SaleController extends Controller
             );
         }
     }
-    
+
 }
