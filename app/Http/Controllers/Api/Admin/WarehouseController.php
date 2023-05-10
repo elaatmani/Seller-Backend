@@ -253,9 +253,9 @@ class WarehouseController extends Controller
 
             return response()->json([
                 'status' => true,
-                'code' => 'SHOP_UPDATED',
+                'code' => 'WAREHOUSE_UPDATED',
                 'message' => 'Warehouse Updated Successfully!',
-                'data' => $warehouse,
+                'data' => [ 'warehouse' => $warehouse],
                 200
             ]);
         } catch (\Throwable $th) {
