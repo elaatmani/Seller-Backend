@@ -33,7 +33,7 @@ class ProductController extends Controller
                 405
             );
         }
-        $products = Product::with('variations')->get()->map(fn($product) => ProductHelper::with_state($product));
+        $products = Product::with('variations','variations.warehouse')->get()->map(fn($product) => ProductHelper::with_state($product));
 
         return response()->json(
             [
@@ -109,6 +109,7 @@ class ProductController extends Controller
                 ProductVariation::create([
                     'product_id' => $product->id,
                     'product_ref' => $product->ref,
+                    'warehouse_id' => $value['warehouse_id'],
                     'size'  => $value['size'],
                     'color' => $value['color'],
                     'quantity' => $value['quantity'],
@@ -171,7 +172,7 @@ class ProductController extends Controller
                 );
             }
 
-            $product = Product::with('variations')->find($id);
+            $product = Product::with('variations', 'variations.warehouse')->find($id);
             if (isset($product)) {
                 $product = ProductHelper::with_state($product);
                 return response()->json(
@@ -318,6 +319,7 @@ class ProductController extends Controller
 
                 // update the old variation with new values
                 $variation->size = $updated_variation['size'];
+                $variation->warehouse_id = $updated_variation['warehouse_id'];
                 $variation->color = $updated_variation['color'];
                 $variation->stockAlert = $updated_variation['stockAlert'];
                 $used_quantity = $v->quantity - $v->available_quantity;
@@ -344,6 +346,7 @@ class ProductController extends Controller
                 ProductVariation::create([
                     'product_id' => $product->id,
                     'product_ref' => $product->ref,
+                    'warehouse_id' => (int) $v['warehouse_id'],
                     'size' => $v['size'],
                     'color' => $v['color'],
                     'quantity' => (int) $v['quantity'],
