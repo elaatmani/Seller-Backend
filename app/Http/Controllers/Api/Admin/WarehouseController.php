@@ -111,9 +111,12 @@ class WarehouseController extends Controller
 
             return response()->json([
                 'status' => true,
-                'code' => 'SHOP_CREATED',
+                'code' => 'WAREHOUSE_CREATED',
                 'message' => 'Warehouse Added Successfully!',
-                'data' => $warehouse,
+                'data' =>[
+                    'warehouse' => $warehouse
+                ] ,
+                
                 200
             ]);
         } catch (\Throwable $th) {
@@ -313,7 +316,7 @@ class WarehouseController extends Controller
 
             return response()->json([
                 'status' => true,
-                'code' => 'SHOP_DELETED',
+                'code' => 'WAREHOUSE_DELETED',
                 'message' => 'Warehouse Deleted Successfully!',
                 'data' => $warehouse,
                 200

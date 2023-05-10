@@ -13,12 +13,14 @@ class WarehouseProduct extends Model
     protected $fillable = [
         'product_id',
         'warehouse_id',
+        'product_variation_id',
         'quantity'
     ];
 
     protected $casts = [
         'product_id' => 'integer',
         'warehouse_id'  => 'integer',
+        'product_variation_id' => 'integer',
         'quantity' => 'integer'
     ];
 
@@ -28,5 +30,9 @@ class WarehouseProduct extends Model
 
     public function warehouses(){
         $this->belongsTo(Warehouse::class,'warehouse_id');
+    }
+
+    public function productVariations(){
+        $this->belongsTo(ProductVariation::class, 'product_variation_id');
     }
 }
