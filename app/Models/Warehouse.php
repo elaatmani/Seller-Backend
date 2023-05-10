@@ -13,4 +13,8 @@ class Warehouse extends Model
         'name',
     ];
 
+    protected $casts = [
+        'name' => 'string',
+    ];
+
 }

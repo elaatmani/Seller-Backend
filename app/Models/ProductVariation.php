@@ -14,6 +14,7 @@ class ProductVariation extends Model
         'product_id',
         'product_ref',
         'quantity',
+        'warehouse_id',
         'size',
         'color',
         'stockAlert'
@@ -23,13 +24,18 @@ class ProductVariation extends Model
         'product_id' => 'integer',
         'product_ref' => 'string',
         'quantity' => 'integer',
+        'warehouse_id' => 'integer',
         'size' => 'string',
         'color' => 'string',
         'stockAlert' => 'integer'
     ];
 
     public function products(){
-        $this->belongsTo(Product::class,'product_id');
+        return  $this->belongsTo(Product::class,'product_id');
+    }
+
+    public function warehouse(){
+        return  $this->belongsTo(Warehouse::class, 'warehouse_id');
     }
     
 }

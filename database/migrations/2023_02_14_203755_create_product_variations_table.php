@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateProductVariationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('product_variations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('warehouse_id');
             $table->string('product_ref');
             $table->string('size');
             $table->string('color');
@@ -23,11 +24,15 @@ return new class extends Migration
             $table->integer('stockAlert');
             $table->timestamps();
 
-
             $table->foreign('product_id')
-          ->references('id')
-          ->on('products')
-          ->onDelete('cascade');
+                  ->references('id')
+                  ->on('products')
+                  ->onDelete('cascade');
+
+            $table->foreign('warehouse_id')
+                  ->references('id')
+                  ->on('warehouses')
+                  ->onDelete('cascade');
         });
     }
 
@@ -40,4 +45,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('product_variations');
     }
-};
+}
