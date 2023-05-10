@@ -27,6 +27,14 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'delete_user', 'description' => 'Delete a user']);
         Permission::create(['name' => 'access_to_users', 'description' => 'Access to user management']);
 
+        //Warehouse
+        Permission::create(['name' => 'show_all_warehouses', 'description' => 'View all warehouses']);
+        Permission::create(['name' => 'view_warehouse', 'description' => 'View a specific warehouse']);
+        Permission::create(['name' => 'create_warehouse', 'description' => 'Create a new warehouse']);
+        Permission::create(['name' => 'update_warehouse', 'description' => 'Update a warehouse']);
+        Permission::create(['name' => 'delete_warehouse', 'description' => 'Delete a warehouse']);
+        Permission::create(['name' => 'access_to_warehouse', 'description' => 'Access to warehouse managment']);
+
         //Shops
         Permission::create(['name' => 'show_all_shops', 'description' => 'View all shops']);
         Permission::create(['name' => 'view_shop', 'description' => 'View a specific shop']);
@@ -111,6 +119,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'update_shop',
             'delete_shop',
             'access_to_shop',
+
+            'show_all_warehouses',
+            'view_warehouse',
+            'create_warehouse',
+            'update_warehouse',
+            'delete_warehouse',
+            'access_to_warehouse',
             
             'show_all_roles',
             'view_role',

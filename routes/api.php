@@ -6,10 +6,9 @@ use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\SaleController;
 use App\Http\Controllers\Api\Admin\ShopController;
+use App\Http\Controllers\Api\Admin\WarehouseController;
 use App\Http\Controllers\Api\Public\OrderController;
 use App\Http\Controllers\Api\NotificationController;
-
-
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -61,6 +60,15 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/delevries',[UserController::class,'delevries']);
     Route::get('/agents',[UserController::class,'agents']);
     Route::get('/online',[UserController::class,'onlineUsers']);
+
+
+    
+    //Warehouse
+    Route::get('/warehouses',[WarehouseController::class,'index']);
+    Route::get('/warehouses/{id}',[WarehouseController::class,'show']);
+    Route::post('/warehouses/new', [WarehouseController::class,'store']);
+    Route::post('/warehouses/update/{id}',[WarehouseController::class,'update']);
+    Route::delete('/warehouses/delete/{id}',[WarehouseController::class,'destroy']);
 
     //Shop
     Route::get('/shops',[ShopController::class,'index']);

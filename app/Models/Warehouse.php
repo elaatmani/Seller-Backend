@@ -5,17 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductAgente extends Model
+class Warehouse extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'product_id',
-        'agente_id'
+        'name',
     ];
 
-    protected $casts = [
-        'product_id' => 'integer',
-        'agente_id' => 'integer',
-    ];
 }
