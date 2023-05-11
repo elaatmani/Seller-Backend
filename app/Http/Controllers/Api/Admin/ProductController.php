@@ -80,7 +80,7 @@ class ProductController extends Controller
                     'ref' => 'required|unique:products,ref',
                     'buying_price' => 'required|integer',
                     'selling_price' => 'required|integer',
-                   
+
                 ]
             );
             if ($validateProduct->fails()) {
@@ -174,7 +174,7 @@ class ProductController extends Controller
 
             $product = Product::with('variations', 'variations.warehouse')->find($id);
             if (isset($product)) {
-                $product = ProductHelper::with_state($product);
+                $product = ProductHelper::with_tracking($product);
                 return response()->json(
                     [
                         'status' => true,

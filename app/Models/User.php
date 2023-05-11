@@ -57,8 +57,8 @@ class User extends Authenticatable
     {
         return $this->hasManyThrough(Product::class, ProductAgente::class, 'agente_id', 'id', 'id', 'product_id');
     }
-    
-    
+
+
 
     public function deliveryPlaces()
     {
