@@ -107,28 +107,27 @@ class ProductHelper {
         }
 
         foreach($warehouses as $warehouse) {
-            // $movements = InventoryMovement::joinRelationship('inventory_movement_variations', function($join) use($warehouse) {
-            //     $join->joinRelationship('product_variations', function($j) use($warehouse) {
-            //         $j->where('warehouse_id', $warehouse->id);
-            //     });
-            // })->where(['product_id', $product->id])->with('inventory_movement_variations.product_variation')->get();
-            $movements_ids = InventoryMovement::where([['inventory_movements.product_id', $product->id]])
-            ->join('inventory_movement_variations', 'inventory_movements.id', '=', 'inventory_movement_variations.inventory_movement_id')
-            ->join('product_variations as pvs', 'pvs.id', '=', 'inventory_movement_variations.product_variation_id')
-            ->where('pvs.warehouse_id', $warehouse->id)
-            ->get('inventory_movements.id')->pluck('id');
 
-            $movements = InventoryMovement::whereIn('id', $movements_ids)->with('inventory_movement_variations.product_variation')->get();
+            // clone default variations
+            $warehouse_product_variations = $product_variations->map(fn($p) => clone $p);
 
-            $warehouse->movements = $movements;
+            // get variations blenogs to this warehouse
+            $warehouse_product_variations = $warehouse_product_variations->where('warehouse_id', $warehouse->id);
 
-            $vs = collect(Arr::flatten($movements->map(fn($m) => $m->inventory_movement_variations)));
 
-            $warehouse->product_variations = $variations->map(function ($v) use($vs) {
-                $q = $vs->where('product_variation_id', $v->id)->sum(fn($i) => $i->quantity);
-                $v->on_hand_quantity = $q;
-                return $v;
-            });
+            foreach($warehouse_product_variations as $warehouse_product_variation) {
+                // get movements related to this variations
+                $movement_variations = InventoryMovementVariation::where('product_variation_id', $warehouse_product_variation->id)->get();
+
+                // get total quantity used in those movements
+                $used_quantity = $movement_variations->sum(fn($m) => $m->quantity);
+
+                // removes the used quantity from the initial quantity for the variations
+                $warehouse_product_variation->on_hand_quantity = $warehouse_product_variation->quantity - $used_quantity;
+            }
+
+            $warehouse->product_variations = $warehouse_product_variations;
+
         }
 
         $tracking = [
