@@ -11,13 +11,11 @@ class Order extends Model
 
     protected $fillable = [
         'fullname',
-        'product_name',
         'agente_id',
         'upsell',
         'phone',
         'city',
         'adresse',
-        'quantity',
         'confirmation',
         'affectation',
         'delivery',
@@ -30,9 +28,21 @@ class Order extends Model
         'reported_delivery_date'
     ];
 
+    protected $appends = [
+        'is_done'
+    ];
+
 
     public function order_histories()
     {
         return $this->hasMany(OrderHistory::class);
+    }
+
+    public function items() {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function getIsDoneAttribute() {
+        return $this->confirmation == 'confirmer' && $this->delivery == 'livrer';
     }
 }
