@@ -126,7 +126,7 @@ class ProductHelper {
                 $warehouse_product_variation->on_hand_quantity = $warehouse_product_variation->quantity - $used_quantity;
             }
 
-            $warehouse->product_variations = $warehouse_product_variations;
+            $warehouse->product_variations = array_values($warehouse_product_variations->toArray());
 
         }
 
