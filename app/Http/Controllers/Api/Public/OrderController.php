@@ -541,12 +541,13 @@ class OrderController extends Controller
             if ($order) {
 
                 DB::beginTransaction();
+                $order->delivery = $request->delivery;
 
-                if($order->confirmation === 'confirmer' && $request->delivery === 'livrer'){
-                    $order->delivery = 'expidier';
-                }else{
-                    $order->delivery = $request->delivery;
-                }
+                // if($order->confirmation === 'confirmer' && $request->delivery === 'livrer'){
+                //     $order->delivery = 'expidier';
+                // }else{
+                //   
+                // }
                 if($request->delivery === 'reporter'){
                     $order->reported_delivery_date = $request->reported_delivery_date;
                     $order->reported_delivery_note = $request->reported_delivery_note;
