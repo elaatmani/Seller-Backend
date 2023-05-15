@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 class SaleController extends Controller
 {
+
     /**
      * Display all Sales.
      *
@@ -70,11 +72,9 @@ class SaleController extends Controller
                 $request->all(),
                 [
                     'fullname' => 'required',
-                    'product_name' => 'required',
                     'phone' => 'required',
                     'city' => 'required',
                     'adresse' => 'required',
-                    'quantity' => 'required|integer',
                     'price' => 'required|integer'
                 ]
             );
@@ -92,15 +92,23 @@ class SaleController extends Controller
             }
 
             DB::beginTransaction();
-             $sale = Order::create([
+            $sale = Order::create([
                 'fullname' => $request->fullname,
-                'product_name' => $request->product_name,
                 'phone' => $request->phone,
                 'city' => $request->city,
                 'adresse' => $request->adresse,
-                'quantity' => $request->quantity,
                 'price' => $request->price
-             ]);
+            ]);
+
+            foreach ($request->orderItems as $orderItem) {
+                OrderItem::create([
+                    'order_id' => $sale->id,
+                    'product_id' => $orderItem['product_id'],
+                    'product_ref' => $orderItem['product_ref'],
+                    'product_variation_id' => $orderItem['product_variation_id'],
+                    'quantity' => $orderItem['quantity']
+                ]);
+            }
             DB::commit();
 
 
@@ -112,7 +120,6 @@ class SaleController extends Controller
                 'data' => $sale,
                 200
             ]);
-
         } catch (\Throwable $th) {
 
             return response()->json(
@@ -127,7 +134,7 @@ class SaleController extends Controller
     }
 
 
-     /**
+    /**
      * Reset orders.
      *
      * @param \Illuminate\Http\Request  $request
@@ -183,5 +190,4 @@ class SaleController extends Controller
             );
         }
     }
-
 }
