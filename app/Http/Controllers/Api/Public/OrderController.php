@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderHistory;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductAgente;
 use App\Models\User;
@@ -116,9 +117,8 @@ class OrderController extends Controller
 
 
 
-
     /**
-     * Update an order.
+     * Update a sale and its associated order items.
      *
      * @param \Illuminate\Http\Request  $request
      * @param int $id
@@ -127,44 +127,63 @@ class OrderController extends Controller
     public function updateOrder(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('update_order')) {
+            if (!$request->user()->can('update_sale')) {
                 return response()->json(
                     [
                         'status' => false,
                         'code' => 'NOT_ALLOWED',
-                        'message' => 'You Dont Have Access To Update Orders',
+                        'message' => 'You Dont Have Access To Update Sales',
                     ],
                     405
                 );
             }
 
-            $order = Order::where('id', $id)->first();
+            $sale = Order::where('id', $id)->first();
 
-            if ($order) {
-                $order->fullname = $request->fullname;
-                $order->product_name = $request->product_name;
-                $order->upsell = $request->upsell;
-                $order->phone = $request->phone;
-                $order->city = $request->city;
-                $order->adresse = $request->adresse;
-                $order->quantity = $request->quantity;
-                $order->confirmation = $request->confirmation;
-                $order->affectation = $request->affectation;
-                if ($request->delivery) {
-                    $order->delivery = $request->delivery;
-                }
-                $order->price = $request->price;
-                if ($request->note) {
-                    $order->note = $request->note;
-                }
+            if ($sale) {
+                $sale->fullname = $request->fullname;
+                $sale->phone = $request->phone;
+                $sale->city = $request->city;
+                $sale->adresse = $request->adresse;
+                $sale->price = $request->price;
 
-                $order->save();
+                $sale->save();
+
+                // Update or delete order items
+                $orderItems = $request->orderItems;
+                $existingOrderItemIds = [];
+
+                $existingItems = collect($request->orderItems)->groupBy(function ($item) {
+                    return  $item['product_id'] . '_' . $item['product_ref'] . '_' . $item['product_variation_id'];
+                })->map(function ($groupedItems) {
+                    $sumQuantity = collect($groupedItems)->sum('quantity');
+                    $firstItem = $groupedItems[0];
+                    $firstItem['quantity'] = $sumQuantity;
+                    return $firstItem;
+                })->values()->toArray();
+    
+                foreach ($existingItems as $orderItem) {
+                    $orderItem = OrderItem::create([
+                        'order_id' => $sale->id,
+                        'product_id' => $orderItem['product_id'],
+                        'product_ref' => $orderItem['product_ref'],
+                        'product_variation_id' => $orderItem['product_variation_id'],
+                        'quantity' => $orderItem['quantity']
+                    ]);
+
+                    $existingOrderItemIds[] = $orderItem->id;
+                }    
+
+               
+
+                // Delete order items that are not in the request
+                $sale->items()->whereNotIn('id', $existingOrderItemIds)->delete();
 
                 return response()->json(
                     [
                         'status' => true,
                         'code' => 'SUCCESS',
-                        'data' => 'Order Updated Successfully!'
+                        'data' => 'Sale and Order Items Updated Successfully!',
                     ],
                     200
                 );
@@ -173,7 +192,7 @@ class OrderController extends Controller
                     [
                         'status' => false,
                         'code' => 'NOT_FOUND',
-                        'message' => 'Order not found',
+                        'message' => 'Sale not found',
                     ],
                     404
                 );
@@ -183,12 +202,86 @@ class OrderController extends Controller
                 [
                     'status' => false,
                     'message' => $th->getMessage(),
-                    'code' => 'SERVER_ERROR'
+                    'code' => 'SERVER_ERROR',
                 ],
                 500
             );
         }
     }
+
+
+    /**
+     * Update an order.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
+    // public function updateOrder(Request $request, $id)
+    // {
+    //     try {
+    //         if (!$request->user()->can('update_order')) {
+    //             return response()->json(
+    //                 [
+    //                     'status' => false,
+    //                     'code' => 'NOT_ALLOWED',
+    //                     'message' => 'You Dont Have Access To Update Orders',
+    //                 ],
+    //                 405
+    //             );
+    //         }
+
+    //         $order = Order::where('id', $id)->first();
+
+    //         if ($order) {
+    //             $order->fullname = $request->fullname;
+    //             $order->product_name = $request->product_name;
+    //             $order->upsell = $request->upsell;
+    //             $order->phone = $request->phone;
+    //             $order->city = $request->city;
+    //             $order->adresse = $request->adresse;
+    //             $order->quantity = $request->quantity;
+    //             $order->confirmation = $request->confirmation;
+    //             $order->affectation = $request->affectation;
+    //             if ($request->delivery) {
+    //                 $order->delivery = $request->delivery;
+    //             }
+    //             $order->price = $request->price;
+    //             if ($request->note) {
+    //                 $order->note = $request->note;
+    //             }
+
+    //             $order->save();
+
+    //             return response()->json(
+    //                 [
+    //                     'status' => true,
+    //                     'code' => 'SUCCESS',
+    //                     'data' => 'Order Updated Successfully!'
+    //                 ],
+    //                 200
+    //             );
+    //         } else {
+    //             return response()->json(
+    //                 [
+    //                     'status' => false,
+    //                     'code' => 'NOT_FOUND',
+    //                     'message' => 'Order not found',
+    //                 ],
+    //                 404
+    //             );
+    //         }
+    //     } catch (\Throwable $th) {
+    //         return response()->json(
+    //             [
+    //                 'status' => false,
+    //                 'message' => $th->getMessage(),
+    //                 'code' => 'SERVER_ERROR'
+    //             ],
+    //             500
+    //         );
+    //     }
+    // }
 
 
 
@@ -224,7 +317,7 @@ class OrderController extends Controller
                     $order->reported_agente_note = $request->reported_agente_note;
                 }
 
-               
+
                 $order->save();
 
 
@@ -355,7 +448,7 @@ class OrderController extends Controller
                     $order->reported_agente_note = $request->reported_agente_note;
                 }
 
-              
+
                 $order->save();
 
                 $orderHistory = new OrderHistory();
@@ -548,7 +641,7 @@ class OrderController extends Controller
                 // }else{
                 //   
                 // }
-                if($request->delivery === 'reporter'){
+                if ($request->delivery === 'reporter') {
                     $order->reported_delivery_date = $request->reported_delivery_date;
                     $order->reported_delivery_note = $request->reported_delivery_note;
                 }
@@ -616,13 +709,13 @@ class OrderController extends Controller
                 $orderHistory->order_id = $id;
                 $orderHistory->user_id = $request->user()->id;
                 $orderHistory->type = 'affectation';
-                if($request->affectation != null){
+                if ($request->affectation != null) {
                     $order->delivery = 'dispatch';
 
                     $deliveryUser = User::find($request->affectation);
                     $delivery = $deliveryUser->firstname . ' ' . $deliveryUser->lastname;
                     $orderHistory->historique = $delivery;
-                }else{
+                } else {
                     $order->delivery = null;
                 }
                 $order->save();
@@ -1021,8 +1114,4 @@ class OrderController extends Controller
             );
         }
     }
-
-
-   
-    
 }
