@@ -75,7 +75,11 @@ class SaleController extends Controller
                     'phone' => 'required',
                     'city' => 'required',
                     'adresse' => 'required',
-                    'price' => 'required|integer'
+                    'price' => 'required|integer',
+                    'orderItems.*.product_id' => 'required',
+                    'orderItems.*.product_ref' => 'required',
+                    'orderItems.*.product_variation_id' => 'required',
+                    'orderItems.*.quantity' => 'required'                    
                 ]
             );
 
@@ -100,7 +104,26 @@ class SaleController extends Controller
                 'price' => $request->price
             ]);
 
-            foreach ($request->orderItems as $orderItem) {
+            // foreach ($request->orderItems as $orderItem) {
+            //     OrderItem::create([
+            //         'order_id' => $sale->id,
+            //         'product_id' => $orderItem['product_id'],
+            //         'product_ref' => $orderItem['product_ref'],
+            //         'product_variation_id' => $orderItem['product_variation_id'],
+            //         'quantity' => $orderItem['quantity']
+            //     ]);
+            // }
+
+            $existingItems = collect($request->orderItems)->groupBy(function ($item) {
+                return  $item['product_id'] . '_' . $item['product_ref'] . '_' . $item['product_variation_id'];
+            })->map(function ($groupedItems) {
+                $sumQuantity = collect($groupedItems)->sum('quantity');
+                $firstItem = $groupedItems[0];
+                $firstItem['quantity'] = $sumQuantity;
+                return $firstItem;
+            })->values()->toArray();
+
+            foreach ($existingItems as $orderItem) {
                 OrderItem::create([
                     'order_id' => $sale->id,
                     'product_id' => $orderItem['product_id'],
@@ -108,7 +131,7 @@ class SaleController extends Controller
                     'product_variation_id' => $orderItem['product_variation_id'],
                     'quantity' => $orderItem['quantity']
                 ]);
-            }
+            }    
             DB::commit();
 
 
