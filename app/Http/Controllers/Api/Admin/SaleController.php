@@ -30,7 +30,7 @@ class SaleController extends Controller
                 405
             );
         }
-        $orders = Order::orderBy('id', 'DESC')->with('items')->get();
+        $orders = Order::orderBy('id', 'DESC')->with(['items' => ['product_variation', 'product']])->get();
 
         return response()->json(
             [

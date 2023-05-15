@@ -24,4 +24,12 @@ class OrderItem extends Model
         'product_variation_id' => 'integer',
         'quantity' => 'integer'
     ];
+
+    public function product() {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function product_variation() {
+        return $this->belongsTo(ProductVariation::class);
+    }
 }
