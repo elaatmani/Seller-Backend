@@ -14,9 +14,9 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions New
-            //Account
-            Permission::create(['name' => 'update_account', 'description' => 'Update account infos']);
-            Permission::create(['name' => 'access_to_account', 'description' => 'Access to account infos']);
+        //Account
+        Permission::create(['name' => 'update_account', 'description' => 'Update account infos']);
+        Permission::create(['name' => 'access_to_account', 'description' => 'Access to account infos']);
 
         //Users
         Permission::create(['name' => 'show_all_users', 'description' => 'View all users']);
@@ -79,6 +79,12 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'delete_sale', 'description' => 'Delete a sale']);
         Permission::create(['name' => 'access_to_sales', 'description' => 'Access to sales management']);
 
+        //Factorisation 
+        Permission::create(['name' => 'show_all_factorisations', 'description' => 'View all factorisations']);
+        Permission::create(['name' => 'update_factorisation', 'description' => 'Update a factorisation']);
+        Permission::create(['name' => 'delete_factorisation', 'description' => 'Delete a factorisation']);
+        Permission::create(['name' => 'access_to_factorisations', 'description' => 'Access to factorisations management']);
+
         //Expidation
         Permission::create(['name' => 'show_all_expidations', 'description' => 'View all expidations']);
         Permission::create(['name' => 'handle_expidation', 'description' => 'Create a ticket']);
@@ -96,6 +102,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'access_to_delivery', 'description' => 'Access to delivery']);
 
 
+
         // create roles and assign created permissions NEW
 
 
@@ -104,7 +111,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $role->givePermissionTo([
             'update_account',
             'access_to_account',
-            
+
             'show_all_users',
             'view_user',
             'create_user',
@@ -112,7 +119,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete_user',
             'update_user_status',
             'access_to_users',
-            
+
             'show_all_shops',
             'view_shop',
             'create_shop',
@@ -126,7 +133,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'update_warehouse',
             'delete_warehouse',
             'access_to_warehouse',
-            
+
             'show_all_roles',
             'view_role',
             'create_role',
@@ -160,6 +167,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete_sale',
             'access_to_sales',
 
+            'show_all_factorisations',
+            'update_factorisation',
+            'delete_factorisation',
+            'access_to_factorisations',
+
             'show_all_expidations',
             'handle_expidation'
         ]);
@@ -183,7 +195,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'update_order',
 
             'show_all_inventory_movements',
-            
+
             'access_to_inventory',
             'show_delivery_inventory_movement'
         ]);
