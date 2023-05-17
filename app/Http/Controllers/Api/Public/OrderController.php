@@ -147,6 +147,19 @@ class OrderController extends Controller
                 $sale->adresse = $request->adresse;
                 $sale->price = $request->price;
 
+                if($request->upsell != $sale->upsell) {
+                    $sale->upsell = $request->upsell;
+
+                    $orderHistory = new OrderHistory();
+                    $orderHistory->order_id = $sale->id;
+                    $orderHistory->user_id = $request->user()->id;
+                    $orderHistory->historique = $request->upsell;
+                    $orderHistory->type = 'upsell';
+                    $orderHistory->note = 'Updated Status of Upsell';
+                    $orderHistory->save();
+                }
+
+
                 $sale->save();
 
                 // Update or delete order items
@@ -178,12 +191,16 @@ class OrderController extends Controller
 
                 // Delete order items that are not in the request
                 $sale->items()->whereNotIn('id', $existingOrderItemIds)->delete();
+                $sale = Order::with(['items' => ['product_variation.warehouse', 'product']])->where('id', $sale->id)->first();
 
                 return response()->json(
                     [
                         'status' => true,
                         'code' => 'SUCCESS',
-                        'data' => 'Sale and Order Items Updated Successfully!',
+                        'message' => 'Sale and Order Items Updated Successfully!',
+                        'data' => [
+                            'sale' => $sale
+                        ]
                     ],
                     200
                 );
@@ -639,7 +656,7 @@ class OrderController extends Controller
                 // if($order->confirmation === 'confirmer' && $request->delivery === 'livrer'){
                 //     $order->delivery = 'expidier';
                 // }else{
-                //   
+                //
                 // }
                 if ($request->delivery === 'reporter') {
                     $order->reported_delivery_date = $request->reported_delivery_date;

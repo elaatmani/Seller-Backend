@@ -79,7 +79,7 @@ class SaleController extends Controller
                     'orderItems.*.product_id' => 'required',
                     'orderItems.*.product_ref' => 'required',
                     'orderItems.*.product_variation_id' => 'required',
-                    'orderItems.*.quantity' => 'required'                    
+                    'orderItems.*.quantity' => 'required'
                 ]
             );
 
@@ -131,18 +131,19 @@ class SaleController extends Controller
                     'product_variation_id' => $orderItem['product_variation_id'],
                     'quantity' => $orderItem['quantity']
                 ]);
-            }    
+            }
             DB::commit();
 
-
+            $sale = Order::with(['items' => ['product_variation.warehouse', 'product']])->where('id', $sale->id)->first();
 
             return response()->json([
                 'status' => true,
                 'code' => 'SALE_ADDED',
                 'message' => 'Sale Added Successfully!',
-                'data' => $sale,
-                200
-            ]);
+                'data' => [
+                    'sale' => $sale
+                ]
+            ], 200);
         } catch (\Throwable $th) {
 
             return response()->json(
