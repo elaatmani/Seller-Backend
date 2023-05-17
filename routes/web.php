@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\NewNotification;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +16,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/test', function() {
+    event(new NewNotification('Hello bro'));
 });

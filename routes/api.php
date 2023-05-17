@@ -1,15 +1,16 @@
 <?php
 
-use App\Http\Controllers\Api\Admin\InventoryController;
+use App\Events\NewNotification;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
-use App\Http\Controllers\Api\Admin\UserController;
-use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\SaleController;
 use App\Http\Controllers\Api\Admin\ShopController;
-use App\Http\Controllers\Api\Admin\WarehouseController;
-use App\Http\Controllers\Api\Public\OrderController;
+use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\NotificationController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Public\OrderController;
+use App\Http\Controllers\Api\Admin\ProductController;
+use App\Http\Controllers\Api\Admin\InventoryController;
+use App\Http\Controllers\Api\Admin\WarehouseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,7 +35,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     //Roles
     Route::get('/auth/roles',[UserController::class,'roles']);
     Route::get('/roles/{id}',[UserController::class,'showRole']);
-    Route::post('/roles/new',[UserController::class,'createRole']); 
+    Route::post('/roles/new',[UserController::class,'createRole']);
     Route::post('/roles/update/{id}',[UserController::class,'updateRole']);
     Route::delete('/roles/delete/{id}',[UserController::class,'deleteRole']);
 
@@ -62,7 +63,7 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/online',[UserController::class,'onlineUsers']);
 
 
-    
+
     //Warehouse
     Route::get('/warehouses',[WarehouseController::class,'index']);
     Route::get('/warehouses/{id}',[WarehouseController::class,'show']);
@@ -84,12 +85,12 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/products/new', [ProductController::class,'create']);
     Route::post('/products/update/{id}',[ProductController::class,'update']);
     Route::delete('/products/delete/{id}',[ProductController::class,'delete']);
-    
+
    //Notification
    Route::get('/notifications',[NotificationController::class,'notifications']);
    Route::get('/notifications/agente',[NotificationController::class,'agenteNotifications']);
    Route::get('/notifications/delivery',[NotificationController::class,'deliveryNotifications']);
-   
+
 
 
     //Sales For Admin
@@ -104,17 +105,17 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::get('/orders/confirmer',[OrderController::class,'confirmedOrders']);
     Route::get('/orders/add',[OrderController::class,'addOrder']);
     Route::post('/orders/update/{id}',[OrderController::class,'updateOrder']);
-  
+
     Route::get('/orders/show/{id}',[OrderController::class,'showOrder']);
 
     Route::get('/orders/history/show/{id}',[OrderController::class,'orderHistory']);
-    
+
     //Orders For Delivery
     Route::get('/orders/todelivery',[OrderController::class,'orderToDelivery']);
     Route::get('/orders/delivred',[OrderController::class,'orderDelivered']);
     Route::post('/orders/update/delivery/note/{id}',[OrderController::class,'updateDeliveryNote']);
 
-    
+
     //Orders update Confirmation Affectation Upsell Note
     Route::post('/orders/update/confirmationandnote/{id}',[OrderController::class,'updateConfirmationAndNote']);
     Route::post('/orders/update/confirmation/{id}',[OrderController::class,'updateConfirmation']);
@@ -134,15 +135,17 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
         Route::post('/inventorymovements/update/{id}',[InventoryController::class,'updateInventoryMovement']);
         Route::delete('/inventorymovements/delete/{id}',[InventoryController::class,'deleteInventoryMovement']);
         Route::get('/inventorymovements/{id}',[InventoryController::class,'showInventoryMovement']);
-        
+
         //Is_Received
         Route::post('/delivery/inventorymovements/update/isreceived/{id}',[InventoryController::class,'updateReceivedInventoryMovement']);
         Route::post('/delivery/inventorymovements/update/note/{id}',[InventoryController::class,'updateNoteInventoryMovement']);
         Route::post('/delivery/inventorymovements/update/{id}',[InventoryController::class,'updateReceivedNoteInventoryMovement']);
-        
- 
-        
-        
+
+
+        Route::get('/test', function() {
+            event(new NewNotification('Hello bro'));
+        });
+
 });
 
 //User Logout
