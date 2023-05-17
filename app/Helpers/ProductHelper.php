@@ -4,11 +4,24 @@ namespace App\Helpers;
 use App\Models\Product;
 use App\Models\InventoryMovement;
 use App\Models\InventoryMovementVariation;
+use App\Models\OrderItem;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Support\Arr;
 use \Spatie\Permission\Models\Role;
 
+// [on_hold, available_quantity] has relation with product_variation
+
+// [
+// on_hand_quantity, -> total of all movements
+// movements_confirmed_quantity, -> total of only confirmed movements
+// movements_not_confirmed_quantity, -> total on only not confirmed movements
+// left_quantity, -> quantity left with the delivery after calculations
+// expidier_quantity, -> only exipdier quantity
+// delivery_quantity, -> only delivered quantity
+// orders -> total of expidier and delivered quantity
+// ]
+// has relation with delivery and product_variation
 
 class ProductHelper {
 
@@ -92,16 +105,61 @@ class ProductHelper {
         }
 
         foreach ($deliveries as $delivery) {
+
+            // get movements related to this product and this delivery
             $movements = InventoryMovement::where([['product_id', $product->id], ['delivery_id', $delivery->id]])->with('inventory_movement_variations.product_variation')->get();
 
+            // group all inventory movement variation in a single array
             $vs = collect(Arr::flatten($movements->map(fn($m) => $m->inventory_movement_variations)));
 
+            // all product original variations
             $variations = $product_variations->map(fn($i) => clone $i);
             $delivery->name = $delivery->firstname . ' ' . $delivery->lastname;
 
-            $delivery->product_variations = $variations->map(function ($v) use($vs) {
-                $q = $vs->where('product_variation_id', $v->id)->sum(fn($i) => $i->quantity);
-                $v->on_hand_quantity = $q;
+            // get orders related to this delivery and delivery is done or shipped
+            $orders_items = OrderItem::join('orders as o', 'order_items.order_id', 'o.id')
+            ->select('order_items.*', 'o.id as order_id', 'o.delivery', 'delivery')
+            ->where('affectation', $delivery->id)
+            ->where('o.confirmation', 'confirmer')
+            ->whereIn('delivery', ['expidier', 'livrer'])
+            ->get();
+
+            $delivery->product_variations = $variations->map(function ($v) use($vs, $orders_items) {
+                $quantity_used_movements = $vs->where('product_variation_id', $v->id)->sum(fn($i) => $i->quantity);
+
+                $quantity_used_movements_confirmed = $vs->where('product_variation_id', $v->id)->sum(function($m) {
+                    if ($m->inventory_movement->is_received) {
+                        return $m->quantity;
+                    }
+
+                    return 0;
+                });
+
+                $quantity_used_movements_not_confirmed = $vs->where('product_variation_id', $v->id)->sum(function($m) {
+                    if (!$m->inventory_movement->is_received) {
+                        return $m->quantity;
+                    }
+
+                    return 0;
+                });
+
+                $expidier_quantity = $orders_items->where('product_variation_id', $v->id,)->where('delivery', 'expidier')->sum(fn($o) => $o->quantity);
+                $delivery_quantity = $orders_items->where('product_variation_id', $v->id,)->where('delivery', 'livrer')->sum(fn($o) => $o->quantity);
+
+                $quantity_used_orders = ($expidier_quantity + $delivery_quantity);
+
+                // total quantity has been in hand
+                $v->on_hand_quantity = $quantity_used_movements;
+
+                $v->movements_not_confirmed_quantity = $quantity_used_movements_not_confirmed;
+                $v->movements_confirmed_quantity = $quantity_used_movements_confirmed;
+
+                $v->left_quantity = $quantity_used_movements - $quantity_used_orders;
+
+                $v->expidier_quantity = $expidier_quantity;
+                $v->delivery_quantity = $delivery_quantity;
+
+                $v->orders = $quantity_used_orders;
                 return $v;
             });
         }
@@ -120,10 +178,10 @@ class ProductHelper {
                 $movement_variations = InventoryMovementVariation::where('product_variation_id', $warehouse_product_variation->id)->get();
 
                 // get total quantity used in those movements
-                $used_quantity = $movement_variations->sum(fn($m) => $m->quantity);
+                $used_quantity_from_movements = $movement_variations->sum(fn($m) => $m->quantity);
 
                 // removes the used quantity from the initial quantity for the variations
-                $warehouse_product_variation->on_hand_quantity = $warehouse_product_variation->quantity - $used_quantity;
+                $warehouse_product_variation->on_hand_quantity = $warehouse_product_variation->quantity - $used_quantity_from_movements;
             }
 
             $warehouse->product_variations = array_values($warehouse_product_variations->toArray());
@@ -136,7 +194,6 @@ class ProductHelper {
         ];
 
         $product->variations = $product_variations;
-        $product->total_quantity = $total_quantity;
         $product->total_quantity = $total_quantity;
         $product->tracking = $tracking;
 

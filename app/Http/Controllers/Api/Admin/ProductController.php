@@ -361,7 +361,7 @@ class ProductController extends Controller
                     'status' => true,
                     'code' => 'PRODUCT_UPDATED',
                     'message' => 'Product Updated Successfully!',
-                    'data' => ProductHelper::with_state(Product::find($product->id))
+                    'data' => ProductHelper::with_tracking(Product::find($product->id))
                 ],
                 200
             );
