@@ -161,7 +161,7 @@ class OrderController extends Controller
                     $firstItem['quantity'] = $sumQuantity;
                     return $firstItem;
                 })->values()->toArray();
-    
+
                 foreach ($existingItems as $orderItem) {
                     $orderItem = OrderItem::create([
                         'order_id' => $sale->id,
@@ -172,9 +172,9 @@ class OrderController extends Controller
                     ]);
 
                     $existingOrderItemIds[] = $orderItem->id;
-                }    
+                }
 
-               
+
 
                 // Delete order items that are not in the request
                 $sale->items()->whereNotIn('id', $existingOrderItemIds)->delete();
@@ -885,14 +885,17 @@ class OrderController extends Controller
                 );
             }
 
+            //Bring product_ids handled by current agente
             $product_ids = ProductAgente::where('agente_id', $request->user()->id)->pluck('product_id');
-            $product_names = Product::whereIn('id', $product_ids)->pluck('name');
-            $AddOrder = Order::whereNull('agente_id')
-                ->whereIn('product_name', $product_names)
-                ->whereNull('confirmation')
-                ->get()
-                ->first();
 
+            //Get the Order_ids related to the Product_ids handled by current agente
+            $OrderItems = OrderItem::whereIn('product_id', $product_ids)->pluck('order_id');
+
+            //Check and get the order_ids if they have both agente and confirmation null
+            $AddOrder = Order::whereIn('id', $OrderItems)->whereNull('agente_id')
+                ->whereNull('confirmation')
+                ->first();
+            
             if ($AddOrder) {
                 DB::beginTransaction();
                 $AddOrder->agente_id = $request->user()->id;
@@ -905,7 +908,7 @@ class OrderController extends Controller
                 $orderHistory->note = 'Got the Order';
                 $orderHistory->save();
                 DB::commit();
-            } else {
+            }  else {
                 return response()->json(
                     [
                         'status' => true,
@@ -921,7 +924,7 @@ class OrderController extends Controller
                     'status' => true,
                     'code' => 'SUCCESS',
                     'data' => [
-                        'orders' => $AddOrder
+                        'orders' => $AddOrder,
                     ]
                 ],
                 200
