@@ -8,6 +8,7 @@ use App\Models\OrderHistory;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductAgente;
+use App\Models\ProductVariation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -653,11 +654,24 @@ class OrderController extends Controller
                 DB::beginTransaction();
                 $order->delivery = $request->delivery;
 
-                // if($order->confirmation === 'confirmer' && $request->delivery === 'livrer'){
-                //     $order->delivery = 'expidier';
-                // }else{
-                //
-                // }
+                if ($request->delivery === 'expidier'){
+                    $orderItems = OrderItem::where('order_id',$request->id)->get();
+                    foreach($orderItems as $orderItem){
+                        $products = ProductVariation::where('id' , $orderItem->product_variation_id)->get();
+                    
+                        if($orderItem->quantity > $products->value('quantity')){
+                            return response()->json(
+                                [
+                                    'status' => false,
+                                    'code' => 'QUANTITY_ERROR',
+                                    'message' => "Quantity of variation '" . $products->value('size') . " / " . $products->value('color') ."' should be greater than ". $products->value('quantity')
+                                ],
+                                200
+                            );
+                        }
+                    }
+
+                }
                 if ($request->delivery === 'reporter') {
                     $order->reported_delivery_date = $request->reported_delivery_date;
                     $order->reported_delivery_note = $request->reported_delivery_note;
