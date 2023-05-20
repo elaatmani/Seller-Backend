@@ -12,6 +12,7 @@ class Order extends Model
     protected $fillable = [
         'fullname',
         'agente_id',
+        'factorisation_id',
         'upsell',
         'phone',
         'city',
@@ -20,7 +21,6 @@ class Order extends Model
         'affectation',
         'delivery',
         'note',
-        'note_d',
         'price',
         'reported_agente_note',
         'reported_delivery_note',
@@ -28,6 +28,24 @@ class Order extends Model
         'reported_delivery_date'
     ];
 
+    protected $casts = [
+        'fullname' => 'string',
+        'agente_id' => 'integer',
+        'factorisation_id',
+        'upsell' => 'string',
+        'phone' => 'string',
+        'city' => 'string',
+        'adresse' => 'string',
+        'confirmation' => 'string',
+        'affectation' => 'integer',
+        'delivery' => 'string',
+        'note' => 'string',
+        'price' => 'integer',
+        'reported_agente_note' => 'string',
+        'reported_delivery_note' => 'string',
+        'reported_agente_date' => 'date',
+        'reported_delivery_date' => 'date'
+    ];
     protected $appends = [
         'is_done'
     ];
@@ -44,5 +62,9 @@ class Order extends Model
 
     public function getIsDoneAttribute() {
         return $this->confirmation == 'confirmer' && $this->delivery == 'livrer';
+    }
+
+    public function factorisations(){
+        return $this->belongsTo(Factorisation::class,'factorisation_id');
     }
 }
