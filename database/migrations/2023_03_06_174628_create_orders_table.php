@@ -15,7 +15,9 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+           
             $table->string('fullname');
+            $table->unsignedBigInteger('factorisation_id');
             $table->string('agente_id')->nullable();
             $table->string('upsell')->nullable();
             $table->string('phone');
@@ -33,6 +35,8 @@ return new class extends Migration
             $table->date('reported_delivery_date')->nullable();
             $table->boolean('counts_from_warehouse')->default(true);
             $table->timestamps();
+
+            $table->foreign('factorisation_id')->on('factorisations')->references('id');
         });
     }
 
