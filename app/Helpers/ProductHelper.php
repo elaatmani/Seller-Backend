@@ -229,20 +229,24 @@ class ProductHelper
                 $movements_total_confirmed_quantity = collect(Arr::flatten($movements->filter(fn($i) => $i->is_received)->map(fn($i) => $i->inventory_movement_variations->filter(fn($i) => $i->product_variation_id == $variation->id))))->sum(fn($i) => $i->quantity);
                 $movements_total_not_confirmed_quantity = collect(Arr::flatten($movements->filter(fn($i) => !$i->is_received)->map(fn($i) => $i->inventory_movement_variations->filter(fn($i) => $i->product_variation_id == $variation->id))))->sum(fn($i) => $i->quantity);
 
-                $confirmed_orders = $orders->filter(fn($i) => (in_array($i->delivery, self::COUNTS_WITH_DELIVERY) && $i->confirmation == 'confirmer'));
-                $delivered_orders = $orders->filter(fn($i) => (in_array($i->delivery, self::REMOVE_FROM_DELIVERY) && $i->confirmation == 'confirmer'));
+                // when calcul quantity from orders when it counts from warehouse
+                $counts_from_warehouse_orders = $orders->filter(fn($i) => (in_array($i->delivery, self::COUNTS_WITH_DELIVERY) && $i->confirmation == 'confirmer') && $i->counts_from_warehouse);
+                $quantity_from_warehouse_orders = collect(Arr::flatten($counts_from_warehouse_orders->map(fn($i) => $i->items->filter(fn($i) => $i->product_variation_id == $variation->id))))->sum(fn($i) => $i->quantity);
 
-                $orders_quantity_confirmed = collect(Arr::flatten($confirmed_orders->map(fn($i) => $i->items->filter(fn($i) => $i->product_variation_id == $variation->id))))->sum(fn($i) => $i->quantity);
-                $orders_quantity_delivered = collect(Arr::flatten($delivered_orders->map(fn($i) => $i->items->filter(fn($i) => $i->product_variation_id == $variation->id))))->sum(fn($i) => $i->quantity);
+                $counts_from_delivery_orders = $orders->filter(fn($i) => (in_array($i->delivery, self::REMOVE_FROM_DELIVERY) && $i->confirmation == 'confirmer') && !$i->counts_from_warehouse);
+                $quantity_delivered_from_orders = collect(Arr::flatten($counts_from_delivery_orders->map(fn($i) => $i->items->filter(fn($i) => $i->product_variation_id == $variation->id))))->sum(fn($i) => $i->quantity);
+
+
+                $total_delivered_orders = $orders->filter(fn($i) => (in_array($i->delivery, ['livrer']) && $i->confirmation == 'confirmer'));
+                $total_delivered_quantity = collect(Arr::flatten($total_delivered_orders->map(fn($i) => $i->items->filter(fn($i) => $i->product_variation_id == $variation->id))))->sum(fn($i) => $i->quantity);
+
+                $quantity_total = ($movements_total_confirmed_quantity + $quantity_from_warehouse_orders) - $quantity_delivered_from_orders;
 
                 $variation->movements_total_confirmed_quantity = $movements_total_confirmed_quantity;
                 $variation->movements_total_not_confirmed_quantity = $movements_total_not_confirmed_quantity;
-                $variation->orders_quantity_confirmed = $orders_quantity_confirmed;
-                $variation->left_quantity = $movements_total_confirmed_quantity - $orders_quantity_delivered;
+                $variation->total_delivered_quantity = $total_delivered_quantity;
+                $variation->on_hand_quantity = $quantity_total;
 
-                // $qts[] = $movements_total_not_confirmed_quantity;
-                // $qts[] = $movements_total_confirmed_quantity;
-                // $qts[] = $orders_quantity_delivered;
             }
         }
 
