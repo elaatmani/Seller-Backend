@@ -30,10 +30,7 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'counts_from_warehouse' => 'boolean'
-    ];
-
-    protected $casts = [
+        'counts_from_warehouse' => 'boolean',
         'fullname' => 'string',
         'agente_id' => 'integer',
         'factorisation_id',
@@ -51,6 +48,7 @@ class Order extends Model
         'reported_agente_date' => 'date',
         'reported_delivery_date' => 'date'
     ];
+
     protected $appends = [
         'is_done'
     ];
