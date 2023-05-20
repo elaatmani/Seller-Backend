@@ -101,7 +101,8 @@ class SaleController extends Controller
                 'phone' => $request->phone,
                 'city' => $request->city,
                 'adresse' => $request->adresse,
-                'price' => $request->price
+                'price' => $request->price,
+                'counts_from_warehouse' => $request->counts_from_warehouse
             ]);
 
             // foreach ($request->orderItems as $orderItem) {

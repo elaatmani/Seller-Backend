@@ -1,6 +1,8 @@
 <?php
 
 use App\Events\NewNotification;
+use App\Helpers\ProductHelper;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,5 +21,6 @@ Route::get('/', function () {
 });
 
 Route::get('/test', function() {
-    event(new NewNotification('Hello bro'));
+    $delivery = User::find(3);
+    return ProductHelper::delivery_products($delivery);
 });

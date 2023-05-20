@@ -147,6 +147,7 @@ class OrderController extends Controller
                 $sale->city = $request->city;
                 $sale->adresse = $request->adresse;
                 $sale->price = $request->price;
+                $sale->counts_from_warehouse = $request->counts_from_warehouse;
 
                 if($request->upsell != $sale->upsell) {
                     $sale->upsell = $request->upsell;
@@ -658,7 +659,7 @@ class OrderController extends Controller
                     $orderItems = OrderItem::where('order_id',$request->id)->get();
                     foreach($orderItems as $orderItem){
                         $products = ProductVariation::where('id' , $orderItem->product_variation_id)->get();
-                    
+
                         if($orderItem->quantity > $products->value('quantity')){
                             return response()->json(
                                 [
@@ -926,7 +927,7 @@ class OrderController extends Controller
             $AddOrder = Order::whereIn('id', $OrderItems)->whereNull('agente_id')
                 ->whereNull('confirmation')
                 ->first();
-            
+
             if ($AddOrder) {
                 DB::beginTransaction();
                 $AddOrder->agente_id = $request->user()->id;
