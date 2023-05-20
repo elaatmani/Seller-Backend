@@ -365,7 +365,7 @@ class FactorisationController extends Controller
                         [
                             'status' => false,
                             'code' => 'DELETE_ERROR',
-                            'message' => "Warning! There is ". $factorisation->commands_number ? 1 ." Command left" : " Commands left"
+                            'message' => "Warning! There is " . ($factorisation->commands_number === 1 ? $factorisation->commands_number . " Command left" : $factorisation->commands_number . " Commands left")
                         ],
                         200
                     );
