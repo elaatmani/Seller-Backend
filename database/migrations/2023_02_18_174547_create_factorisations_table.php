@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('factorisations', function (Blueprint $table) {
             $table->id();
-            $table->string('facturation_number')->unique();
+            $table->string('facturation_id')->unique();
             $table->unsignedBigInteger('delivery_id');
             $table->boolean('close');
             $table->boolean('paid');

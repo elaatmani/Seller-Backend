@@ -654,6 +654,9 @@ class OrderController extends Controller
 
                 DB::beginTransaction();
                 $order->delivery = $request->delivery;
+                if ( $request->delivery === 'livrer'){
+                    
+                }
 
                 if ($request->delivery === 'expidier'){
                     $orderItems = OrderItem::where('order_id',$request->id)->get();
