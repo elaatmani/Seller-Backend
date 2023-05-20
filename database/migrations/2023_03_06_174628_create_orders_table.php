@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
            
             $table->string('fullname');
-            $table->unsignedBigInteger('factorisation_id');
+            $table->unsignedBigInteger('factorisation_id')->nullable();
             $table->string('agente_id')->nullable();
             $table->string('upsell')->nullable();
             $table->string('phone');
@@ -36,7 +36,7 @@ return new class extends Migration
             $table->boolean('counts_from_warehouse')->default(true);
             $table->timestamps();
 
-            $table->foreign('factorisation_id')->on('factorisations')->references('id');
+            // $table->foreign('factorisation_id')->on('factorisations')->references('id');
         });
     }
 

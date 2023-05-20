@@ -82,6 +82,7 @@ class RolesAndPermissionsSeeder extends Seeder
         //Factorisation 
         Permission::create(['name' => 'show_all_factorisations', 'description' => 'View all factorisations']);
         Permission::create(['name' => 'update_factorisation', 'description' => 'Update a factorisation']);
+        Permission::create(['name' => 'view_factorisation', 'description' => 'View a specific factorisation']);
         Permission::create(['name' => 'delete_factorisation', 'description' => 'Delete a factorisation']);
         Permission::create(['name' => 'access_to_factorisations', 'description' => 'Access to factorisations management']);
 

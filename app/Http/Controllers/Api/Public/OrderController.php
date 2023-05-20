@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Factorisation;
 use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Models\OrderItem;
@@ -12,7 +13,7 @@ use App\Models\ProductVariation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Str;
 class OrderController extends Controller
 {
 
@@ -654,6 +655,45 @@ class OrderController extends Controller
 
                 DB::beginTransaction();
                 $order->delivery = $request->delivery;
+
+                if ($order->confirmation ==='confirmer' && $request->delivery === 'livrer') {
+                    $existingFactorization = Factorisation::where('delivery_id', $order->affectation)
+                        ->where('close', false)
+                        ->first();
+                
+                    if ($existingFactorization) {
+                        // Update the existing factorization
+                        $existingFactorization->price += $order->price;
+                        $existingFactorization->commands_number += 1;
+                        $existingFactorization->save();
+                
+                        $order->factorisation_id = $existingFactorization->id;
+                    } else {
+                        // Create a new factorization
+                        $newFactorization = Factorisation::create([
+                            'factorisation_id' => 'FCT-'. date('dmY-His', strtotime($order->created_at)),
+                            'delivery_id' => $order->affectation,
+                            'commands_number' => +1,
+                            'price' => $order->price,
+                        ]);
+                
+                        $order->factorisation_id = $newFactorization->id;
+                    }
+                }
+
+                if($order->factorisation_id){
+                    if($request->delivery !== 'livrer'){
+                        $oldFactorisation = Factorisation::find($order->factorisation_id)->first();
+                        $oldFactorisation->price -= $order->price;
+                        $oldFactorisation->commands_number -= 1;
+                        $oldFactorisation->save();
+                        $order->factorisation_id = null;
+
+                        if($oldFactorisation->commands_number == 0){
+                            $oldFactorisation->delete();
+                        }
+                    }
+                }
 
                 if ($request->delivery === 'expidier'){
                     $orderItems = OrderItem::where('order_id',$request->id)->get();
