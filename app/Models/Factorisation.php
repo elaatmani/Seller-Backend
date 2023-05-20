@@ -10,7 +10,7 @@ class Factorisation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'facturation_number',
+        'factorisation_id',
         'delivery_id',
         'close',
         'paid',
@@ -23,7 +23,7 @@ class Factorisation extends Model
 
 
     protected $casts = [
-        'facturation_number' => 'string',
+        'factorisation_id' => 'string',
         'delivery_id' => 'integer',
         'close' => 'boolean',
         'paid' => 'boolean',

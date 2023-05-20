@@ -36,7 +36,7 @@ return new class extends Migration
             $table->boolean('counts_from_warehouse')->default(true);
             $table->timestamps();
 
-            $table->foreign('factorisation_id')->on('factorisations')->references('id');
+            // $table->foreign('factorisation_id')->on('factorisations')->references('id');
         });
     }
 

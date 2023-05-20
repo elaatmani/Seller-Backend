@@ -15,15 +15,16 @@ return new class extends Migration
     {
         Schema::create('factorisations', function (Blueprint $table) {
             $table->id();
-            $table->string('facturation_id')->unique();
+            $table->string('factorisation_id')->unique();
             $table->unsignedBigInteger('delivery_id');
-            $table->boolean('close');
-            $table->boolean('paid');
-            $table->integer('commands_number');
+            $table->boolean('close')->default(false);
+            $table->boolean('paid')->default(false);
+            $table->integer('commands_number')->default(0);
             $table->integer('price');
-            $table->dateTime('close_at');
-            $table->dateTime('paid_at');
-            $table->string('comment');
+            $table->dateTime('close_at')->nullable();
+            $table->dateTime('paid_at')->nullable();
+            $table->string('comment')->nullable();
+            $table->string('note')->nullable();
             $table->timestamps();
 
 
