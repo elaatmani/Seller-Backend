@@ -25,7 +25,12 @@ class Order extends Model
         'reported_agente_note',
         'reported_delivery_note',
         'reported_agente_date',
-        'reported_delivery_date'
+        'reported_delivery_date',
+        'counts_from_warehouse'
+    ];
+
+    protected $casts = [
+        'counts_from_warehouse' => 'boolean'
     ];
 
     protected $appends = [

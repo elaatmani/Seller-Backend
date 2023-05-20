@@ -31,8 +31,8 @@ class ProductHelper
 {
     const COUNTS_WITH_DELIVERY = ['expidier'];
     const REMOVE_FROM_DELIVERY = ['livrer'];
-    const COUNTS_IN_WAREHOUSE = [];
-    const COUNTS_WITH_NONE = [];
+    const COUNTS_IN_WAREHOUSE = [ 'annuler', 'refuser' ];
+    const COUNTS_WITH_NONE = [  ];
 
     // Product::with_state($id);
 
@@ -232,17 +232,17 @@ class ProductHelper
                 $confirmed_orders = $orders->filter(fn($i) => (in_array($i->delivery, self::COUNTS_WITH_DELIVERY) && $i->confirmation == 'confirmer'));
                 $delivered_orders = $orders->filter(fn($i) => (in_array($i->delivery, self::REMOVE_FROM_DELIVERY) && $i->confirmation == 'confirmer'));
 
-                $orders_quantity = collect(Arr::flatten($confirmed_orders->map(fn($i) => $i->items->filter(fn($i) => $i->product_variation_id == $variation->id))))->sum(fn($i) => $i->quantity);
+                $orders_quantity_confirmed = collect(Arr::flatten($confirmed_orders->map(fn($i) => $i->items->filter(fn($i) => $i->product_variation_id == $variation->id))))->sum(fn($i) => $i->quantity);
                 $orders_quantity_delivered = collect(Arr::flatten($delivered_orders->map(fn($i) => $i->items->filter(fn($i) => $i->product_variation_id == $variation->id))))->sum(fn($i) => $i->quantity);
 
                 $variation->movements_total_confirmed_quantity = $movements_total_confirmed_quantity;
                 $variation->movements_total_not_confirmed_quantity = $movements_total_not_confirmed_quantity;
-                $variation->orders_quantity = $orders_quantity;
+                $variation->orders_quantity_confirmed = $orders_quantity_confirmed;
                 $variation->left_quantity = $movements_total_confirmed_quantity - $orders_quantity_delivered;
 
-                $qts[] = $movements_total_not_confirmed_quantity;
-                $qts[] = $movements_total_confirmed_quantity;
-                $qts[] = $orders_quantity_delivered;
+                // $qts[] = $movements_total_not_confirmed_quantity;
+                // $qts[] = $movements_total_confirmed_quantity;
+                // $qts[] = $orders_quantity_delivered;
             }
         }
 
