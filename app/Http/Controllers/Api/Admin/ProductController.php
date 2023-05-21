@@ -174,7 +174,7 @@ class ProductController extends Controller
 
             $product = Product::with('variations', 'variations.warehouse')->find($id);
             if (isset($product)) {
-                $product = ProductHelper::with_tracking($product);
+                $product = ProductHelper::get_state($product);
                 return response()->json(
                     [
                         'status' => true,

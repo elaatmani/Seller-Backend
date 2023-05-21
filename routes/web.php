@@ -23,7 +23,7 @@ Route::get('/', function () {
 });
 
 Route::get('/test', function() {
-    $warehouse = Warehouse::find(2);
+    $warehouse = Warehouse::find(1);
     $product = Product::find(1);
-    return ProductHelper::get_warehouse_state($warehouse, $product);
+    return ProductHelper::get_state($product);
 });

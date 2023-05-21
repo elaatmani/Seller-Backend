@@ -259,8 +259,12 @@ class ProductHelper
         $orders = Order::with('items')->where('affectation', $delivery->id)->get();
         $movements = InventoryMovement::with('inventory_movement_variations.product_variation.product')->where('delivery_id', $delivery->id)->get();
 
+        $variations = [];
+
 
         foreach ($product->variations as $variation) {
+
+            $variation = clone $variation;
 
             // get confirmed movements
             $movements_total_confirmed_quantity = collect(Arr::flatten($movements->filter(fn ($i) => $i->is_received)->map(fn ($i) => $i->inventory_movement_variations->filter(fn ($i) => $i->product_variation_id == $variation->id))))->sum(fn ($i) => $i->quantity);
@@ -275,16 +279,24 @@ class ProductHelper
 
             $total_delivered_orders = $orders->filter(fn ($i) => (in_array($i->delivery, ['livrer']) && $i->confirmation == 'confirmer'));
             $total_delivered_quantity = collect(Arr::flatten($total_delivered_orders->map(fn ($i) => $i->items->filter(fn ($i) => $i->product_variation_id == $variation->id))))->sum(fn ($i) => $i->quantity);
+            $total_shipped_orders = $orders->filter(fn ($i) => (in_array($i->delivery, ['shipped']) && $i->confirmation == 'confirmer'));
+            $total_shipped_quantity = collect(Arr::flatten($total_shipped_orders->map(fn ($i) => $i->items->filter(fn ($i) => $i->product_variation_id == $variation->id))))->sum(fn ($i) => $i->quantity);
 
             $quantity_total = ($movements_total_confirmed_quantity + $quantity_from_warehouse_orders) - $quantity_delivered_from_orders;
 
             $variation->movements_total_confirmed_quantity = $movements_total_confirmed_quantity;
             $variation->movements_total_not_confirmed_quantity = $movements_total_not_confirmed_quantity;
             $variation->total_delivered_quantity = $total_delivered_quantity;
+            $variation->total_shipped_quantity = $total_shipped_quantity;
             $variation->on_hand_quantity = $quantity_total;
+
+            $variations[] = $variation;
         }
 
-        return response()->json(['data' => $product]);
+        $delivery->name = $delivery->firstname . ' ' . $delivery->lastname;
+        $delivery->product_variations = $variations;
+
+        return $delivery;
     }
 
 
@@ -356,8 +368,8 @@ class ProductHelper
                 $warehouse_product_variation->movements_total_confirmed_quantity = $movements_total_confirmed_quantity;
                 $warehouse_product_variation->movements_total_not_confirmed_quantity = $movements_total_not_confirmed_quantity;
 
-                $warehouse_product_variation->used_quantity_expidier = $used_quantity_from_warehouse_expidier;
-                $warehouse_product_variation->used_quantity_livrer = $used_quantity_from_warehouse_livrer;
+                $warehouse_product_variation->total_shipped_quantity = $used_quantity_from_warehouse_expidier;
+                $warehouse_product_variation->total_delivered_quantity = $used_quantity_from_warehouse_livrer;
 
                 // removes the used quantity from the initial quantity for the variations
                 $warehouse_product_variation->on_hand_quantity = $warehouse_product_variation->quantity - $total_used_quantity;
@@ -366,5 +378,23 @@ class ProductHelper
         $warehouse->product_variations = array_values($warehouse_product_variations->toArray());
 
         return $warehouse;
+    }
+
+
+    static public function get_state($product) {
+        $deliveries = Role::where('name', 'delivery')->first()->users->map(fn($d) => self::get_delivery_state_by_product($d, $product));
+        $orders = Order::with('items')->get();
+        $warehouses = Warehouse::all()->map(fn($w) => self::get_warehouse_state($w, $product, $orders));
+
+        $tracking = [
+            'deliveries' => $deliveries,
+            'warehouses' => $warehouses
+        ];
+
+        // $product->variations = $product_variations;
+        // $product->total_quantity = $total_quantity;
+        $product->tracking = $tracking;
+
+        return $product;
     }
 }
