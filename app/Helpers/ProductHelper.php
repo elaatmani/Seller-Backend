@@ -279,7 +279,7 @@ class ProductHelper
 
             $total_delivered_orders = $orders->filter(fn ($i) => (in_array($i->delivery, ['livrer']) && $i->confirmation == 'confirmer'));
             $total_delivered_quantity = collect(Arr::flatten($total_delivered_orders->map(fn ($i) => $i->items->filter(fn ($i) => $i->product_variation_id == $variation->id))))->sum(fn ($i) => $i->quantity);
-            $total_shipped_orders = $orders->filter(fn ($i) => (in_array($i->delivery, ['shipped']) && $i->confirmation == 'confirmer'));
+            $total_shipped_orders = $orders->filter(fn ($i) => (in_array($i->delivery, ['expidier']) && $i->confirmation == 'confirmer'));
             $total_shipped_quantity = collect(Arr::flatten($total_shipped_orders->map(fn ($i) => $i->items->filter(fn ($i) => $i->product_variation_id == $variation->id))))->sum(fn ($i) => $i->quantity);
 
             $quantity_total = ($movements_total_confirmed_quantity + $quantity_from_warehouse_orders) - $quantity_delivered_from_orders;
