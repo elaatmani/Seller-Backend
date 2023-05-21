@@ -296,9 +296,9 @@ class FactorisationController extends Controller
             if ($factorisation) {
                 $factorisation->paid = $request->paid;
                 if($request->close == true){
-                    $factorisation->paid = now();
+                    $factorisation->paid_at = now();
                 }else{
-                    $factorisation->paid = null;
+                    $factorisation->paid_at = null;
                 }
                 $factorisation->save();
             }
@@ -350,7 +350,7 @@ class FactorisationController extends Controller
 
             $factorisation = Factorisation::find($id);
             if ($factorisation) {
-                if ($factorisation->commands_number == 0) {
+                
                     $factorisation->delete();
                     return response()->json(
                         [
@@ -360,16 +360,17 @@ class FactorisationController extends Controller
                         ],
                         200
                     );
-                } else {
-                    return response()->json(
-                        [
-                            'status' => false,
-                            'code' => 'DELETE_ERROR',
-                            'message' => "Warning! There is " . ($factorisation->commands_number === 1 ? $factorisation->commands_number . " Command left" : $factorisation->commands_number . " Commands left")
-                        ],
-                        200
-                    );
-                }
+                
+                //  else {
+                //     return response()->json(
+                //         [
+                //             'status' => false,
+                //             'code' => 'DELETE_ERROR',
+                //             'message' => "Warning! There is " . ($factorisation->commands_number === 1 ? $factorisation->commands_number . " Command left" : $factorisation->commands_number . " Commands left")
+                //         ],
+                //         200
+                //     );
+                // }
             }
             return response()->json(
                 [
