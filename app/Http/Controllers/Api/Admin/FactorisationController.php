@@ -296,7 +296,7 @@ class FactorisationController extends Controller
 
             if ($factorisation) {
                 $factorisation->paid = $request->paid;
-                if($request->close == true){
+                if($request->paid == true){
                     $factorisation->paid_at = now();
                 }else{
                     $factorisation->paid_at = null;
@@ -351,7 +351,7 @@ class FactorisationController extends Controller
 
             $factorisation = Factorisation::find($id);
             if ($factorisation) {
-                
+
                     $factorisation->delete();
                     return response()->json(
                         [
@@ -361,7 +361,7 @@ class FactorisationController extends Controller
                         ],
                         200
                     );
-                
+
                 //  else {
                 //     return response()->json(
                 //         [
