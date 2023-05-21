@@ -171,6 +171,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'show_all_factorisations',
             'update_factorisation',
             'delete_factorisation',
+            'view_factorisation',
             'access_to_factorisations',
 
             'show_all_expidations',

@@ -26,7 +26,7 @@ class FactorisationController extends Controller
             );
         }
 
-        $factorisation = Factorisation::all();
+        $factorisation = Factorisation::with('delivery')->get();
 
         return response()->json(
             [
@@ -63,7 +63,8 @@ class FactorisationController extends Controller
                 );
             }
 
-            $factorisation = Factorisation::find($id);
+            $factorisation = Factorisation::with('delivery')->find($id);
+
             if (isset($factorisation)) {
                 return response()->json(
                     [
@@ -218,7 +219,7 @@ class FactorisationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function updateClosing(Request $request, $id)
+     public function updateClosing(Request $request, $id)
     {
         try {
 

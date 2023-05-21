@@ -35,7 +35,7 @@ class Factorisation extends Model
     ];
 
     
-    public function deliveries(){
-        $this->belongsTo(User::class,'delivery_id');
+    public function delivery(){
+       return $this->belongsTo(User::class,'delivery_id');
     }
 }
