@@ -655,8 +655,10 @@ class OrderController extends Controller
 
                 DB::beginTransaction();
                 $order->delivery = $request->delivery;
-
+              
                 if ($order->confirmation ==='confirmer' && $request->delivery === 'livrer') {
+                    $order->cmd = 'CMD-'. date('dmY-His', strtotime($order->created_at));
+                    $order->delivery_date = now();
                     $existingFactorization = Factorisation::where('delivery_id', $order->affectation)
                         ->where('close', false)
                         ->first();
@@ -671,7 +673,7 @@ class OrderController extends Controller
                     } else {
                         // Create a new factorization
                         $newFactorization = Factorisation::create([
-                            'factorisation_id' => 'FCT-'. date('dmY-His', strtotime($order->created_at)),
+                            'factorisation_id' => 'FCT-'. date('dmY-His', strtotime($order->delivery_date)),
                             'delivery_id' => $order->affectation,
                             'commands_number' => +1,
                             'price' => $order->price,
@@ -683,6 +685,7 @@ class OrderController extends Controller
 
                 if($order->factorisation_id){
                     if($request->delivery !== 'livrer'){
+                        $order->delivery_date = null;
                         $oldFactorisation = Factorisation::find($order->factorisation_id)->first();
                         $oldFactorisation->price -= $order->price;
                         $oldFactorisation->commands_number -= 1;

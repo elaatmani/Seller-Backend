@@ -26,7 +26,9 @@ class Order extends Model
         'reported_delivery_note',
         'reported_agente_date',
         'reported_delivery_date',
-        'counts_from_warehouse'
+        'counts_from_warehouse',
+        'delivery_date',
+        'cmd'
     ];
 
     protected $casts = [
@@ -46,7 +48,9 @@ class Order extends Model
         'reported_agente_note' => 'string',
         'reported_delivery_note' => 'string',
         'reported_agente_date' => 'date',
-        'reported_delivery_date' => 'date'
+        'reported_delivery_date' => 'date',
+        'delivery_date'  => 'dateTime',
+        'cmd'  => 'string'
     ];
 
     protected $appends = [
@@ -70,4 +74,6 @@ class Order extends Model
     public function factorisations(){
         return $this->belongsTo(Factorisation::class,'factorisation_id');
     }
+
+    
 }

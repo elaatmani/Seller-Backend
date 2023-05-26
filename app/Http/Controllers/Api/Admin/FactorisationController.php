@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Factorisation;
+use App\Models\Order;
+use App\Models\OrderItem;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+// use PDF;
 use Illuminate\Http\Request;
+
 
 class FactorisationController extends Controller
 {
@@ -392,4 +397,37 @@ class FactorisationController extends Controller
             );
         }
     }
+
+
+
+
+
+
+
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function generatePDF($id)
+    {
+    
+        $factorisation = Factorisation::with('delivery','delivery.deliveryPlaces','delivery.deliveryPlaces.city')->where('id',$id)->first(); // Retrieve the user based on the ID
+        // dd($factorisation);
+        $sales = Order::with('items','items.product')->where('factorisation_id',$factorisation->id)->get();
+        
+    
+    
+        $headers = [
+            'Content-Type' => 'application/pdf',
+        ];
+        // return view('factorisationpdf')->with(compact('factorisation','sales'));
+        $pdf = PDF::loadView('factorisationpdf', compact('factorisation','sales'));
+        return  $pdf->download();
+     
+    }
+
 }

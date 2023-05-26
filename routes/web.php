@@ -2,6 +2,7 @@
 
 use App\Events\NewNotification;
 use App\Helpers\ProductHelper;
+use App\Http\Controllers\Api\Admin\FactorisationController;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -27,3 +28,5 @@ Route::get('/test', function() {
     $product = Product::find(1);
     return ProductHelper::get_state($product);
 });
+
+Route::get('/fact/{id}',[FactorisationController::class,'generatePDF']);

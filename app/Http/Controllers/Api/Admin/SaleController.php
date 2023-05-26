@@ -193,6 +193,7 @@ class SaleController extends Controller
                 $order->reported_agente_note = null;
                 $order->reported_delivery_date = null;
                 $order->reported_delivery_note = null;
+                $order->delivery_date = null;
                 $order->factorisation_id = null;
                 $order->save();
             }
