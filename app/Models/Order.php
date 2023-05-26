@@ -49,7 +49,7 @@ class Order extends Model
         'reported_delivery_note' => 'string',
         'reported_agente_date' => 'date',
         'reported_delivery_date' => 'date',
-        'delivery_date'  => 'dateTime',
+        'delivery_date'  => 'datetime',
         'cmd'  => 'string'
     ];
 
