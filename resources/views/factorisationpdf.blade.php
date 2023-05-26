@@ -61,6 +61,7 @@
     .hiddenMobile {
       display: block;
     }
+    
   </style>
 </head>
 
