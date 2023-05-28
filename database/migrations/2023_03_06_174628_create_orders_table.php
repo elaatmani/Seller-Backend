@@ -15,7 +15,8 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-           
+            $table->string('sheets_id')->nullable(); // generated unique id for the row
+
             $table->string('fullname');
             $table->unsignedBigInteger('factorisation_id')->nullable();
             $table->string('agente_id')->nullable();
