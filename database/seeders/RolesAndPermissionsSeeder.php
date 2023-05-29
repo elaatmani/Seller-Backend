@@ -79,7 +79,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'delete_sale', 'description' => 'Delete a sale']);
         Permission::create(['name' => 'access_to_sales', 'description' => 'Access to sales management']);
 
-        //Factorisation 
+        //Factorisation
         Permission::create(['name' => 'show_all_factorisations', 'description' => 'View all factorisations']);
         Permission::create(['name' => 'update_factorisation', 'description' => 'Update a factorisation']);
         Permission::create(['name' => 'view_factorisation', 'description' => 'View a specific factorisation']);
@@ -184,7 +184,8 @@ class RolesAndPermissionsSeeder extends Seeder
         $role->givePermissionTo([
             'show_all_orders',
             'update_order',
-            'access_to_orders'
+            'access_to_orders',
+            'show_all_products'
         ]);
 
 
