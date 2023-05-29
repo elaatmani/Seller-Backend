@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\NewNotification;
+use App\Http\Controllers\Api\Admin\SheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -66,7 +67,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/online', [UserController::class, 'onlineUsers']);
 
 
-    
+
     //Factorisation
     Route::get('/factorisations', [FactorisationController::class, 'index']);
     Route::get('/factorisations/{id}', [FactorisationController::class, 'show']);
@@ -77,6 +78,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/factorisations/delete/{id}', [FactorisationController::class, 'destroy']);
     Route::get('/factorisations/generate-pdf/{id}', [FactorisationController::class,'generatePDF']);
 
+
+    // Google Sheet
+    Route::get('/sheets', [SheetController::class, 'index']);
+    Route::post('/sheets', [SheetController::class, 'store']);
+    Route::post('/sheets/{id}', [SheetController::class, 'update']);
+    Route::delete('/sheets/{id}', [SheetController::class, 'destroy']);
+    Route::post('/sheets/{id}/auto-fetch', [SheetController::class, 'updateAutoFetch']);
 
 
     //Warehouse
@@ -162,7 +170,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::delete('/inventorymovements/delete/{id}', [InventoryController::class, 'deleteInventoryMovement']);
         Route::get('/inventorymovements/{id}', [InventoryController::class, 'showInventoryMovement']);
 
-        
+
         //Is_Received
         Route::post('/delivery/inventorymovements/update/isreceived/{id}', [InventoryController::class, 'updateReceivedInventoryMovement']);
         Route::post('/delivery/inventorymovements/update/note/{id}', [InventoryController::class, 'updateNoteInventoryMovement']);

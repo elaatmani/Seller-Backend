@@ -39,7 +39,7 @@ class OrderController extends Controller
 
 
 
-        $orders = Order::where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirmer']])->get();
+        $orders = Order::with(['items' => ['product', 'product_variation']])->where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirmer']])->get();
 
         if (count($orders) > 0) {
             return response()->json(
@@ -91,7 +91,7 @@ class OrderController extends Controller
 
 
 
-        $order = Order::where([['agente_id', $request->user()->id], ['confirmation', null]])->get();
+        $order = Order::with(['items' => ['product', 'product_variation']])->where([['agente_id', $request->user()->id], ['confirmation', null]])->get();
 
         if (count($order) > 0) {
             return response()->json(
@@ -655,20 +655,20 @@ class OrderController extends Controller
 
                 DB::beginTransaction();
                 $order->delivery = $request->delivery;
-              
+
                 if ($order->confirmation ==='confirmer' && $request->delivery === 'livrer') {
                     $order->cmd = 'CMD-'. date('dmY-His', strtotime($order->created_at));
                     $order->delivery_date = now();
                     $existingFactorization = Factorisation::where('delivery_id', $order->affectation)
                         ->where('close', false)
                         ->first();
-                
+
                     if ($existingFactorization) {
                         // Update the existing factorization
                         $existingFactorization->price += $order->price;
                         $existingFactorization->commands_number += 1;
                         $existingFactorization->save();
-                
+
                         $order->factorisation_id = $existingFactorization->id;
                     } else {
                         // Create a new factorization
@@ -678,7 +678,7 @@ class OrderController extends Controller
                             'commands_number' => +1,
                             'price' => $order->price,
                         ]);
-                
+
                         $order->factorisation_id = $newFactorization->id;
                     }
                 }
@@ -967,7 +967,7 @@ class OrderController extends Controller
             $OrderItems = OrderItem::whereIn('product_id', $product_ids)->pluck('order_id');
 
             //Check and get the order_ids if they have both agente and confirmation null
-            $AddOrder = Order::whereIn('id', $OrderItems)->whereNull('agente_id')
+            $AddOrder = Order::with(['items' => ['product', 'product_variation']])->whereIn('id', $OrderItems)->whereNull('agente_id')
                 ->whereNull('confirmation')
                 ->first();
 

@@ -414,20 +414,20 @@ class FactorisationController extends Controller
      */
     public function generatePDF($id)
     {
-    
+
         $factorisation = Factorisation::with('delivery','delivery.deliveryPlaces','delivery.deliveryPlaces.city')->where('id',$id)->first(); // Retrieve the user based on the ID
         // dd($factorisation);
         $sales = Order::with('items','items.product')->where('factorisation_id',$factorisation->id)->get();
-        
-    
-    
+
+
+
         $headers = [
             'Content-Type' => 'application/pdf',
         ];
         // return view('factorisationpdf')->with(compact('factorisation','sales'));
         $pdf = PDF::loadView('factorisationpdf', compact('factorisation','sales'));
         return  $pdf->stream();
-     
+
     }
 
 }

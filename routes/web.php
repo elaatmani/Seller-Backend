@@ -3,6 +3,7 @@
 use App\Events\NewNotification;
 use App\Helpers\ProductHelper;
 use App\Http\Controllers\Api\Admin\FactorisationController;
+use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -23,10 +24,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/test', function() {
-    $warehouse = Warehouse::find(1);
-    $product = Product::find(1);
-    return ProductHelper::get_state($product);
-});
+Route::get('/test', [GoogleSheetController::class, 'index']);
 
 Route::get('/fact/{id}',[FactorisationController::class,'generatePDF']);
