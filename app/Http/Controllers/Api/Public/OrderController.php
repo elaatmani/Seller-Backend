@@ -39,7 +39,7 @@ class OrderController extends Controller
 
 
 
-        $orders = Order::with(['items' => ['product', 'product_variation']])->where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirmer']])->get();
+        $orders = Order::with(['items' => ['product', 'product_variation.warehouse']])->where([['agente_id', $request->user()->id], ['confirmation', '!=', 'confirmer']])->get();
 
         if (count($orders) > 0) {
             return response()->json(
@@ -60,7 +60,7 @@ class OrderController extends Controller
                 'code' => 'SUCCESS',
                 'message' => 'Add New One !',
                 'data' => [
-                    'orders' => ''
+                    'orders' => []
                 ]
             ],
             200
@@ -900,7 +900,7 @@ class OrderController extends Controller
             );
         }
 
-        $confirmedOrders = Order::where([['agente_id', $request->user()->id], ['confirmation', 'confirmer']])->get();
+        $confirmedOrders = Order::with(['items' => ['product', 'product_variation.warehouse']])->where([['agente_id', $request->user()->id], ['confirmation', 'confirmer']])->get();
         if (count($confirmedOrders) > 0) {
             return response()->json(
                 [
