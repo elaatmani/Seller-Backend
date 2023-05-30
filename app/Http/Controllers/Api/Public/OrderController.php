@@ -1193,4 +1193,67 @@ class OrderController extends Controller
             );
         }
     }
+
+
+
+    /**
+     * Display delivered orders.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orderScanner(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->can('handle_expidation')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Delivery Orders',
+                    ],
+                    405
+                );
+            }
+
+            $order = Order::find($id);
+
+            if (count($order) > 0) {
+
+                $order->delivery = $request->delivery;
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'message' => 'Order Delivery Status Updated Successfuly',
+                        'data' => [
+                            'orders' => $order,
+                        ]
+                    ],
+                    200
+                );
+            }
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'NO_ORDER',
+                    'message' => 'ORDER_NOT_FOUND',
+                    'data' => [
+                        'orders' => [],
+                    ]
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
 }
