@@ -427,6 +427,6 @@ class FactorisationController extends Controller
         ];
         // return view('factorisationpdf')->with(compact('factorisation','sales'));
         $pdf = PDF::loadView('factorisationpdf', compact('factorisation', 'sales'));
-        return  $pdf->stream();
+        return  $pdf->download();
     }
 }
