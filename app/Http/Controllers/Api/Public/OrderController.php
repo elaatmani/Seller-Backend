@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+
 class OrderController extends Controller
 {
 
@@ -150,7 +151,7 @@ class OrderController extends Controller
                 $sale->price = $request->price;
                 $sale->counts_from_warehouse = $request->counts_from_warehouse;
 
-                if($request->upsell != $sale->upsell) {
+                if ($request->upsell != $sale->upsell) {
                     $sale->upsell = $request->upsell;
 
                     $orderHistory = new OrderHistory();
@@ -656,8 +657,8 @@ class OrderController extends Controller
                 DB::beginTransaction();
                 $order->delivery = $request->delivery;
 
-                if ($order->confirmation ==='confirmer' && $request->delivery === 'livrer') {
-                    $order->cmd = 'CMD-'. date('dmY-His', strtotime($order->created_at));
+                if ($order->confirmation === 'confirmer' && $request->delivery === 'livrer') {
+                    $order->cmd = 'CMD-' . date('dmY-His', strtotime($order->created_at));
                     $order->delivery_date = now();
                     $existingFactorization = Factorisation::where('delivery_id', $order->affectation)
                         ->where('close', false)
@@ -673,7 +674,7 @@ class OrderController extends Controller
                     } else {
                         // Create a new factorization
                         $newFactorization = Factorisation::create([
-                            'factorisation_id' => 'FCT-'. date('dmY-His', strtotime($order->delivery_date)),
+                            'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)),
                             'delivery_id' => $order->affectation,
                             'commands_number' => +1,
                             'price' => $order->price,
@@ -683,38 +684,38 @@ class OrderController extends Controller
                     }
                 }
 
-                if($order->factorisation_id){
-                    if($request->delivery !== 'livrer'){
+                if ($order->factorisation_id) {
+                    if ($request->delivery !== 'livrer') {
                         $order->delivery_date = null;
-                        $oldFactorisation = Factorisation::find($order->factorisation_id)->first();
-                        $oldFactorisation->price -= $order->price;
-                        $oldFactorisation->commands_number -= 1;
-                        $oldFactorisation->save();
                         $order->factorisation_id = null;
-
-                        if($oldFactorisation->commands_number == 0){
-                            $oldFactorisation->delete();
+                        $oldFactorisation = Factorisation::find($order->factorisation_id);
+                        if ($oldFactorisation) {
+                            $oldFactorisation->price -= $order->price;
+                            $oldFactorisation->commands_number -= 1;
+                            $oldFactorisation->save();
+                            if ($oldFactorisation->commands_number == 0) {
+                                $oldFactorisation->delete();
+                            }
                         }
                     }
                 }
 
-                if ($request->delivery === 'expidier'){
-                    $orderItems = OrderItem::where('order_id',$request->id)->get();
-                    foreach($orderItems as $orderItem){
-                        $products = ProductVariation::where('id' , $orderItem->product_variation_id)->get();
+                if ($request->delivery === 'expidier') {
+                    $orderItems = OrderItem::where('order_id', $request->id)->get();
+                    foreach ($orderItems as $orderItem) {
+                        $products = ProductVariation::where('id', $orderItem->product_variation_id)->get();
 
-                        if($orderItem->quantity > $products->value('quantity')){
+                        if ($orderItem->quantity > $products->value('quantity')) {
                             return response()->json(
                                 [
                                     'status' => false,
                                     'code' => 'QUANTITY_ERROR',
-                                    'message' => "Quantity of variation '" . $products->value('size') . " / " . $products->value('color') ."' should be greater than ". $products->value('quantity')
+                                    'message' => "Quantity of variation '" . $products->value('size') . " / " . $products->value('color') . "' should be greater than " . $products->value('quantity')
                                 ],
                                 200
                             );
                         }
                     }
-
                 }
                 if ($request->delivery === 'reporter') {
                     $order->reported_delivery_date = $request->reported_delivery_date;
@@ -983,7 +984,7 @@ class OrderController extends Controller
                 $orderHistory->note = 'Got the Order';
                 $orderHistory->save();
                 DB::commit();
-            }  else {
+            } else {
                 return response()->json(
                     [
                         'status' => true,

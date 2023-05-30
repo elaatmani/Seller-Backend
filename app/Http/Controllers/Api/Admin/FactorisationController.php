@@ -416,8 +416,8 @@ class FactorisationController extends Controller
     {
 
         $factorisation = Factorisation::with('delivery', 'delivery.deliveryPlaces', 'delivery.deliveryPlaces.city')->where('id', $id)->first(); // Retrieve the user based on the ID
+        // dd($factorisation->id);
         $sales = Order::with('items', 'items.product')->where('factorisation_id', $factorisation->id)->get();
-        // dd($sales);
 
         // $factorisation = $factorisation->chunk(20);
         // $sales = $sales->chunk(20);
