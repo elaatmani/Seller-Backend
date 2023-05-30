@@ -13,6 +13,7 @@ class Sheet extends Model
         'name',
         'sheet_id',
         'sheet_name',
-        'auto_fetch'
+        'auto_fetch',
+        'active'
     ];
 }

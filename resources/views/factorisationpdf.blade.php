@@ -7,6 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <style>
+    * {
+        font-family: Arial, Helvetica, sans-serif;
+    }
     .infos {
       margin-top: -400px;
       margin-left: 450px;
@@ -23,6 +26,7 @@
 
     table{
       text-align: center;
+      border-collapse: collapse;
     }
 
     td{
@@ -74,7 +78,7 @@
       <th>Téléphone</th>
       <th>Ville</th>
       <th>Produit</th>
-      <th>Etat</th>
+      {{-- <th>Etat</th> --}}
       <th>CRBT</th>
       <th>Frais</th>
     </tr>
@@ -86,7 +90,7 @@
       <td> {{ $sale->phone }} </td>
       <td> {{ $sale->city }} </td>
       <td> x{{ count($sale->items->pluck('product')->pluck('name')) }} </td>
-      <td> {{ $sale->delivery }} </td>
+      {{-- <td> {{ $sale->delivery }} </td> --}}
       <td> {{ $sale->price }} </td>
       <td> @foreach ($factorisation->delivery->deliveryPlaces as $deliveryPlace)
         @if ($deliveryPlace->city->name === $sale->city)

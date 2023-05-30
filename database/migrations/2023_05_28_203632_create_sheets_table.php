@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('sheet_id');
             $table->string('sheet_name');
             $table->boolean('auto_fetch')->default(true);
-            // $table->string('type')->nullable()->default(null);
+            $table->boolean('active')->default(false);
             $table->timestamps();
         });
     }
