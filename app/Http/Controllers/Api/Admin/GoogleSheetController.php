@@ -2,52 +2,136 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Helpers\SheetHelper;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Sheet;
 use Revolution\Google\Sheets\Facades\Sheets;
 
 class GoogleSheetController extends Controller
 {
     public function index() {
-        $sheet_id = "1Ua71zLgcQZwLhfAzWGNqGs3ZIvlx8YxbDZnbeXoqARk";
-        $sheet_id = "1Q_F_IctzZzFLDqMjhw9ZR1C0bbRG84vxr1cBROU0Xz0";
-        $sheet = "Sheet1";
-        $sheet = "Youcan-Orders";
 
-        $data = Sheets::spreadsheet($sheet_id)->sheet($sheet)->get();
+        try {
+            $sheets = Sheet::where('auto_fetch', 1)->get();
+            $sheet_helper = new SheetHelper();
 
-        $headers = $data->pull(0);
-        $values = Sheets::collection($headers, $data);
-        $rows = array_values($values->toArray());
+            $newOrders = [];
 
-        $rows = array_map(function($item) {
-            return [
-                ...$item,
-                "Total charge" => (float) $item["Total charge"]
-            ];
-        }, $rows);
+            foreach($sheets as $sheet) {
+                $orders = $sheet_helper->sync_orders($sheet, false);
+                $newOrders = [...$newOrders, ...$orders];
+            }
 
-        $test = $this->sync_sheet_orders($rows);
+            return response()->json([
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => [
+                    'orders' => $newOrders
+                ]
+            ]);
 
-        // $id = $this->order_sheet_id($sheet_id, $sheet, $rows[0]['ID']);
-
-        return response()->json($test);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'code' => 'SERVER_ERROR',
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
-    public function sync_sheet_orders($orders) {
-        $ids = collect($orders)->pluck('Order ID');
-        $all_ids = Order::whereIn($ids)->get()->pluck('sheets_id');
+    public function sync_orders(Request $request, $id) {
+        try {
 
-        $new_orders = array_filter($orders, function($order) use($all_ids) {
-            return in_array($order['Order ID'], $all_ids);
-        });
+            $sheet = Sheet::find($id);
 
-        return $new_orders;
+            if (!isset($sheet)) {
+
+                return response()->json([
+                    'status' => false,
+                    'code' => 'NOT_FOUND',
+                ]);
+            }
+
+            $sheet_helper = new SheetHelper();
+            $orders = $sheet_helper->sync_orders($sheet, false);
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'orders' => $orders,
+                    ],
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
     }
 
-    public function order_sheet_id($sheet_id, $sheet_name, $order_id) {
-        return $sheet_id . '-' . Str::slug($sheet_name) . '-' . $order_id;
+
+    public function save_orders(Request $request, $id) {
+        try {
+
+            $sheet = Sheet::find($id);
+
+            if (!isset($sheet)) {
+
+                return response()->json([
+                    'status' => false,
+                    'code' => 'NOT_FOUND',
+                ]);
+            }
+
+            $sheet_helper = new SheetHelper();
+            $orders = $sheet_helper->sync_orders($sheet);
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'orders' => $orders,
+                    ],
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR'
+                ],
+                500
+            );
+        }
     }
+
+
+
+    public function test() {
+        $sheet_id = "1RBisw6xN9ifUYHoQImqKE5B0h2j6JDlDUkyeAiCJSmE";
+        $sheet_name = "Sheet1";
+        $sheet = new Sheet();
+        $sheet->sheet_id = $sheet_id;
+        $sheet->sheet_name = $sheet_name;
+
+        $sheet_helper = new SheetHelper();
+
+        return $sheet_helper->sync_orders($sheet, false);
+    }
+
+
 }

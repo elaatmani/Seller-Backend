@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('close')->default(false);
             $table->boolean('paid')->default(false);
             $table->integer('commands_number')->default(0);
-            $table->integer('price');
+            $table->float('price');
             $table->dateTime('close_at')->nullable();
             $table->dateTime('paid_at')->nullable();
             $table->string('comment')->nullable();

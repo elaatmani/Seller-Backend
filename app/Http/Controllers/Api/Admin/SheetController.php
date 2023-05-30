@@ -132,7 +132,7 @@ class SheetController extends Controller
             // }
 
 
-            $sheet = sheet::find($id);
+            $sheet = Sheet::find($id);
 
             if (!isset($sheet)) {
 

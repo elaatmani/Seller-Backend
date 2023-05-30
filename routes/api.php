@@ -3,6 +3,7 @@
 use App\Events\NewNotification;
 use App\Http\Controllers\Api\Admin\SheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
+use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\SaleController;
@@ -85,6 +86,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/sheets/{id}', [SheetController::class, 'update']);
     Route::delete('/sheets/{id}', [SheetController::class, 'destroy']);
     Route::post('/sheets/{id}/auto-fetch', [SheetController::class, 'updateAutoFetch']);
+
+    // Fetching orders from sheets
+    Route::get('/sync/{id}', [GoogleSheetController::class, 'sync_orders']);
+    Route::get('/sync/{id}/save', [GoogleSheetController::class, 'save_orders']);
+
 
 
     //Warehouse

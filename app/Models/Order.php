@@ -28,6 +28,7 @@ class Order extends Model
         'reported_delivery_date',
         'counts_from_warehouse',
         'delivery_date',
+        'sheets_id',
         'cmd'
     ];
 
@@ -44,7 +45,7 @@ class Order extends Model
         'affectation' => 'integer',
         'delivery' => 'string',
         'note' => 'string',
-        'price' => 'integer',
+        'price' => 'float',
         'reported_agente_note' => 'string',
         'reported_delivery_note' => 'string',
         'reported_agente_date' => 'date',
@@ -75,5 +76,5 @@ class Order extends Model
         return $this->belongsTo(Factorisation::class,'factorisation_id');
     }
 
-    
+
 }

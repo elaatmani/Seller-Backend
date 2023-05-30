@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('confirmation')->nullable();
             $table->integer('affectation')->nullable();
             $table->string('delivery')->nullable();
-            $table->integer('price');
+            $table->float('price');
             $table->string('note')->nullable();
             $table->string('note_d')->nullable();
             $table->dateTime('delivery_date')->nullable();

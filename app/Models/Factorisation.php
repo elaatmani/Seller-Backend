@@ -28,13 +28,13 @@ class Factorisation extends Model
         'close' => 'boolean',
         'paid' => 'boolean',
         'commands_number' => 'integer',
-        'price' => 'integer',
+        'price' => 'float',
         'close_at' => 'datetime',
         'paid_at' => 'datetime',
         'comment' => 'string'
     ];
 
-    
+
     public function delivery(){
        return $this->belongsTo(User::class,'delivery_id');
     }
