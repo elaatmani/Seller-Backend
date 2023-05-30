@@ -47,7 +47,7 @@ class FactorisationController extends Controller
 
 
 
-      /**
+    /**
      * Display the specified resource.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -217,14 +217,14 @@ class FactorisationController extends Controller
 
 
 
-     /**
+    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-     public function updateClosing(Request $request, $id)
+    public function updateClosing(Request $request, $id)
     {
         try {
 
@@ -243,9 +243,9 @@ class FactorisationController extends Controller
 
             if ($factorisation) {
                 $factorisation->close = $request->close;
-                if($request->close == true){
+                if ($request->close == true) {
                     $factorisation->close_at = now();
-                }else{
+                } else {
                     $factorisation->close_at = null;
                 }
                 $factorisation->save();
@@ -275,7 +275,7 @@ class FactorisationController extends Controller
     }
 
 
-         /**
+    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -301,9 +301,9 @@ class FactorisationController extends Controller
 
             if ($factorisation) {
                 $factorisation->paid = $request->paid;
-                if($request->paid == true){
+                if ($request->paid == true) {
                     $factorisation->paid_at = now();
-                }else{
+                } else {
                     $factorisation->paid_at = null;
                 }
                 $factorisation->save();
@@ -357,15 +357,15 @@ class FactorisationController extends Controller
             $factorisation = Factorisation::find($id);
             if ($factorisation) {
 
-                    $factorisation->delete();
-                    return response()->json(
-                        [
-                            'status' => true,
-                            'code' => 'FACTORISATION_DELETED',
-                            'message' => 'Factorisation Deleted Successfully!',
-                        ],
-                        200
-                    );
+                $factorisation->delete();
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'FACTORISATION_DELETED',
+                        'message' => 'Factorisation Deleted Successfully!',
+                    ],
+                    200
+                );
 
                 //  else {
                 //     return response()->json(
@@ -415,19 +415,18 @@ class FactorisationController extends Controller
     public function generatePDF($id)
     {
 
-        $factorisation = Factorisation::with('delivery','delivery.deliveryPlaces','delivery.deliveryPlaces.city')->where('id',$id)->first(); // Retrieve the user based on the ID
-        // dd($factorisation);
-        $sales = Order::with('items','items.product')->where('factorisation_id',$factorisation->id)->get();
+        $factorisation = Factorisation::with('delivery', 'delivery.deliveryPlaces', 'delivery.deliveryPlaces.city')->where('id', $id)->first(); // Retrieve the user based on the ID
+        $sales = Order::with('items', 'items.product')->where('factorisation_id', $factorisation->id)->get();
+        // dd($sales);
 
-
+        // $factorisation = $factorisation->chunk(20);
+        // $sales = $sales->chunk(20);
 
         $headers = [
             'Content-Type' => 'application/pdf',
         ];
         // return view('factorisationpdf')->with(compact('factorisation','sales'));
-        $pdf = PDF::loadView('factorisationpdf', compact('factorisation','sales'));
+        $pdf = PDF::loadView('factorisationpdf', compact('factorisation', 'sales'));
         return  $pdf->stream();
-
     }
-
 }
