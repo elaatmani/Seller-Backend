@@ -184,8 +184,10 @@ class RolesAndPermissionsSeeder extends Seeder
         $role->givePermissionTo([
             'show_all_orders',
             'update_order',
+            'update_sale',
             'access_to_orders',
-            'show_all_products'
+            'show_all_products',
+            'show_all_warehouses'
         ]);
 
 
