@@ -29,7 +29,8 @@ class Order extends Model
         'counts_from_warehouse',
         'delivery_date',
         'sheets_id',
-        'cmd'
+        'cmd',
+        'product_name'
     ];
 
     protected $casts = [
@@ -53,6 +54,8 @@ class Order extends Model
         'delivery_date'  => 'datetime',
         'cmd'  => 'string'
     ];
+
+    protected $with = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
 
     protected $appends = [
         'is_done'

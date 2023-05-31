@@ -171,6 +171,24 @@ class GoogleSheetController extends Controller
                 200
             );
         } catch (\Throwable $th) {
+            if($th->getMessage() == 'PERMISSION_DENIED') {
+
+                $sheet = Sheet::find($id);
+                $sheet->active = false;
+                $sheet->save();
+
+                return response()->json(
+                    [
+                        'status' => false,
+                        'message' => $th->getMessage(),
+                        'code' => 'PERMISSION_DENIED',
+                        'data' => [
+                            'sheet' => $sheet
+                        ]
+                    ],
+                    500
+                );
+            }
             return response()->json(
                 [
                     'status' => false,
