@@ -67,6 +67,8 @@ class GoogleSheetController extends Controller
 
             $sheet_helper = new SheetHelper();
             $orders = $sheet_helper->sync_orders($sheet, false);
+            $sheet->active = true;
+            $sheet->save();
 
             return response()->json(
                 [
@@ -74,6 +76,7 @@ class GoogleSheetController extends Controller
                     'code' => 'SUCCESS',
                     'data' => [
                         'orders' => $orders,
+                        'sheet' => $sheet
                     ],
                 ],
                 200
@@ -89,7 +92,10 @@ class GoogleSheetController extends Controller
                     [
                         'status' => false,
                         'message' => $th->getMessage(),
-                        'code' => 'PERMISSION_DENIED'
+                        'code' => 'PERMISSION_DENIED',
+                        'data' => [
+                            'sheet' => $sheet
+                        ]
                     ],
                     500
                 );
