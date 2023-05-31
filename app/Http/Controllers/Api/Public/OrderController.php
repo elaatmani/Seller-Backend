@@ -687,7 +687,7 @@ class OrderController extends Controller
                 if ($order->factorisation_id) {
                     if ($request->delivery !== 'livrer') {
                         $order->delivery_date = null;
-                        $order->factorisation_id = null;
+                        
                         $oldFactorisation = Factorisation::find($order->factorisation_id);
                         if ($oldFactorisation) {
                             $oldFactorisation->price -= $order->price;
@@ -697,6 +697,7 @@ class OrderController extends Controller
                                 $oldFactorisation->delete();
                             }
                         }
+                        $order->factorisation_id = null;
                     }
                 }
 
