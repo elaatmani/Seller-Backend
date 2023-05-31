@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Exception;
 use Illuminate\Support\Str;
 use Revolution\Google\Sheets\Facades\Sheets;
@@ -39,15 +40,19 @@ class SheetHelper {
             });
 
             if($save) {
-                $newRows = $this->insert_sheet_orders($newRows, $sheet);
+                $newRows = $this->insert_sheet_orders(array_values($newRows), $sheet);
                 return $newRows;
             }
 
-            return $newRows;
+            return array_values($newRows);
         } catch (\Throwable $th) {
-            $message = json_decode($th->getMessage());
-            throw new Exception('PERMISSION_DENIED');
-            // return $message;
+            $message = json_decode($th->getMessage(), true);
+
+            if($message['error']['status'] == 'PERMISSION_DENIED') {
+                throw new Exception('PERMISSION_DENIED');
+            } else {
+                throw new Exception($th->getMessage());
+            }
         }
     }
 
@@ -63,6 +68,11 @@ class SheetHelper {
             $city = array_key_exists('city', $o) ? $o['city'] : '';
             $adresse = array_key_exists('ADRESS', $o) ? $o['ADRESS'] : '';
             $price = array_key_exists('Total charge', $o) ? $o['Total charge'] : '';
+            $quantity = array_key_exists('Total quantity', $o) ? $o['Total quantity'] : '';
+            $sku = array_key_exists('SKU', $o) ? $o['SKU'] : '';
+            $product_name = array_key_exists('Product name', $o) ? $o['Product name'] : '';
+
+            $product = Product::where('ref', $sku)->first();
 
             $order = Order::create([
                 'fullname' => $fullname,
@@ -72,7 +82,30 @@ class SheetHelper {
                 'price' => (float) $price,
                 'sheets_id' => self::order_sheet_id($sheet, $o['Order ID']),
                 'counts_from_warehouse' => true,
+                'product_name' => $product_name
             ]);
+
+            if(isset($product)) {
+                $arr = explode('\n', $quantity);
+
+                // return $product->variations->first()->id;
+
+                foreach($arr as $q) {
+                    try {
+
+                        OrderItem::create([
+                            'order_id' => $order->id,
+                            'product_id' => $product->id,
+                            'product_ref' => $product->ref,
+                            'product_variation_id' => $product->variations->first()->id,
+                            'quantity' => (int) $q
+                        ]);
+                    } catch (\Exception $th) {
+                        return $th->getMessage();
+                    }
+                }
+            }
+
             $relationship = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
             $newOrders[] = $order->fresh()->load($relationship);
         }

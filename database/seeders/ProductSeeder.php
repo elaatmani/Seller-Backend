@@ -99,7 +99,52 @@ class ProductSeeder extends Seeder
                         'stockAlert' => 30,
                     ]
                 ]
-            ]
+                    ],
+                    [
+                        'name' => 'Product 3',
+                        'ref' => 'P003',
+                        'selling_price' => 30.0,
+                        'buying_price' => 10.0,
+                        'description' => 'Description for product 3',
+                        'variations' => [
+                            [
+                                'product_id' => 3,
+                                'product_ref' => 'P003',
+                                'quantity' => 50,
+                                'warehouse_id' => 1,
+                                'size' => 'S',
+                                'color' => 'Black',
+                                'stockAlert' => 35,
+                            ],
+                            [
+                                'product_id' => 3,
+                                'product_ref' => 'P003',
+                                'quantity' => 80,
+                                'warehouse_id' => 1,
+                                'size' => 'M',
+                                'color' => 'White',
+                                'stockAlert' => 40,
+                            ],
+                            [
+                                'product_id' => 3,
+                                'product_ref' => 'P003',
+                                'quantity' => 30,
+                                'warehouse_id' => 1,
+                                'size' => 'L',
+                                'color' => 'Red',
+                                'stockAlert' => 15,
+                            ],
+                            [
+                                'product_id' => 3,
+                                'product_ref' => 'P003',
+                                'quantity' => 60,
+                                'warehouse_id' => 1,
+                                'size' => 'XL',
+                                'color' => 'Blue',
+                                'stockAlert' => 30,
+                            ]
+                        ]
+                    ]
         ];
 
         foreach ($products as $product) {

@@ -32,6 +32,7 @@ return new class extends Migration
             $table->string('note_d')->nullable();
             $table->dateTime('delivery_date')->nullable();
             $table->string('cmd')->nullable();
+            $table->longText('product_name')->nullable();
             $table->string('reported_agente_note')->nullable();
             $table->string('reported_delivery_note')->nullable();
             $table->date('reported_agente_date')->nullable();
