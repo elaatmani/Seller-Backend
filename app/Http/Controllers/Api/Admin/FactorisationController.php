@@ -401,10 +401,6 @@ class FactorisationController extends Controller
 
 
 
-
-
-
-
     /**
      * Display the specified resource.
      *
