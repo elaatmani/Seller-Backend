@@ -12,9 +12,20 @@ use Revolution\Google\Sheets\Facades\Sheets;
 
 class GoogleSheetController extends Controller
 {
-    public function index() {
+    public function index(Request $request) {
 
         try {
+            if (!$request->user()->can('show_all_sheets')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To See Sheets',
+                    ],
+                    405
+                );
+            }
+            
             $sheets = Sheet::where('auto_fetch', 1)->get();
             $sheet_helper = new SheetHelper();
 
@@ -55,6 +66,16 @@ class GoogleSheetController extends Controller
     public function sync_orders(Request $request, $id) {
         try {
 
+            if (!$request->user()->can('update_sheet')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Sheets',
+                    ],
+                    405
+                );
+            }
             $sheet = Sheet::find($id);
 
             if (!isset($sheet)) {
@@ -114,6 +135,17 @@ class GoogleSheetController extends Controller
 
     public function save_orders(Request $request, $id) {
         try {
+            
+            if (!$request->user()->can('update_sheet')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Sheets',
+                    ],
+                    405
+                );
+            }
 
             $sheet = Sheet::find($id);
 

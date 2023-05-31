@@ -103,6 +103,16 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'access_to_delivery', 'description' => 'Access to delivery']);
 
 
+        //Sheet
+        Permission::create(['name' => 'show_all_sheets', 'description' => 'View all sheets']);
+        Permission::create(['name' => 'create_sheet', 'description' => 'Create a new sheet']);
+        Permission::create(['name' => 'update_sheet', 'description' => 'Update a sheet']);
+        Permission::create(['name' => 'view_sheet', 'description' => 'View a specific sheet']);
+        Permission::create(['name' => 'delete_sheet', 'description' => 'Delete a sheet']);
+        Permission::create(['name' => 'access_to_sheets', 'description' => 'Access to sheets management']);
+
+
+
 
         // create roles and assign created permissions NEW
 
@@ -173,6 +183,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete_factorisation',
             'view_factorisation',
             'access_to_factorisations',
+
+            'show_all_sheets',
+            'create_sheet',
+            'update_sheet',
+            'view_sheet',
+            'delete_sheet',
+            'access_to_sheets',
 
             'show_all_expidations',
             'handle_expidation'
