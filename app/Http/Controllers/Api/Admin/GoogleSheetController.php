@@ -21,8 +21,18 @@ class GoogleSheetController extends Controller
             $newOrders = [];
 
             foreach($sheets as $sheet) {
-                $orders = $sheet_helper->sync_orders($sheet, false);
-                $newOrders = [...$newOrders, ...$orders];
+                try {
+                    $orders = $sheet_helper->sync_orders($sheet, false);
+                    $newOrders = [...$newOrders, ...$orders];
+                    $sheet->active = true;
+                    $sheet->save();
+                } catch (\Throwable $th) {
+                    if($th->getMessage() == 'PERMISSION_DENIED') {
+                        $sheet->active = false;
+                        $sheet->save();
+                    }
+                    continue;
+                }
             }
 
             return response()->json([
@@ -57,6 +67,8 @@ class GoogleSheetController extends Controller
 
             $sheet_helper = new SheetHelper();
             $orders = $sheet_helper->sync_orders($sheet, false);
+            $sheet->active = true;
+            $sheet->save();
 
             return response()->json(
                 [
@@ -64,11 +76,30 @@ class GoogleSheetController extends Controller
                     'code' => 'SUCCESS',
                     'data' => [
                         'orders' => $orders,
+                        'sheet' => $sheet
                     ],
                 ],
                 200
             );
         } catch (\Throwable $th) {
+            if($th->getMessage() == 'PERMISSION_DENIED') {
+
+                $sheet = Sheet::find($id);
+                $sheet->active = false;
+                $sheet->save();
+
+                return response()->json(
+                    [
+                        'status' => false,
+                        'message' => $th->getMessage(),
+                        'code' => 'PERMISSION_DENIED',
+                        'data' => [
+                            'sheet' => $sheet
+                        ]
+                    ],
+                    500
+                );
+            }
             return response()->json(
                 [
                     'status' => false,

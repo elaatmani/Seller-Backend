@@ -88,6 +88,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/sheets/{id}/auto-fetch', [SheetController::class, 'updateAutoFetch']);
 
     // Fetching orders from sheets
+    Route::get('/sync', [GoogleSheetController::class, 'index']);
     Route::get('/sync/{id}', [GoogleSheetController::class, 'sync_orders']);
     Route::get('/sync/{id}/save', [GoogleSheetController::class, 'save_orders']);
 
