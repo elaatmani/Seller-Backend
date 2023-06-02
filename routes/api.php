@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Public\OrderController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\InventoryController;
 use App\Http\Controllers\Api\Admin\WarehouseController;
+use App\Http\Controllers\Api\Public\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -184,6 +185,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/delivery/inventorymovements/update/note/{id}', [InventoryController::class, 'updateNoteInventoryMovement']);
         Route::post('/delivery/inventorymovements/update/{id}', [InventoryController::class, 'updateReceivedNoteInventoryMovement']);
 
+
+    // Dashboard
+    Route::get('/dashboard/delivery', [DashboardController::class, 'delivery']);
 
     Route::get('/test', function () {
         event(new NewNotification('Hello bro'));
