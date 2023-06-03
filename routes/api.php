@@ -188,6 +188,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Dashboard
     Route::get('/dashboard/delivery', [DashboardController::class, 'delivery']);
+    Route::get('/dashboard/agente', [DashboardController::class, 'agente']);
 
     Route::get('/test', function () {
         event(new NewNotification('Hello bro'));

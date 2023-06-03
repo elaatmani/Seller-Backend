@@ -25,7 +25,7 @@ class GoogleSheetController extends Controller
                     405
                 );
             }
-            
+
             $sheets = Sheet::where('auto_fetch', 1)->get();
             $sheet_helper = new SheetHelper();
 
@@ -135,7 +135,7 @@ class GoogleSheetController extends Controller
 
     public function save_orders(Request $request, $id) {
         try {
-            
+
             if (!$request->user()->can('update_sheet')) {
                 return response()->json(
                     [

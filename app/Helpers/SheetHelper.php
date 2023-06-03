@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Revolution\Google\Sheets\Facades\Sheets;
 
@@ -59,13 +60,13 @@ class SheetHelper {
 
     public function insert_sheet_orders($orders, $sheet) {
 
-
+        DB::beginTransaction();
         $newOrders = [];
         foreach($orders as $o) {
 
             $fullname = array_key_exists('Full name', $o) ? $o['Full name'] : '';
             $phone = array_key_exists('Phone', $o) ? $o['Phone'] : '';
-            $city = array_key_exists('city', $o) ? $o['city'] : '';
+            $city = array_key_exists('City', $o) ? $o['City'] : '';
             $adresse = array_key_exists('ADRESS', $o) ? $o['ADRESS'] : '';
             $price = array_key_exists('Total charge', $o) ? $o['Total charge'] : '';
             $quantity = array_key_exists('Total quantity', $o) ? $o['Total quantity'] : '';
@@ -109,6 +110,7 @@ class SheetHelper {
             $relationship = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
             $newOrders[] = $order->fresh()->load($relationship);
         }
+        DB::commit();
         return $newOrders;
     }
 

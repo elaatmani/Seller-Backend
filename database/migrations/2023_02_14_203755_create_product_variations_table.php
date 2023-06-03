@@ -18,9 +18,9 @@ class CreateProductVariationsTable extends Migration
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('warehouse_id');
             $table->string('product_ref');
-            $table->string('size');
-            $table->string('color');
-            $table->integer('quantity');
+            $table->string('size')->nullable();
+            $table->string('color')->nullable();
+            $table->integer('quantity')->default(0);
             $table->integer('stockAlert');
             $table->timestamps();
 
