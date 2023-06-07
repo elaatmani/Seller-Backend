@@ -29,7 +29,6 @@ class SheetHelper {
             $sheet_name = $sheet->sheet_name;
 
             $data = Sheets::spreadsheet($sheet_id)->sheet($sheet_name)->get();
-
             $headers = $data->pull(0);
             $values = Sheets::collection($headers, $data);
             $rows = array_values($values->toArray());
@@ -49,7 +48,7 @@ class SheetHelper {
         } catch (\Throwable $th) {
             $message = json_decode($th->getMessage(), true);
 
-            if($message['error']['status'] == 'PERMISSION_DENIED') {
+            if(isset($message['error']) && $message['error']['status'] == 'PERMISSION_DENIED') {
                 throw new Exception('PERMISSION_DENIED');
             } else {
                 throw new Exception($th->getMessage());
