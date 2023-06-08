@@ -163,6 +163,30 @@ class OrderController extends Controller
                     $orderHistory->save();
                 }
 
+                if ($request->confirmation != $sale->confirmation) {
+                    $sale->confirmation = $request->confirmation;
+
+                    $orderHistory = new OrderHistory();
+                    $orderHistory->order_id = $sale->id;
+                    $orderHistory->user_id = $request->user()->id;
+                    $orderHistory->historique = $request->confirmation;
+                    $orderHistory->type = 'confirmation';
+                    $orderHistory->note = 'Updated Status of C  onfirmation';
+                    $orderHistory->save();
+                }
+
+                if ($request->affectation != $sale->affectation) {
+                    $sale->affectation = $request->affectation;
+
+                    $orderHistory = new OrderHistory();
+                    $orderHistory->order_id = $sale->id;
+                    $orderHistory->user_id = $request->user()->id;
+                    $orderHistory->historique = $request->affectation;
+                    $orderHistory->type = 'affectation';
+                    $orderHistory->note = 'Updated Status of C  onfirmation';
+                    $orderHistory->save();
+                }
+
 
                 $sale->save();
 
