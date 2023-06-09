@@ -148,6 +148,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::get('/orders/history/show/{id}', [OrderController::class, 'orderHistory']);
 
+    Route::get('/orders/count',[OrderController::class , 'orderCount']);
 
 
     //Orders For Delivery

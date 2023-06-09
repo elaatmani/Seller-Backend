@@ -27,3 +27,5 @@ Route::get('/', function () {
 Route::get('/test', [GoogleSheetController::class, 'test']);
 
 Route::get('/fact/{id}',[FactorisationController::class,'generatePDF']);
+
+

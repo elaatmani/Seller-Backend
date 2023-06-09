@@ -1281,4 +1281,64 @@ class OrderController extends Controller
             );
         }
     }
+
+
+
+
+     /**
+     * Display delivered orders.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orderCount(Request $request)
+    {
+        
+        try {
+            if (!$request->user()->can('show_all_orders')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Delivery Orders',
+                    ],
+                    405
+                );
+            }
+
+             //Bring product_ids handled by current agente
+             $product_ids = ProductAgente::where('agente_id', $request->user()->id)->pluck('product_id');
+
+             //Get the Order_ids related to the Product_ids handled by current agente
+             $OrderItems = OrderItem::whereIn('product_id', $product_ids)->pluck('order_id');
+ 
+             //Check and get the order_ids if they have both agente and confirmation null
+             $AddOrder = Order::with(['items' => ['product', 'product_variation']])->whereIn('id', $OrderItems)->whereNull('agente_id')
+                 ->whereNull('confirmation')
+                 ->count();
+            
+             
+            return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'message' => 'Availble Order Count',
+                        'data' => [
+                            'availble' => $AddOrder,
+                        ]
+                    ],
+                    200
+            );
+
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
 }
