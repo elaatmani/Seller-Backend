@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('ref')->unique();
             $table->string('name');
-            $table->integer('selling_price');
-            $table->integer('buying_price');
+            $table->float('selling_price');
+            $table->float('buying_price');
             $table->text('description')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();

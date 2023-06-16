@@ -22,8 +22,8 @@ class Product extends Model
     protected $casts = [
         'name' => 'string',
         'ref' => 'string',
-        'selling_price' => 'integer',
-        'buying_price' => 'integer',
+        'selling_price' => 'float',
+        'buying_price' => 'float',
         'description' => 'string'
     ];
 

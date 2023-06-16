@@ -34,6 +34,8 @@ class Factorisation extends Model
         'comment' => 'string'
     ];
 
+    protected $with = ['delivery'];
+
 
     public function delivery(){
        return $this->belongsTo(User::class,'delivery_id');
