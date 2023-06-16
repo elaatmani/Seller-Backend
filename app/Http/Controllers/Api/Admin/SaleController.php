@@ -131,7 +131,8 @@ class SaleController extends Controller
                     'product_id' => $orderItem['product_id'],
                     'product_ref' => $orderItem['product_ref'],
                     'product_variation_id' => $orderItem['product_variation_id'],
-                    'quantity' => $orderItem['quantity']
+                    'quantity' => $orderItem['quantity'],
+                    'price' => $orderItem['price']
                 ]);
             }
             DB::commit();

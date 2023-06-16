@@ -205,12 +205,13 @@ class OrderController extends Controller
                 })->values()->toArray();
 
                 foreach ($existingItems as $orderItem) {
-                    $orderItem = OrderItem::create([
+                    $orderItem = OrderItem::updateOrCreate( ['id' => $orderItem['id'], 'product_variation_id' => $orderItem['product_variation_id']], [
                         'order_id' => $sale->id,
                         'product_id' => $orderItem['product_id'],
                         'product_ref' => $orderItem['product_ref'],
                         'product_variation_id' => $orderItem['product_variation_id'],
-                        'quantity' => $orderItem['quantity']
+                        'quantity' => $orderItem['quantity'],
+                        'price' => $orderItem['price']
                     ]);
 
                     $existingOrderItemIds[] = $orderItem->id;
@@ -1297,10 +1298,22 @@ class OrderController extends Controller
 
         try {
             if (!$request->user()->can('show_all_orders')) {
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'message' => 'Availble Order Count',
+                        'data' => [
+                            'availble' => 0,
+                        ]
+                    ],
+                    200
+            );
                 return response()->json(
                     [
                         'status' => false,
-                        'code' => 'NOT_ALLOWED',
+                        'code' => '',
                         'message' => 'You Dont Have Access To Delivery Orders',
                     ],
                     405
