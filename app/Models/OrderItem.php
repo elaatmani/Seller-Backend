@@ -14,7 +14,8 @@ class OrderItem extends Model
         'product_id',
         'product_ref',
         'product_variation_id',
-        'quantity'
+        'quantity',
+        'price'
     ];
 
     protected $casts = [
@@ -22,7 +23,8 @@ class OrderItem extends Model
         'product_id' => 'integer',
         'product_ref' => 'string',
         'product_variation_id' => 'integer',
-        'quantity' => 'integer'
+        'quantity' => 'integer',
+        'price' => 'float'
     ];
 
     public function product() {
