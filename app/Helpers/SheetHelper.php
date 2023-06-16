@@ -72,6 +72,8 @@ class SheetHelper {
             $sku = array_key_exists('SKU', $o) ? $o['SKU'] : '';
             $product_name = array_key_exists('Product name', $o) ? $o['Product name'] : '';
 
+            if(!!$sku) continue;
+
             $product = Product::where('ref', $sku)->first();
 
             $order = Order::create([

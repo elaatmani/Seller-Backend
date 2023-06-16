@@ -149,6 +149,7 @@ class OrderController extends Controller
                 $sale->city = $request->city;
                 $sale->adresse = $request->adresse;
                 $sale->price = $request->price;
+                $sale->note = $request->note;
                 $sale->counts_from_warehouse = $request->counts_from_warehouse;
 
                 if ($request->upsell != $sale->upsell) {
@@ -1293,7 +1294,7 @@ class OrderController extends Controller
      */
     public function orderCount(Request $request)
     {
-        
+
         try {
             if (!$request->user()->can('show_all_orders')) {
                 return response()->json(
@@ -1311,13 +1312,13 @@ class OrderController extends Controller
 
              //Get the Order_ids related to the Product_ids handled by current agente
              $OrderItems = OrderItem::whereIn('product_id', $product_ids)->pluck('order_id');
- 
+
              //Check and get the order_ids if they have both agente and confirmation null
              $AddOrder = Order::with(['items' => ['product', 'product_variation']])->whereIn('id', $OrderItems)->whereNull('agente_id')
                  ->whereNull('confirmation')
                  ->count();
-            
-             
+
+
             return response()->json(
                     [
                         'status' => true,

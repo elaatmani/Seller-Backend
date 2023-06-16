@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('product_ref');
             $table->unsignedBigInteger('product_variation_id');
             $table->integer('quantity');
+            $table->float('price')->nullable();
             $table->timestamps();
 
             $table
