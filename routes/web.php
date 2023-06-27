@@ -8,6 +8,8 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
+use App\Helpers\SteHelper;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,4 +30,12 @@ Route::get('/test', [GoogleSheetController::class, 'test']);
 
 Route::get('/fact/{id}',[FactorisationController::class,'generatePDF']);
 
+
+Route::get('/test-helper', function () {
+    $data = array(
+        'company' => 'Voldo',
+    );
+    $endpoint = 'getcities/';
+    SteHelper::apiSte($data, $endpoint);
+});
 
