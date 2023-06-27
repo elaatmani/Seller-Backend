@@ -196,5 +196,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     });
 });
 
+// Auto fetch
+Route::post('/sync', [GoogleSheetController::class, 'sync']);
 //User Logout
 Route::get('/auth/logout', [AuthController::class, 'logoutUser']);

@@ -72,7 +72,10 @@ class SheetHelper {
             $sku = array_key_exists('SKU', $o) ? $o['SKU'] : '';
             $product_name = array_key_exists('Product name', $o) ? $o['Product name'] : '';
 
-            if(!!$sku) continue;
+            $check = Order::where('sheets_id', self::order_sheet_id($sheet, $o['Order ID']))->first();
+
+            if(!$sku) continue;
+            if(!!$check) continue;
 
             $product = Product::where('ref', $sku)->first();
 

@@ -30,14 +30,17 @@ class GoogleSheetController extends Controller
             $sheet_helper = new SheetHelper();
 
             $newOrders = [];
+            $done = [];
 
             foreach($sheets as $sheet) {
                 try {
-                    $orders = $sheet_helper->sync_orders($sheet, false);
+                    $orders = $sheet_helper->sync_orders($sheet);
+                    $done[] = ['id' => $sheet->id, 'orders' => count($orders), 'status' => true];
                     $newOrders = [...$newOrders, ...$orders];
                     $sheet->active = true;
                     $sheet->save();
                 } catch (\Throwable $th) {
+                    $done[] = ['id' => $sheet->id, 'orders' => count($orders), 'status' => false];
                     if($th->getMessage() == 'PERMISSION_DENIED') {
                         $sheet->active = false;
                         $sheet->save();
@@ -50,7 +53,60 @@ class GoogleSheetController extends Controller
                 'status' => true,
                 'code' => 'SUCCESS',
                 'data' => [
-                    'orders' => $newOrders
+                    'orders' => $newOrders,
+                    'sheets' => $done
+                ]
+            ]);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'code' => 'SERVER_ERROR',
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function sync(Request $request) {
+
+        try {
+            if (!$request->user()->can('show_all_sheets')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To See Sheets',
+                    ],
+                    405
+                );
+            }
+
+            $sheets = Sheet::where('auto_fetch', 1)->get();
+            $sheet_helper = new SheetHelper();
+
+            $done = [];
+
+            foreach($sheets as $sheet) {
+                try {
+                    $orders = $sheet_helper->sync_orders($sheet);
+                    $done[] = ['id' => $sheet->id, 'orders' => count($orders), 'status' => true];
+                    $sheet->active = true;
+                    $sheet->save();
+                } catch (\Throwable $th) {
+                    $done[] = ['id' => $sheet->id, 'orders' => count($orders), 'status' => false];
+                    if($th->getMessage() == 'PERMISSION_DENIED') {
+                        $sheet->active = false;
+                        $sheet->save();
+                    }
+                    continue;
+                }
+            }
+
+            return response()->json([
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => [
+                    'sheets' => $done
                 ]
             ]);
 
@@ -159,6 +215,8 @@ class GoogleSheetController extends Controller
 
             $sheet_helper = new SheetHelper();
             $orders = $sheet_helper->sync_orders($sheet);
+            $sheet->active = true;
+            $sheet->save();
 
             return response()->json(
                 [
