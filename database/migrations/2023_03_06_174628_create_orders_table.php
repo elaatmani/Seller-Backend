@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('upsell')->nullable();
             $table->string('phone');
             $table->string('city');
+            $table->integer('city_id')->nullable();
             $table->string('adresse');
             $table->string('confirmation')->nullable();
             $table->integer('affectation')->nullable();

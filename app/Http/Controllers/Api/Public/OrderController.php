@@ -147,6 +147,7 @@ class OrderController extends Controller
                 $sale->fullname = $request->fullname;
                 $sale->phone = $request->phone;
                 $sale->city = $request->city;
+                $sale->city_id = $request->city_id;
                 $sale->adresse = $request->adresse;
                 $sale->price = $request->price;
                 $sale->note = $request->note;
@@ -184,7 +185,7 @@ class OrderController extends Controller
                     $orderHistory->user_id = $request->user()->id;
                     $orderHistory->historique = $request->affectation;
                     $orderHistory->type = 'affectation';
-                    $orderHistory->note = 'Updated Status of C  onfirmation';
+                    $orderHistory->note = 'Updated Status of Confirmation';
                     $orderHistory->save();
                 }
 

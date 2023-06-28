@@ -45,6 +45,16 @@ class UserSeeder extends Seeder
         $delivery->assignRole('delivery');
 
         $Ste = User::create([
+            'firstname' => 'Road',
+            'lastname' => 'Runner',
+            'email' => 'roadrunner@gmail.com',
+            'phone' => '12345678',
+            'password' => Hash::make('roadrunner'),
+            'status' => 1
+        ]);
+
+        $Ste->assignRole('delivery');
+        $Ste = User::create([
             'firstname' => 'ste',
             'lastname' => 'ste',
             'email' => 'ste@gmail.com',

@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\InventoryController;
 use App\Http\Controllers\Api\Admin\WarehouseController;
 use App\Http\Controllers\Api\Public\DashboardController;
+use App\Services\RoadRunnerService;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,6 +65,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/users/status/{id}', [UserController::class, 'updateUserStatus']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::get('/cities', [UserController::class, 'allCities']);
+    // Route::get('/cities', [RoadRunnerService::class, 'cities']);
     Route::get('/delevries', [UserController::class, 'delevries']);
     Route::get('/agents', [UserController::class, 'agents']);
     Route::get('/online', [UserController::class, 'onlineUsers']);

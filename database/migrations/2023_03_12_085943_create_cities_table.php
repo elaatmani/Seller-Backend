@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->integer('roadrunner_city_id')->nullable();
+            $table->integer('roadrunner_zone_id')->nullable();
             $table->timestamps();
         });
     }

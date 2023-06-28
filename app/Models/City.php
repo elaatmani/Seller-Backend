@@ -9,6 +9,8 @@ class City extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['id', 'name', 'roadrunner_city_id', 'roadrunner_zone_id'];
+
 
     public function deliveryPlaces()
     {
