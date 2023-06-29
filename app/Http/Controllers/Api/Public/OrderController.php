@@ -809,7 +809,9 @@ class OrderController extends Controller
 
             if ($order) {
                 DB::beginTransaction();
-                
+                if($order->affectation == 5 && $request->affectation != 5){
+                    RoadRunnerService::supprimer($order->id);
+                }
                 $order->affectation = $request->affectation;
                 $orderHistory = new OrderHistory();
                 $orderHistory->order_id = $id;
@@ -820,6 +822,7 @@ class OrderController extends Controller
                     if($request->affectation == 5){
                         RoadRunnerService::insert($order);
                     }
+                    
                     $deliveryUser = User::find($request->affectation);
                     $delivery = $deliveryUser->firstname . ' ' . $deliveryUser->lastname;
                     $orderHistory->historique = $delivery;

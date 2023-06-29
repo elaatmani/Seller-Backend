@@ -27,7 +27,7 @@ class RoadRunnerService
             "lastName" => "raer",
             "countryPhoneCode" => "961",
             "phoneNumber" => $order->phone,
-            "reference_id" => "Voldo-".$order->id,
+            "reference_id" => "voldo-".$order->id,
             "totalLbpPrice" => 10000,
             "totalUsdPrice" => $order->price,
             "orderSize" => 1,
@@ -37,5 +37,14 @@ class RoadRunnerService
         );
 
         return SteHelper::apiSte($data, 'insert/');
+    }
+
+    public static function supprimer($id)
+    {
+        $data = array(
+            "reference_id" => 'voldo-'.$id
+        );
+
+        return SteHelper::apiSte($data, 'delete/');
     }
 }
