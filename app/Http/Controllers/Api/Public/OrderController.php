@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductAgente;
 use App\Models\ProductVariation;
 use App\Models\User;
+use App\Services\RoadRunnerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -678,7 +679,7 @@ class OrderController extends Controller
             }
 
             $order = Order::where('id', $id)->first();
-
+            
             if ($order) {
 
                 DB::beginTransaction();
@@ -808,6 +809,7 @@ class OrderController extends Controller
 
             if ($order) {
                 DB::beginTransaction();
+                
                 $order->affectation = $request->affectation;
                 $orderHistory = new OrderHistory();
                 $orderHistory->order_id = $id;
@@ -815,7 +817,9 @@ class OrderController extends Controller
                 $orderHistory->type = 'affectation';
                 if ($request->affectation != null) {
                     $order->delivery = 'dispatch';
-
+                    if($request->affectation == 5){
+                        RoadRunnerService::insert($order);
+                    }
                     $deliveryUser = User::find($request->affectation);
                     $delivery = $deliveryUser->firstname . ' ' . $deliveryUser->lastname;
                     $orderHistory->historique = $delivery;

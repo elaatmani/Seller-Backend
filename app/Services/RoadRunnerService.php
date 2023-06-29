@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Helpers\SteHelper;
+
 use App\Models\City;
 use Illuminate\Support\Facades\Http;
 
@@ -20,18 +21,19 @@ class RoadRunnerService
         if(!$city) return false;
 
         $data = array(
-            'company' => 'Voldo',
+
+            "company" => "Voldo",
             "firstName" => $order->fullname,
-            "lastName" => "",
+            "lastName" => "raer",
             "countryPhoneCode" => "961",
             "phoneNumber" => $order->phone,
-            "reference_id" => $order->cmd,
-            "totalLbpPrice" => 0,
+            "reference_id" => "Voldo-".$order->id,
+            "totalLbpPrice" => 10000,
             "totalUsdPrice" => $order->price,
-            "orderSize" => "1",
+            "orderSize" => 1,
             "zone_id" => $city->roadrunner_zone_id,
             "address" => $order->adresse,
-            "note" => $order->note
+            "note" => $order->note ? $order->note : "No-Note"
         );
 
         return SteHelper::apiSte($data, 'insert/');
