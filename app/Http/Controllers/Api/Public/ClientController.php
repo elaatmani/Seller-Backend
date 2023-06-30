@@ -21,6 +21,16 @@ class ClientController extends Controller
                 ], 404);
             }
 
+            $statuses = [
+                'picked-up' => '',
+                'transfer' => '',
+                'delivered' => '',
+                'canceled' => '',
+                'returned' => '',
+                'delayed' => '',
+                'paid' => ''
+            ];
+
             return response()->json([
                 'code' => 'SUCCESS',
                 'message' => "Order delivery status has changed to '" . $request->status . "'."
