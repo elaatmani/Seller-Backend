@@ -8,6 +8,6 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 
 
-Route::post('order/delivery', [ClientController::class, 'updateDelivery']);
+Route::post('order/delivery', [ClientController::class, 'updateDelivery'])->middleware('bearer:delivery-update');
 
 

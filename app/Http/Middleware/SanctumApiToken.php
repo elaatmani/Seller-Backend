@@ -34,7 +34,7 @@ class SanctumApiToken
             return response()->json(['error' => 'Invalid token'], 401);
         }
 
-        if ($accessToken->expires_at->isPast()) {
+        if (!!$accessToken->expires_at && $accessToken->expires_at->isPast()) {
             return response()->json(['error' => 'Token expired'], 401);
         }
 
