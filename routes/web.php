@@ -13,6 +13,7 @@ use App\Helpers\SteHelper;
 use App\Http\Controllers\Api\Public\OrderController;
 use App\Models\Order;
 use App\Services\RoadRunnerService;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,13 +50,15 @@ Route::get('/cities', function () {
     return response()->json($response);
 });
 
-
-
-// Route::get('/inserto', function () {
-//     $order = Order::find(80);
-//     $response = RoadRunnerService::insert($order);
-//     return $response;
-// });
+Route::get('/inserto', function () {
+    $order = Order::find(29);
+    $response = RoadRunnerService::insert($order);
+    // $response = $order;
+    return response()->json([
+        'status' => true,
+        'data' => $response
+    ]);
+});
 
 
 

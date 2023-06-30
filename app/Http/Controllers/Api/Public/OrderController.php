@@ -679,7 +679,7 @@ class OrderController extends Controller
             }
 
             $order = Order::where('id', $id)->first();
-            
+
             if ($order) {
 
                 DB::beginTransaction();
@@ -809,8 +809,8 @@ class OrderController extends Controller
 
             if ($order) {
                 DB::beginTransaction();
-                if($order->affectation == 5 && $request->affectation != 5){
-                    RoadRunnerService::supprimer($order->id);
+                if($order->affectation == 3 && $request->affectation != 3){
+                    RoadRunnerService::delete($order->id);
                 }
                 $order->affectation = $request->affectation;
                 $orderHistory = new OrderHistory();
@@ -819,10 +819,10 @@ class OrderController extends Controller
                 $orderHistory->type = 'affectation';
                 if ($request->affectation != null) {
                     $order->delivery = 'dispatch';
-                    if($request->affectation == 5){
+                    if($request->affectation == 3){
                         RoadRunnerService::insert($order);
                     }
-                    
+
                     $deliveryUser = User::find($request->affectation);
                     $delivery = $deliveryUser->firstname . ' ' . $deliveryUser->lastname;
                     $orderHistory->historique = $delivery;
