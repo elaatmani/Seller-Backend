@@ -66,25 +66,28 @@ class ClientController extends Controller
 
             $roadrunner->success = true;
             $roadrunner->message = "Order delivery status has changed to '" . $request->status . "'.";
-            $roadrunner->save();
 
             if(!in_array($request->status, $statuses)) {
-                $newStatus = 'dispatch';
+                $newStatus = $order->delivery;
+                $roadrunner->message = "The state '" . $request->status ."' was not found. state was not updated from " . $order->delivery;
             } else {
                 $newStatus = $references[$request->status];
+
+                $orderHistory = new OrderHistory();
+                $orderHistory->order_id = $order->id;
+                $orderHistory->user_id = auth()->user()->id;
+                $orderHistory->type = 'delivery';
+                $orderHistory->historique = $newStatus;
+                $orderHistory->note = 'Updated Status of Delivery';
+                $orderHistory->save();
             }
+
+            $roadrunner->save();
 
             $order->delivery = $newStatus;
             $order->save();
 
 
-            $orderHistory = new OrderHistory();
-            $orderHistory->order_id = $order->id;
-            $orderHistory->user_id = auth()->user()->id;
-            $orderHistory->type = 'delivery';
-            $orderHistory->historique = $newStatus;
-            $orderHistory->note = 'Updated Status of Delivery';
-            $orderHistory->save();
 
             DB::commit();
 
