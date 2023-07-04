@@ -69,7 +69,7 @@ class ClientController extends Controller
 
             if(!in_array($request->status, $statuses)) {
                 $newStatus = $order->delivery;
-                $roadrunner->message = "The state '" . $request->status ."' was not found. state was not updated from " . $order->delivery;
+                $roadrunner->message = "The state '" . $request->status ."' was not found. order delivery stays in '" . $order->delivery . "'.";
             } else {
                 $newStatus = $references[$request->status];
 
