@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers\Api\Public;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\RoadRunnerRequest;
+use App\Models\OrderHistory;
 use Illuminate\Http\Request;
+use App\Models\RoadRunnerRequest;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class ClientController extends Controller
 {
 
     public function updateDelivery(Request $request) {
         try {
+            DB::beginTransaction();
+
+
             $id = substr($request->reference_id, 6);
             $order = Order::where('id', $id)->first();
 
@@ -31,25 +36,65 @@ class ClientController extends Controller
                 ], 404);
             }
 
+            if($order->affectation != 4) {
+
+            }
+
             $statuses = [
-                'picked-up' => '',
-                'transfer' => '',
-                'delivered' => '',
-                'canceled' => '',
-                'returned' => '',
-                'delayed' => '',
-                'paid' => ''
+                'New',
+                'Picked up',
+                'Transfer',
+                'Delayed',
+                'Delivered',
+                'Cancelled',
+                'Returned',
+                'Delivered & return',
+                'Paid'
+            ];
+
+            $references = [
+                'New' => 'dispatch',
+                'Picked up' => 'expidier',
+                'Transfer' => 'transfer',
+                'Delayed' => 'pas-de-reponse',
+                'Delivered' => 'livrer',
+                'Cancelled' => 'annuler',
+                'Returned' => 'retourner',
+                'Delivered & return' => 'refuser',
+                'Paid' => 'paid'
             ];
 
             $roadrunner->success = true;
             $roadrunner->message = "Order delivery status has changed to '" . $request->status . "'.";
             $roadrunner->save();
 
+            if(!in_array($request->status, $statuses)) {
+                $newStatus = 'dispatch';
+            } else {
+                $newStatus = $references[$request->status];
+            }
+
+            $order->delivery = $newStatus;
+            $order->save();
+
+
+            $orderHistory = new OrderHistory();
+            $orderHistory->order_id = $order->id;
+            $orderHistory->user_id = auth()->user()->id;
+            $orderHistory->type = 'delivery';
+            $orderHistory->historique = $newStatus;
+            $orderHistory->note = 'Updated Status of Delivery';
+            $orderHistory->save();
+
+            DB::commit();
+
+
             return response()->json([
                 'code' => 'SUCCESS',
                 'message' => "Order delivery status has changed to '" . $request->status . "'."
             ]);
         } catch (\Throwable $th) {
+            DB::rollBack();
             $roadrunner = RoadRunnerRequest::create([
                 'reference_id' => $request->reference_id,
                 'status' => $request->status,

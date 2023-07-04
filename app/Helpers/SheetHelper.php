@@ -61,6 +61,8 @@ class SheetHelper {
 
         DB::beginTransaction();
         $newOrders = [];
+        $productNotFoundOrders = [];
+        $alreadyExistsOrders = [];
         foreach($orders as $o) {
 
             $fullname = array_key_exists('Full name', $o) ? $o['Full name'] : '';
@@ -72,10 +74,19 @@ class SheetHelper {
             $sku = array_key_exists('SKU', $o) ? $o['SKU'] : '';
             $product_name = array_key_exists('Product name', $o) ? $o['Product name'] : '';
 
-            $check = Order::where('sheets_id', self::order_sheet_id($sheet, $o['Order ID']))->first();
+            $product_exists = Product::where('ref', $sku)->first();
 
             if(!$sku) continue;
-            if(!!$check) continue;
+            if(!$product_exists) {
+                $productNotFoundOrders[] = $o;
+                continue;
+            };
+
+            $order_exists = Order::where('sheets_id', self::order_sheet_id($sheet, $o['Order ID']))->first();
+            if(!!$order_exists) {
+                $alreadyExistsOrders[] = $o;
+                continue;
+            };
 
             $product = Product::where('ref', $sku)->first();
 
