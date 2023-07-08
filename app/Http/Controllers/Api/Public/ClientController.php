@@ -8,11 +8,37 @@ use Illuminate\Http\Request;
 use App\Models\RoadRunnerRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
 
-    public function updateDelivery(Request $request) {
+    public $statuses = [
+        'New',
+        'Picked up',
+        'Transfer',
+        'Delayed',
+        'Delivered',
+        'Cancelled',
+        'Returned',
+        'Delivered & return',
+        'Paid'
+    ];
+
+    public $references = [
+        'New' => 'dispatch',
+        'Picked up' => 'expidier',
+        'Transfer' => 'transfer',
+        'Delayed' => 'pas-de-reponse',
+        'Delivered' => 'livrer',
+        'Cancelled' => 'annuler',
+        'Returned' => 'retourner',
+        'Delivered & return' => 'livrer',
+        'Paid' => 'paid'
+    ];
+
+    public function updateDelivery(Request $request)
+    {
         try {
             DB::beginTransaction();
 
@@ -25,7 +51,7 @@ class ClientController extends Controller
                 'status' => $request->status
             ]);
 
-            if(!$order) {
+            if (!$order) {
                 $roadrunner->success = false;
                 $roadrunner->message = "Order not found";
                 $roadrunner->save();
@@ -36,42 +62,18 @@ class ClientController extends Controller
                 ], 404);
             }
 
-            if($order->affectation != 4) {
-
+            if ($order->affectation != 4) {
             }
 
-            $statuses = [
-                'New',
-                'Picked up',
-                'Transfer',
-                'Delayed',
-                'Delivered',
-                'Cancelled',
-                'Returned',
-                'Delivered & return',
-                'Paid'
-            ];
-
-            $references = [
-                'New' => 'dispatch',
-                'Picked up' => 'expidier',
-                'Transfer' => 'transfer',
-                'Delayed' => 'pas-de-reponse',
-                'Delivered' => 'livrer',
-                'Cancelled' => 'annuler',
-                'Returned' => 'retourner',
-                'Delivered & return' => 'refuser',
-                'Paid' => 'paid'
-            ];
 
             $roadrunner->success = true;
             $roadrunner->message = "Order delivery status has changed to '" . $request->status . "'.";
 
-            if(!in_array($request->status, $statuses)) {
+            if (!in_array($request->status, $this->statuses)) {
                 $newStatus = $order->delivery;
-                $roadrunner->message = "The state '" . $request->status ."' was not found. order delivery stays in '" . $order->delivery . "'.";
+                $roadrunner->message = "The state '" . $request->status . "' was not found. order delivery stays in '" . $order->delivery . "'.";
             } else {
-                $newStatus = $references[$request->status];
+                $newStatus = $this->references[$request->status];
 
                 $orderHistory = new OrderHistory();
                 $orderHistory->order_id = $order->id;
@@ -104,6 +106,120 @@ class ClientController extends Controller
                 'success' => false,
                 'message' => $th->getMessage()
             ]);
+
+            return response()->json([
+                'code' => 'SERVER_ERROR',
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function updateMultipleDelivery(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $references = $request->orders;
+
+            $validate = Validator::make($request->all(), ['orders' => 'required']);
+
+            if($validate->fails()) {
+                return response()->json([
+                    'code' => 'VALIDATION_ERROR',
+                    'errors' => $validate->errors()
+                ]);
+            }
+
+            $success = [];
+            $failed = [];
+
+            foreach ($references as $res) {
+
+                try {
+                    $id = substr($res['reference_id'], 6);
+                    $order = Order::where('id', $id)->first();
+
+                    $roadrunner = RoadRunnerRequest::create([
+                        'reference_id' => $res['reference_id'],
+                        'status' => $res['status']
+                    ]);
+
+                    if (!$order) {
+                        $roadrunner->success = false;
+                        $roadrunner->message = "Order not found";
+                        $roadrunner->save();
+
+                        $failed[] = [
+                            'reference_id' => $res['reference_id'],
+                            'error' => 'Order not found'
+                        ];
+                        continue;
+                    }
+
+
+                    $roadrunner->success = true;
+                    $roadrunner->message = "Order delivery status has changed to '" . $res['status'] . "'.";
+
+                    if (!in_array($res['status'], $this->statuses)) {
+                        $newStatus = $order->delivery;
+                        $roadrunner->message = "The state '" . $res['status'] . "' was not found. order delivery stays in '" . $order->delivery . "'.";
+
+                        $failed[] = [
+                            'reference_id' => $res['reference_id'],
+                            'error' => "'Status not found: '" . $res['status'] . "'"
+                        ];
+                        continue;
+
+                    } else {
+                        $newStatus = $this->references[$res['status']];
+
+                        $orderHistory = new OrderHistory();
+                        $orderHistory->order_id = $order->id;
+                        $orderHistory->user_id = auth()->user()->id;
+                        $orderHistory->type = 'delivery';
+                        $orderHistory->historique = $newStatus;
+                        $orderHistory->note = 'Updated Status of Delivery';
+                        $orderHistory->save();
+                    }
+
+                    $roadrunner->save();
+
+                    $order->delivery = $newStatus;
+                    $order->save();
+
+                    $success[] = $res['reference_id'];
+
+                } catch (\Throwable $th) {
+                    $failed[] = [
+                        'reference_id' => $res['reference_id'],
+                        'error' => $th->getMessage()
+                    ];
+                    continue;
+                }
+            }
+
+
+
+            DB::commit();
+
+
+            return response()->json([
+                'code' => 'SUCCESS',
+                'success' => $success,
+                'failed' => $failed,
+            ]);
+
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            // $roadrunner = RoadRunnerRequest::create([
+            //     'reference_id' => $references,
+            //     'status' => $statuses,
+            //     'success' => false,
+            //     'message' => $th->getMessage()
+            // ]);
 
             return response()->json([
                 'code' => 'SERVER_ERROR',

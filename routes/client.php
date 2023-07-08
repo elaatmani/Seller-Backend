@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 
 
 Route::post('order/delivery', [ClientController::class, 'updateDelivery'])->middleware('bearer:delivery-update');
+Route::post('order/delivery/multiple', [ClientController::class, 'updateMultipleDelivery'])->middleware('bearer:delivery-update');
 
 Route::post('getToken', function() {
     $token = User::find(4)->createToken('API TOKEN', ["delivery:update"])->plainTextToken;
