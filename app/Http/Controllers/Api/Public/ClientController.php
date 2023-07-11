@@ -42,25 +42,25 @@ class ClientController extends Controller
 
             $statuses = [
                 'New',
-                'Picked up',
+                'Picked Up',
                 'Transfer',
                 'Delayed',
                 'Delivered',
-                'Cancelled',
+                'Canceled',
                 'Returned',
-                'Delivered & return',
+                'Delivered & Return',
                 'Paid'
             ];
 
             $references = [
                 'New' => 'dispatch',
-                'Picked up' => 'expidier',
+                'Picked Up' => 'expidier',
                 'Transfer' => 'transfer',
                 'Delayed' => 'pas-de-reponse',
                 'Delivered' => 'livrer',
-                'Cancelled' => 'annuler',
+                'Canceled' => 'annuler',
                 'Returned' => 'retourner',
-                'Delivered & return' => 'refuser',
+                'Delivered & Return' => 'refuser',
                 'Paid' => 'paid'
             ];
 
