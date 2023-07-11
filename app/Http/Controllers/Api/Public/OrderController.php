@@ -809,7 +809,7 @@ class OrderController extends Controller
 
             if ($order) {
                 DB::beginTransaction();
-                if($order->affectation == 3 && $request->affectation != 3){
+                if($order->affectation == 4 && $request->affectation != 4){
                     RoadRunnerService::delete($order->id);
                 }
                 $order->affectation = $request->affectation;
@@ -819,7 +819,7 @@ class OrderController extends Controller
                 $orderHistory->type = 'affectation';
                 if ($request->affectation != null) {
                     $order->delivery = 'dispatch';
-                    if($request->affectation == 3){
+                    if($request->affectation == 4){
                         RoadRunnerService::insert($order);
                     }
 
