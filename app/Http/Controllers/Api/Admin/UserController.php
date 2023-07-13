@@ -385,7 +385,16 @@ class UserController extends Controller
                     if ($numProducts === 1 && $productIds[0] === 0) {
                         $products = Product::all();
                         $productIds = $products->pluck('id')->toArray();
+
+                        // $userH = User::find($id);
+                        // $userH->having_all = 1;
+                        // $userH->save();
                     }
+                    // if($productIds[0] !== 0){
+                    //     $userH = User::find($id);
+                    //     $userH->having_all = 0;
+                    //     $userH->save();
+                    // }
 
                     // Get current product IDs assigned to the user
                     $currentProductIds = ProductAgente::where('agente_id', $user->id)->pluck('product_id')->toArray();

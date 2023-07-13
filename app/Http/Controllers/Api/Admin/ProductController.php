@@ -13,6 +13,8 @@ use App\Http\Controllers\Controller;
 
 use Illuminate\Support\Facades\Validator;
 use App\Models\InventoryMovementVariation;
+use App\Models\ProductAgente;
+use App\Models\User;
 
 class ProductController extends Controller
 {
@@ -117,7 +119,16 @@ class ProductController extends Controller
                 ]);
                 $quantityTotal += $value['quantity'];
             }
-
+            $users = User::where('having_all',1)->get('id');
+            if($users){
+                foreach($users as $user){
+                    ProductAgente::create([
+                        'agente_id'=> $user->id,
+                        'product_id' => $product->id
+                    ]);
+                }
+              
+            }
             DB::commit();
             return response()->json(
                 [
