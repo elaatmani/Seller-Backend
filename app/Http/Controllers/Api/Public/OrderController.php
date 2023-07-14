@@ -180,7 +180,7 @@ class OrderController extends Controller
 
                 if ($request->affectation != $sale->affectation) {
                     $sale->affectation = $request->affectation;
-
+                    $sale->delivery = "dispatch";
                     $orderHistory = new OrderHistory();
                     $orderHistory->order_id = $sale->id;
                     $orderHistory->user_id = $request->user()->id;
@@ -207,7 +207,7 @@ class OrderController extends Controller
                 })->values()->toArray();
 
                 foreach ($existingItems as $orderItem) {
-                    $orderItem = OrderItem::updateOrCreate( ['id' => $orderItem['id'], 'product_variation_id' => $orderItem['product_variation_id']], [
+                    $orderItem = OrderItem::updateOrCreate(['id' => $orderItem['id'], 'product_variation_id' => $orderItem['product_variation_id']], [
                         'order_id' => $sale->id,
                         'product_id' => $orderItem['product_id'],
                         'product_ref' => $orderItem['product_ref'],
@@ -1020,22 +1020,53 @@ class OrderController extends Controller
             $OrderItems = OrderItem::whereIn('product_id', $product_ids)->pluck('order_id');
 
             //Check and get the order_ids if they have both agente and confirmation null
-            $AddOrder = Order::with(['items' => ['product', 'product_variation']])->whereIn('id', $OrderItems)->whereNull('agente_id')
+            $AddOrder = Order::with(['items' => ['product', 'product_variation']])
+                ->whereIn('id', $OrderItems)
+                ->whereNull('agente_id')
                 ->whereNull('confirmation')
                 ->first();
 
-            if ($AddOrder) {
-                DB::beginTransaction();
-                $AddOrder->agente_id = $request->user()->id;
-                $AddOrder->save();
 
-                $orderHistory = new OrderHistory();
-                $orderHistory->order_id = $AddOrder->id;
-                $orderHistory->user_id = $request->user()->id;
-                $orderHistory->type = 'responsibility';
-                $orderHistory->note = 'Got the Order';
-                $orderHistory->save();
-                DB::commit();
+
+            if ($AddOrder) {
+                $checkOrder = Order::where('fullname', $AddOrder->fullname)
+                    ->where('phone', $AddOrder->phone)
+                    ->where('city', $AddOrder->city)
+                    ->where('product_name', $AddOrder->product_name)
+                    ->whereNull('agente_id')
+                    ->get();
+
+                if ($checkOrder->count() > 1) {
+                    DB::beginTransaction();
+
+                    foreach ($checkOrder as $order) {
+                        $order->agente_id = $request->user()->id;
+                        $order->save();
+
+                        $orderHistory = new OrderHistory();
+                        $orderHistory->order_id = $order->id;
+                        $orderHistory->user_id = $request->user()->id;
+                        $orderHistory->type = 'responsibility';
+                        $orderHistory->note = 'Got the Order';
+                        $orderHistory->save();
+                    }
+
+                    DB::commit();
+                } else {
+                    // Only one order or no duplicates found
+                    // Continue with the original code without any modifications
+                    DB::beginTransaction();
+                    $AddOrder->agente_id = $request->user()->id;
+                    $AddOrder->save();
+
+                    $orderHistory = new OrderHistory();
+                    $orderHistory->order_id = $AddOrder->id;
+                    $orderHistory->user_id = $request->user()->id;
+                    $orderHistory->type = 'responsibility';
+                    $orderHistory->note = 'Got the Order';
+                    $orderHistory->save();
+                    DB::commit();
+                }
             } else {
                 return response()->json(
                     [
@@ -1052,7 +1083,7 @@ class OrderController extends Controller
                     'status' => true,
                     'code' => 'SUCCESS',
                     'data' => [
-                        'orders' => $AddOrder,
+                        'orders' => $checkOrder->count() > 1 ? $checkOrder : $AddOrder,
                     ]
                 ],
                 200
@@ -1312,7 +1343,7 @@ class OrderController extends Controller
 
 
 
-     /**
+    /**
      * Display delivered orders.
      *
      * @param \Illuminate\Http\Request  $request
@@ -1334,7 +1365,7 @@ class OrderController extends Controller
                         ]
                     ],
                     200
-            );
+                );
                 return response()->json(
                     [
                         'status' => false,
@@ -1345,30 +1376,29 @@ class OrderController extends Controller
                 );
             }
 
-             //Bring product_ids handled by current agente
-             $product_ids = ProductAgente::where('agente_id', $request->user()->id)->pluck('product_id');
+            //Bring product_ids handled by current agente
+            $product_ids = ProductAgente::where('agente_id', $request->user()->id)->pluck('product_id');
 
-             //Get the Order_ids related to the Product_ids handled by current agente
-             $OrderItems = OrderItem::whereIn('product_id', $product_ids)->pluck('order_id');
+            //Get the Order_ids related to the Product_ids handled by current agente
+            $OrderItems = OrderItem::whereIn('product_id', $product_ids)->pluck('order_id');
 
-             //Check and get the order_ids if they have both agente and confirmation null
-             $AddOrder = Order::with(['items' => ['product', 'product_variation']])->whereIn('id', $OrderItems)->whereNull('agente_id')
-                 ->whereNull('confirmation')
-                 ->count();
+            //Check and get the order_ids if they have both agente and confirmation null
+            $AddOrder = Order::with(['items' => ['product', 'product_variation']])->whereIn('id', $OrderItems)->whereNull('agente_id')
+                ->whereNull('confirmation')
+                ->count();
 
 
             return response()->json(
-                    [
-                        'status' => true,
-                        'code' => 'SUCCESS',
-                        'message' => 'Availble Order Count',
-                        'data' => [
-                            'availble' => $AddOrder,
-                        ]
-                    ],
-                    200
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'message' => 'Availble Order Count',
+                    'data' => [
+                        'availble' => $AddOrder,
+                    ]
+                ],
+                200
             );
-
         } catch (\Throwable $th) {
             return response()->json(
                 [

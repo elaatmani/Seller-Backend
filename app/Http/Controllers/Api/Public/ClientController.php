@@ -12,28 +12,29 @@ use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
-
+    
+    
     public $statuses = [
         'New',
-        'Picked up',
+        'Picked Up',
         'Transfer',
         'Delayed',
         'Delivered',
-        'Cancelled',
+        'Canceled',
         'Returned',
-        'Delivered & return',
+        'Delivered & Return',
         'Paid'
     ];
 
     public $references = [
         'New' => 'dispatch',
-        'Picked up' => 'expidier',
+        'Picked Up' => 'expidier',
         'Transfer' => 'transfer',
         'Delayed' => 'pas-de-reponse',
         'Delivered' => 'livrer',
-        'Cancelled' => 'annuler',
+        'Canceled' => 'annuler',
         'Returned' => 'retourner',
-        'Delivered & return' => 'livrer',
+        'Delivered & Return' => 'livrer',
         'Paid' => 'paid'
     ];
 
