@@ -17,6 +17,8 @@ class SteHelper
 
         $httpCode = $response->status();
 
+        return $response->json();
+
         if ($httpCode === 200) {
             $responseData = $response->json();
             // Process the response data

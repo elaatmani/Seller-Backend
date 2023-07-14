@@ -806,11 +806,22 @@ class OrderController extends Controller
             }
 
             $order = Order::where('id', $id)->first();
+            $roadrunner = [
+                'ip_address' => $_SERVER['SERVER_ADDR'],
+                'domain' => $_SERVER['HTTP_HOST'],
+                'request' => "NONE",
+                'response' => NULL,
+                ];
 
             if ($order) {
                 DB::beginTransaction();
                 if($order->affectation == 4 && $request->affectation != 4){
-                    RoadRunnerService::delete($order->id);
+                    $roadrunner = [
+                        'ip_address' => $_SERVER['SERVER_ADDR'],
+                        'domain' => $_SERVER['HTTP_HOST'],
+                        'request' => 'DELETE',
+                        'response' => RoadRunnerService::delete($order->id),
+                    ];
                 }
                 $order->affectation = $request->affectation;
                 $orderHistory = new OrderHistory();
@@ -820,7 +831,12 @@ class OrderController extends Controller
                 if ($request->affectation != null) {
                     $order->delivery = 'dispatch';
                     if($request->affectation == 4){
-                        RoadRunnerService::insert($order);
+                        $roadrunner = [
+                            'ip_address' => $_SERVER['SERVER_ADDR'],
+                            'domain' => $_SERVER['HTTP_HOST'],
+                            'request' => 'INSERT',
+                            'response' => RoadRunnerService::insert($order),
+                        ];
                     }
 
                     $deliveryUser = User::find($request->affectation);
@@ -837,6 +853,7 @@ class OrderController extends Controller
                     [
                         'status' => true,
                         'code' => 'SUCCESS',
+                        'roadrunner' => $roadrunner,
                         'data' => 'Order\'s Affectation Updated Successfully!'
                     ],
                     200
