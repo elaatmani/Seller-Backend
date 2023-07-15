@@ -127,7 +127,7 @@ class ProductController extends Controller
                         'product_id' => $product->id
                     ]);
                 }
-              
+
             }
             DB::commit();
             return response()->json(

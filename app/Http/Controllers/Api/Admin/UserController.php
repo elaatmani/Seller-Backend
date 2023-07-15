@@ -117,7 +117,8 @@ class UserController extends Controller
                                 'role' => $user->roles->pluck('id')->first(),
                                 'product' => $user->roles->pluck('id')->first() === 2 ? $user->products->pluck('id') : null,
                                 'deliveryPlaces' => $user->deliveryPlaces,
-                                'city' => $user->City ? $user->City : null
+                                'city' => $user->city ? $user->city : null,
+                                'having_all' => $user->having_all,
                             ]
                         ],
                     ],
@@ -199,14 +200,14 @@ class UserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'status' => $request->status,
+                'having_all' => $request->having_all
             ]);
 
 
             if ($request->role === 2 && isset($request->product_id)) {
                 $productIds = is_array($request->product_id) ? $request->product_id : [$request->product_id];
-                $numProducts = count($productIds);
 
-                if ($numProducts === 1 && $productIds[0] === 0) {
+                if ($user->having_all) {
                     $products = Product::all();
                     $productIds = $products->pluck('id')->toArray();
                 }
@@ -378,38 +379,42 @@ class UserController extends Controller
 
 
 
-                if ($request->role === 2 && isset($request->product_id)) {
-                    $productIds = is_array($request->product_id) ? $request->product_id : [$request->product_id];
-                    $numProducts = count($productIds);
+                if ($request->role == 2) {
+                    $having_all = $request->having_all == 'true' ? 1 : 0;
 
-                    if ($numProducts === 1 && $productIds[0] === 0) {
-                        $products = Product::all();
-                        $productIds = $products->pluck('id')->toArray();
+                    if($having_all && $having_all != $user->having_all) {
 
-                        // $userH = User::find($id);
-                        // $userH->having_all = 1;
-                        // $userH->save();
-                    }
-                    // if($productIds[0] !== 0){
-                    //     $userH = User::find($id);
-                    //     $userH->having_all = 0;
-                    //     $userH->save();
-                    // }
+                        $user->having_all = $having_all;
+                        $user->save();
+                            $products = Product::all();
+                            $productIds = $products->pluck('id')->toArray();
+                            foreach ($productIds as $productId) {
+                                ProductAgente::updateOrCreate([
+                                    'agente_id' => $user->id,
+                                    'product_id' => $productId
+                                ]);
+                            }
 
-                    // Get current product IDs assigned to the user
-                    $currentProductIds = ProductAgente::where('agente_id', $user->id)->pluck('product_id')->toArray();
+                        } else {
 
-                    // Delete product assignments that are not in the new list
-                    $deleteProductIds = array_diff($currentProductIds, $productIds);
-                    ProductAgente::where('agente_id', $user->id)->whereIn('product_id', $deleteProductIds)->delete();
+                            $productIds = is_array($request->product_id) ? $request->product_id : [$request->product_id];
+                            // Get current product IDs assigned to the user
+                            $currentProductIds = ProductAgente::where('agente_id', $user->id)->pluck('product_id')->toArray();
 
-                    // Add new product assignments
-                    foreach ($productIds as $productId) {
-                        ProductAgente::updateOrCreate([
-                            'agente_id' => $user->id,
-                            'product_id' => $productId
-                        ]);
-                    }
+                            // Delete product assignments that are not in the new list
+                            $deleteProductIds = array_diff($currentProductIds, $productIds);
+
+                            ProductAgente::where('agente_id', $user->id)->whereIn('product_id', $deleteProductIds)->delete();
+
+                            // Add new product assignments
+                            foreach ($productIds as $productId) {
+                                ProductAgente::updateOrCreate([
+                                    'agente_id' => $user->id,
+                                    'product_id' => $productId
+                                ]);
+                            }
+                        }
+
                 }
 
 

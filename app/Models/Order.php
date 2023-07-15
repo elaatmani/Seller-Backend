@@ -52,13 +52,16 @@ class Order extends Model
         'reported_agente_date' => 'date',
         'reported_delivery_date' => 'date',
         'delivery_date'  => 'datetime',
-        'cmd'  => 'string'
+        'cmd'  => 'string',
+        'double' => 'integer'
     ];
 
     protected $with = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
 
     protected $appends = [
-        'is_done'
+        'is_done',
+        'has_doubles',
+        'is_double'
     ];
 
 
@@ -77,6 +80,22 @@ class Order extends Model
 
     public function factorisations(){
         return $this->belongsTo(Factorisation::class,'factorisation_id');
+    }
+
+    public function doubles() {
+        return $this->hasMany(Order::class, 'double', 'id');
+    }
+
+    // public function origin() {
+    //     return $this->belongsTo(Order::class, 'id', 'double');
+    // }
+
+    public function getHasDoublesAttribute() {
+        return $this->doubles->count() > 0;
+    }
+
+    public function getIsDoubleAttribute() {
+        return !!$this->double;
     }
 
 

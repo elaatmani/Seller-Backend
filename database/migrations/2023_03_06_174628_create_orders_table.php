@@ -38,6 +38,7 @@ return new class extends Migration
             $table->string('reported_delivery_note')->nullable();
             $table->date('reported_agente_date')->nullable();
             $table->date('reported_delivery_date')->nullable();
+            $table->foreignId('double')->nullable();
             $table->boolean('counts_from_warehouse')->default(true);
             $table->timestamps();
 

@@ -1000,18 +1000,21 @@ class OrderController extends Controller
             }
 
 
-            $countOrderNotConfirmed = Order::where([['agente_id', $request->user()->id], ['confirmation', null]])->count();
+            $countOrderNotConfirmed = Order::where([['agente_id', $request->user()->id], ['confirmation', null]])->get();
 
-            if ($countOrderNotConfirmed > 0) {
+            if ($countOrderNotConfirmed->count() > 0) {
                 return response()->json(
                     [
                         'status' => true,
                         'code' => 'ORDER_NOT_CONFIRMED',
-                        'message' => 'An Order Not Confirmed'
+                        'message' => 'An Order Not Confirmed',
+                        'orders' => $countOrderNotConfirmed
                     ],
                     200
                 );
             }
+
+
 
             //Bring product_ids handled by current agente
             $product_ids = ProductAgente::where('agente_id', $request->user()->id)->pluck('product_id');
@@ -1038,9 +1041,11 @@ class OrderController extends Controller
 
                 if ($checkOrder->count() > 1) {
                     DB::beginTransaction();
+                    // $firstOrder = $checkOrder->first();
 
                     foreach ($checkOrder as $order) {
                         $order->agente_id = $request->user()->id;
+                        // $order->double = $firstOrder->id;
                         $order->save();
 
                         $orderHistory = new OrderHistory();
@@ -1083,7 +1088,9 @@ class OrderController extends Controller
                     'status' => true,
                     'code' => 'SUCCESS',
                     'data' => [
-                        'orders' => $checkOrder->count() > 1 ? $checkOrder : $AddOrder,
+                        'orders' => $AddOrder,
+                        'double' => $checkOrder->count() > 1,
+                        'double_orders' => $checkOrder
                     ]
                 ],
                 200
