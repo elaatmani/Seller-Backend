@@ -807,8 +807,8 @@ class OrderController extends Controller
 
             $order = Order::where('id', $id)->first();
             $roadrunner = [
-                'ip_address' => $_SERVER['SERVER_ADDR'],
-                'domain' => $_SERVER['HTTP_HOST'],
+                // 'ip_address' => $_SERVER['SERVER_ADDR'],
+                // 'domain' => $_SERVER['HTTP_HOST'],
                 'request' => "NONE",
                 'response' => NULL,
                 ];
@@ -817,11 +817,22 @@ class OrderController extends Controller
                 DB::beginTransaction();
                 if($order->affectation == 4 && $request->affectation != 4){
                     $roadrunner = [
-                        'ip_address' => $_SERVER['SERVER_ADDR'],
-                        'domain' => $_SERVER['HTTP_HOST'],
+                        // 'ip_address' => $_SERVER['SERVER_ADDR'],
+                        // 'domain' => $_SERVER['HTTP_HOST'],
                         'request' => 'DELETE',
                         'response' => RoadRunnerService::delete($order->id),
                     ];
+
+                    if(array_key_exists('error', $roadrunner['response'])) {
+                        return response()->json(
+                            [
+                                'status' => false,
+                                'code' => 'ERROR',
+                                'message' => "Road Runner: " . $roadrunner['response']['error'],
+                            ],
+                            500
+                        );
+                    }
                 }
                 $order->affectation = $request->affectation;
                 $orderHistory = new OrderHistory();
@@ -832,11 +843,22 @@ class OrderController extends Controller
                     $order->delivery = 'dispatch';
                     if($request->affectation == 4){
                         $roadrunner = [
-                            'ip_address' => $_SERVER['SERVER_ADDR'],
-                            'domain' => $_SERVER['HTTP_HOST'],
+                            // 'ip_address' => $_SERVER['SERVER_ADDR'],
+                            // 'domain' => $_SERVER['HTTP_HOST'],
                             'request' => 'INSERT',
                             'response' => RoadRunnerService::insert($order),
                         ];
+
+                        if(array_key_exists('error', $roadrunner['response'])) {
+                            return response()->json(
+                                [
+                                    'status' => false,
+                                    'code' => 'ERROR',
+                                    'message' => "Road Runner: " . $roadrunner['response']['error'],
+                                ],
+                                500
+                            );
+                        }
                     }
 
                     $deliveryUser = User::find($request->affectation);
