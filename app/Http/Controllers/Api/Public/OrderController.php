@@ -141,6 +141,12 @@ class OrderController extends Controller
                     405
                 );
             }
+             $roadrunner = [
+                // 'ip_address' => $_SERVER['SERVER_ADDR'],
+                // 'domain' => $_SERVER['HTTP_HOST'],
+                'request' => "NONE",
+                'response' => NULL,
+                ];
 
             $sale = Order::where('id', $id)->first();
 
@@ -179,8 +185,49 @@ class OrderController extends Controller
                 }
 
                 if ($request->affectation != $sale->affectation) {
+                     if($sale->affectation == 4 && $request->affectation != 4){
+                            $roadrunner = [
+                                // 'ip_address' => $_SERVER['SERVER_ADDR'],
+                                // 'domain' => $_SERVER['HTTP_HOST'],
+                                'request' => 'DELETE',
+                                'response' => RoadRunnerService::delete($sale->id),
+                            ];
+        
+                            if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
+                                return response()->json(
+                                    [
+                                        'status' => false,
+                                        'code' => 'ERROR',
+                                        'message' => "Road Runner: " . $roadrunner['response']['error'],
+                                    ],
+                                    500
+                                );
+                            }
+                        }
                     $sale->affectation = $request->affectation;
-                    $sale->delivery = "dispatch";
+                    
+                     if ($request->affectation != null) {
+                         $sale->delivery = 'dispatch';
+                            if($request->affectation == 4){
+                                $roadrunner = [
+                                    // 'ip_address' => $_SERVER['SERVER_ADDR'],
+                                    // 'domain' => $_SERVER['HTTP_HOST'],
+                                    'request' => 'INSERT',
+                                    'response' => RoadRunnerService::insert($sale),
+                                ];
+        
+                                if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
+                                    return response()->json(
+                                        [
+                                            'status' => false,
+                                            'code' => 'ERROR',
+                                            'message' => "Road Runner: " . $roadrunner['response']['error'],
+                                        ],
+                                        500
+                                    );
+                                }
+                            }
+                    }
                     $orderHistory = new OrderHistory();
                     $orderHistory->order_id = $sale->id;
                     $orderHistory->user_id = $request->user()->id;
@@ -805,7 +852,7 @@ class OrderController extends Controller
                 );
             }
 
-            $order = Order::where('id', $id)->first();
+            $order = Order::with('items.product_variation')->where('id', $id)->first();
             $roadrunner = [
                 // 'ip_address' => $_SERVER['SERVER_ADDR'],
                 // 'domain' => $_SERVER['HTTP_HOST'],
@@ -823,7 +870,7 @@ class OrderController extends Controller
                         'response' => RoadRunnerService::delete($order->id),
                     ];
 
-                    if(array_key_exists('error', $roadrunner['response'])) {
+                    if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
                         return response()->json(
                             [
                                 'status' => false,
@@ -849,7 +896,7 @@ class OrderController extends Controller
                             'response' => RoadRunnerService::insert($order),
                         ];
 
-                        if(array_key_exists('error', $roadrunner['response'])) {
+                        if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
                             return response()->json(
                                 [
                                     'status' => false,

@@ -9,12 +9,15 @@ class SteHelper
 
     public static function apiSte($data, $endpoint)
     {
+        $test_url = "https://systemtunes.com/apivoldo/";
+        $live_url = "https://roadrunner-lb.com/api/vooldo/";
+        
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
             'Authorization' => 'Bearer ' . env('API_STE', ''),
             'X-Access-Token' => 'oHD-w3=GD3sKBZcLF]CMb#!rjj)Azs;-?wnZsqf43:0WlQO:8U%&-Y-dpzCgua5HJT?tyxJ={Q{+9hJ[dN?|t?-tZ7F[J1'
-        ])->post("https://systemtunes.com/apivoldo/".$endpoint, $data);
+        ])->post($live_url.$endpoint, $data);
 
         $httpCode = $response->status();
 
@@ -31,4 +34,7 @@ class SteHelper
             return $errorData;
         }
     }
+    
+    
+
 }

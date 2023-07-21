@@ -62,6 +62,16 @@ Route::get('/inserto', function () {
 
 
 
+Route::get('/citi' , function(){
+    $data = array(
+        'company' => 'Voldo',
+    );
+    $endpoint = 'getcities';
+    $response = SteHelper::apiSte($data, $endpoint);
+
+    return response()->json($response);
+});
+
 // Route::get('/insert', function () {
 //     $data = array(
 //         'company' => 'Voldo',
@@ -80,6 +90,21 @@ Route::get('/inserto', function () {
 //     $endpoint = 'insert/';
 //     SteHelper::apiSte($data, $endpoint);
 // });
+
+Route::get('/deleteId' , function(){
+    $response = RoadRunnerService::delete(246);
+    return response()->json($response);
+});
+
+
+Route::get('/formatS', function(){
+    $orderData = Order::with('items.product_variation')->where('refere',246)->first();
+    $order = json_decode($orderData, true);
+    
+    $result = RoadRunnerService::formatProductString($order);
+    return response()->json($result);
+
+});
 
 
 

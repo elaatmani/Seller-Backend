@@ -44,7 +44,7 @@ class ClientController extends Controller
             DB::beginTransaction();
 
 
-            $id = substr($request->reference_id, 6);
+            $id = substr($request->reference_id, 11);
             $order = Order::where('id', $id)->first();
 
             $roadrunner = RoadRunnerRequest::create([
@@ -138,7 +138,7 @@ class ClientController extends Controller
             foreach ($references as $res) {
 
                 try {
-                    $id = substr($res['reference_id'], 6);
+                    $id = substr($res['reference_id'], 11);
                     $order = Order::where('id', $id)->first();
 
                     $roadrunner = RoadRunnerRequest::create([

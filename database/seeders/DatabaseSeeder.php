@@ -28,6 +28,6 @@ class DatabaseSeeder extends Seeder
         // $this->call(CitySeeder::class);
         $this->call(CityLebanonSeeder::class);
         // $this->call(InventoryMovementSeeder::class);
-        $this->call(SheetSeeder::class);
+        // $this->call(SheetSeeder::class);
     }
 }

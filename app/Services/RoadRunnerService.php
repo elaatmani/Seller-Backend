@@ -30,13 +30,13 @@ class RoadRunnerService
             "lastName" => "-",
             "countryPhoneCode" => "961",
             "phoneNumber" => $order->phone,
-            "reference_id" => "voldo-".$order->id,
-            "totalLbpPrice" => 10000,
-            "totalUsdPrice" => $order->price,
-            "orderSize" => 1,
+            "reference_id" => "voldooshop-".$order->id,
+            "totalLbpPrice" => 0,
+            "totalUsdPrice" => self::getPrice($order),
+            "orderSize" => 5,
             "zone_id" => $city->roadrunner_zone_id,
             "address" => $order->adresse,
-            "note" => !!$order->note ? $order->note : "No-Note"
+            "note" => self::formatProductString($order)
         );
 
         return SteHelper::apiSte($data, 'insert/');
@@ -45,9 +45,40 @@ class RoadRunnerService
     public static function delete($id)
     {
         $data = array(
-            "reference_id" => 'voldo-'.$id
+            "reference_id" => 'voldooshop-'.$id
         );
 
         return SteHelper::apiSte($data, 'delete/');
     }
+    
+    public static function getPrice($order) {
+        if (!$order) return 0;
+        $total = array_reduce($order['items']->values()->toArray(), function($sum, $item) {
+            return $sum + (!$item['price'] ? 0 : $item['price']);
+        }, 0);
+            return floatval(!$order['price'] ? 0 : $order['price']) + floatval($total);
+    }
+    
+    
+    public static function formatProductString($order) {
+        $order = json_decode($order, true);
+        
+        $result = '';
+    
+        if (!empty($order['items'])) {
+            foreach ($order['items'] as $item) {
+                $productName = isset($item['product']['name']) ? $item['product']['name'] : 'Unknown Product';
+                $quantity = isset($item['quantity']) ? $item['quantity'] : 0;
+                $variationSize = isset($item['product_variation']['size']) ? $item['product_variation']['size'] : '';
+                $variationColor = isset($item['product_variation']['color']) ? $item['product_variation']['color'] : '';
+    
+                $result .= "[product=\"$productName\";quantity=$quantity;variation=$variationSize/$variationColor], ";
+            }
+        
+            $result = rtrim($result, ', '); // Remove the trailing comma and space
+        }
+        
+        return $result;
+    }
+
 }

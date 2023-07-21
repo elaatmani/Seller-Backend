@@ -80,8 +80,8 @@ class ProductController extends Controller
                 [
                     'name' => 'required',
                     'ref' => 'required|unique:products,ref',
-                    'buying_price' => 'required|integer',
-                    'selling_price' => 'required|integer',
+                    'buying_price' => 'required',
+                    'selling_price' => 'required',
 
                 ]
             );
@@ -261,8 +261,8 @@ class ProductController extends Controller
                 [
                     'name' => 'required',
                     'ref' => 'required|unique:products,ref,' . $product->id,
-                    'buying_price' => 'required|integer',
-                    'selling_price' => 'required|integer',
+                    'buying_price' => 'required',
+                    'selling_price' => 'required',
                 ]
             );
 
