@@ -35,4 +35,8 @@ class Product extends Model
     {
         return $this->hasManyThrough(User::class, ProductAgente::class, 'product_id', 'id', 'id', 'agente_id');
     }
+
+    public function deliveries(){
+        return $this->hasMany(ProductDelivery::class,'product_id');
+    }
 }

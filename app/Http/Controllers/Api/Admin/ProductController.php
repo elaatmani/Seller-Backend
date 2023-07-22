@@ -14,6 +14,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Models\InventoryMovementVariation;
 use App\Models\ProductAgente;
+use App\Models\ProductDelivery;
 use App\Models\User;
 
 class ProductController extends Controller
@@ -82,7 +83,6 @@ class ProductController extends Controller
                     'ref' => 'required|unique:products,ref',
                     'buying_price' => 'required',
                     'selling_price' => 'required',
-
                 ]
             );
             if ($validateProduct->fails()) {
@@ -105,6 +105,13 @@ class ProductController extends Controller
                 'description' => $request->description,
                 'status' => 1
             ]);
+            foreach($request->deliveries as $delivery ){
+
+                ProductDelivery::Create([
+                    'deliver_id' => $delivery['delivery_id'],
+                    'product_id' => $product->id
+                ]);
+            }
 
             $quantityTotal = 0;
             foreach ($request->variations as  $value) {
@@ -183,7 +190,7 @@ class ProductController extends Controller
                 );
             }
 
-            $product = Product::with('variations', 'variations.warehouse')->find($id);
+            $product = Product::with('variations', 'variations.warehouse','deliveries')->find($id);
             if (isset($product)) {
                 $product = ProductHelper::get_state($product);
                 return response()->json(
