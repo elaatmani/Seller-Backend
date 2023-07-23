@@ -27,16 +27,16 @@ class UserController extends Controller
     public function index(Request $request)
     {
         try {
-            if (!$request->user()->can('show_all_users')) {
-                return response()->json(
-                    [
-                        'status' => false,
-                        'code' => 'NOT_ALLOWED',
-                        'message' => 'You Dont Have Access To See All Users',
-                    ],
-                    405
-                );
-            }
+            // if (!$request->user()->can('show_all_users')) {
+            //     return response()->json(
+            //         [
+            //             'status' => false,
+            //             'code' => 'NOT_ALLOWED',
+            //             'message' => 'You Dont Have Access To See All Users',
+            //         ],
+            //         405
+            //     );
+            // }
             $users = User::with('role')->get();;
             return response()->json([
                 'status' => true,
@@ -44,6 +44,7 @@ class UserController extends Controller
                 'data' => [
                     'users' => $users->map(function ($user) {
                         return [
+                            'delivery_products' => $user->productsDelivery,
                             'id' => $user->id,
                             'firstname' => $user->firstname,
                             'lastname' => $user->lastname,
@@ -894,7 +895,24 @@ class UserController extends Controller
     public function delevries(Request $request)
     {
         $deliveryRole = Role::where('name', 'delivery')->first();
-        $deliveries = $deliveryRole->users()->get();
+        $deliveries = $deliveryRole->users()->get()->map(function ($user) {
+            return [
+                'delivery_products' => $user->productsDelivery,
+                'id' => $user->id,
+                'firstname' => $user->firstname,
+                'lastname' => $user->lastname,
+                'phone' => $user->phone,
+                'email' => $user->email,
+                'photo' => $user->photo,
+                'is_online' => $user->is_online,
+                'last_action' => $user->last_action,
+                'status' => $user->status,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+                'role' => $user->roles->first(),
+                'role_name' => $user->roles->pluck('name')->first(),
+            ];
+        });
 
         return response()->json(
             [

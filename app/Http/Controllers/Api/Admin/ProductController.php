@@ -108,7 +108,7 @@ class ProductController extends Controller
             foreach($request->deliveries as $delivery ){
 
                 ProductDelivery::Create([
-                    'deliver_id' => $delivery['delivery_id'],
+                    'delivery_id' => $delivery['delivery_id'],
                     'product_id' => $product->id
                 ]);
             }
@@ -137,11 +137,15 @@ class ProductController extends Controller
 
             }
             DB::commit();
+            $product->fresh();
             return response()->json(
                 [
                     'status' => true,
                     'code' => 'PRODUCT_CREATED',
                     'message' => 'Product Created Successfully!',
+                    'data' => [
+                        'product' => $product
+                    ]
                 ],
                 200
             );
@@ -305,7 +309,7 @@ class ProductController extends Controller
 
             // Loop through existing deliveries and delete those that are not in the new array
             foreach ($existingDeliveries as $existingDelivery) {
-                if (!in_array($existingDelivery->deliver_id, $newDeliveryIds)) {
+                if (!in_array($existingDelivery->delivery_id, $newDeliveryIds)) {
                     $existingDelivery->delete();
                 }
             }
@@ -314,11 +318,11 @@ class ProductController extends Controller
             foreach ($request->deliveries as $delivery) {
                 ProductDelivery::updateOrCreate(
                     [
-                        'deliver_id' => $delivery['delivery_id'],
+                        'delivery_id' => $delivery['delivery_id'],
                         'product_id' => $product->id
                     ],
                     [
-                        'deliver_id' => $delivery['delivery_id'],
+                        'delivery_id' => $delivery['delivery_id'],
                         'product_id' => $product->id
                     ]
                 );
@@ -407,7 +411,9 @@ class ProductController extends Controller
                     'status' => true,
                     'code' => 'PRODUCT_UPDATED',
                     'message' => 'Product Updated Successfully!',
-                    'data' => ProductHelper::with_tracking(Product::find($product->id))
+                    'data' => [
+                        'product' => ProductHelper::with_tracking(Product::find($product->id))
+                    ]
                 ],
                 200
             );

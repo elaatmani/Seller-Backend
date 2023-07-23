@@ -9,7 +9,7 @@ class Product extends Model
 {
     use HasFactory;
 
-  
+
     protected $fillable = [
         'name',
         'ref',
@@ -27,10 +27,12 @@ class Product extends Model
         'description' => 'string'
     ];
 
+    protected $with = [ 'deliveries' ];
+
     public function variations(){
         return $this->hasMany('App\Models\ProductVariation');
     }
-    
+
     public function users()
     {
         return $this->hasManyThrough(User::class, ProductAgente::class, 'product_id', 'id', 'id', 'agente_id');

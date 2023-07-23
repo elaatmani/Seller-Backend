@@ -253,7 +253,7 @@ class AuthController extends Controller
 
 
     /**
-     * Display user permission 
+     * Display user permission
      * @param Request $request
      * @return User
      */
