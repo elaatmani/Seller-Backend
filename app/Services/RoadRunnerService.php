@@ -30,7 +30,7 @@ class RoadRunnerService
             "lastName" => "-",
             "countryPhoneCode" => "961",
             "phoneNumber" => $order->phone,
-            "reference_id" => "voldooshop-".$order->id,
+            "reference_id" => "vld".(2000+(int)$order->id),
             "totalLbpPrice" => 0,
             "totalUsdPrice" => self::getPrice($order),
             "orderSize" => 5,
@@ -45,7 +45,7 @@ class RoadRunnerService
     public static function delete($id)
     {
         $data = array(
-            "reference_id" => 'voldooshop-'.$id
+            "reference_id" => "vld".(2000+(int)$id)
         );
 
         return SteHelper::apiSte($data, 'delete/');
