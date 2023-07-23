@@ -296,6 +296,34 @@ class ProductController extends Controller
             $product->save();
 
             DB::beginTransaction();
+
+            // Get all existing product deliveries for the given product
+            $existingDeliveries = ProductDelivery::where('product_id', $product->id)->get();
+
+            // Get an array of delivery IDs from the new $request->deliveries
+            $newDeliveryIds = array_column($request->deliveries, 'delivery_id');
+
+            // Loop through existing deliveries and delete those that are not in the new array
+            foreach ($existingDeliveries as $existingDelivery) {
+                if (!in_array($existingDelivery->deliver_id, $newDeliveryIds)) {
+                    $existingDelivery->delete();
+                }
+            }
+
+            // Loop through the new $request->deliveries and update or create records accordingly
+            foreach ($request->deliveries as $delivery) {
+                ProductDelivery::updateOrCreate(
+                    [
+                        'deliver_id' => $delivery['delivery_id'],
+                        'product_id' => $product->id
+                    ],
+                    [
+                        'deliver_id' => $delivery['delivery_id'],
+                        'product_id' => $product->id
+                    ]
+                );
+            }
+
             // all variations
             $all_variations = collect($request->variations);
 
