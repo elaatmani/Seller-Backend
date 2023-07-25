@@ -41,4 +41,8 @@ class Product extends Model
     public function deliveries(){
         return $this->hasMany(ProductDelivery::class,'product_id');
     }
+
+    public function image(){
+        return $this->hasOne(ProductImage::class, 'prodcut_id');
+    }
 }

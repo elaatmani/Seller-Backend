@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Helpers\ProductHelper;
 use App\Models\ProductVariation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
 use App\Http\Controllers\Controller;
 
 
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\InventoryMovementVariation;
 use App\Models\ProductAgente;
 use App\Models\ProductDelivery;
+use App\Models\ProductImage;
 use App\Models\User;
 
 class ProductController extends Controller
@@ -105,6 +108,22 @@ class ProductController extends Controller
                 'description' => $request->description,
                 'status' => 1
             ]);
+
+
+            if ($request->hasFile('image')) {
+                // Upload and associate the image with the product
+                $image = $request->file('image');
+                $uniqueId = Str::uuid()->toString();
+                $extension = $image->getClientOriginalExtension();
+                $imagePath = "productImages/{$uniqueId}.{$extension}";
+                $image->storeAs('public', $imagePath);
+    
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_path' => $imagePath,
+                ]);
+            }
+
             foreach($request->deliveries as $delivery ){
 
                 ProductDelivery::Create([
@@ -299,8 +318,25 @@ class ProductController extends Controller
 
             $product->save();
 
-            DB::beginTransaction();
+            if ($request->hasFile('image')) {
+                // Delete the existing product image from the database and storage
+                $product->images()->delete();
+    
+                // Upload and associate the new image with the product
+                $image = $request->file('image');
+                $uniqueId = Str::uuid()->toString();
+                $extension = $image->getClientOriginalExtension();
+                $imagePath = "productImages/{$uniqueId}.{$extension}";
+                $image->storeAs('public', $imagePath);
+    
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_path' => $imagePath,
+                ]);
+            }
 
+            DB::beginTransaction();
+            
             // Get all existing product deliveries for the given product
             $existingDeliveries = ProductDelivery::where('product_id', $product->id)->get();
 
