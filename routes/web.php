@@ -30,6 +30,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/sync', [GoogleSheetController::class, 'index']);
+
+
 Route::get('/test', [GoogleSheetController::class, 'test']);
 
 Route::get('/fact/{id}',[FactorisationController::class,'generatePDF']);
@@ -100,7 +103,7 @@ Route::get('/deleteId' , function(){
 Route::get('/formatS', function(){
     $orderData = Order::with('items.product_variation')->where('refere',246)->first();
     $order = json_decode($orderData, true);
-    
+
     $result = RoadRunnerService::formatProductString($order);
     return response()->json($result);
 

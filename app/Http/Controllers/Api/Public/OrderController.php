@@ -184,58 +184,7 @@ class OrderController extends Controller
                     $orderHistory->save();
                 }
 
-                if ($request->affectation != $sale->affectation) {
-                     if($sale->affectation == 4 && $request->affectation != 4){
-                            $roadrunner = [
-                                // 'ip_address' => $_SERVER['SERVER_ADDR'],
-                                // 'domain' => $_SERVER['HTTP_HOST'],
-                                'request' => 'DELETE',
-                                'response' => RoadRunnerService::delete($sale->id),
-                            ];
-        
-                            if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
-                                return response()->json(
-                                    [
-                                        'status' => false,
-                                        'code' => 'ERROR',
-                                        'message' => "Road Runner: " . $roadrunner['response']['error'],
-                                    ],
-                                    500
-                                );
-                            }
-                        }
-                    $sale->affectation = $request->affectation;
-                    
-                     if ($request->affectation != null) {
-                         $sale->delivery = 'dispatch';
-                            if($request->affectation == 4){
-                                $roadrunner = [
-                                    // 'ip_address' => $_SERVER['SERVER_ADDR'],
-                                    // 'domain' => $_SERVER['HTTP_HOST'],
-                                    'request' => 'INSERT',
-                                    'response' => RoadRunnerService::insert($sale),
-                                ];
-        
-                                if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
-                                    return response()->json(
-                                        [
-                                            'status' => false,
-                                            'code' => 'ERROR',
-                                            'message' => "Road Runner: " . $roadrunner['response']['error'],
-                                        ],
-                                        500
-                                    );
-                                }
-                            }
-                    }
-                    $orderHistory = new OrderHistory();
-                    $orderHistory->order_id = $sale->id;
-                    $orderHistory->user_id = $request->user()->id;
-                    $orderHistory->historique = $request->affectation;
-                    $orderHistory->type = 'affectation';
-                    $orderHistory->note = 'Updated Status of Confirmation';
-                    $orderHistory->save();
-                }
+
 
 
                 $sale->save();
@@ -271,6 +220,62 @@ class OrderController extends Controller
                 // Delete order items that are not in the request
                 $sale->items()->whereNotIn('id', $existingOrderItemIds)->delete();
                 $sale = Order::with(['items' => ['product_variation.warehouse', 'product']])->where('id', $sale->id)->first();
+
+
+                if ($request->affectation != $sale->affectation) {
+                    if($sale->affectation == 4 && $request->affectation != 4){
+                           $roadrunner = [
+                               // 'ip_address' => $_SERVER['SERVER_ADDR'],
+                               // 'domain' => $_SERVER['HTTP_HOST'],
+                               'request' => 'DELETE',
+                               'response' => RoadRunnerService::delete($sale->id),
+                           ];
+
+                           if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
+                               return response()->json(
+                                   [
+                                       'status' => false,
+                                       'code' => 'ERROR',
+                                       'message' => "Road Runner: " . $roadrunner['response']['error'],
+                                   ],
+                                   500
+                               );
+                           }
+                       }
+                   $sale->affectation = $request->affectation;
+
+                    if ($request->affectation != null) {
+                        $sale->delivery = 'dispatch';
+                           if($request->affectation == 4){
+                               $roadrunner = [
+                                   // 'ip_address' => $_SERVER['SERVER_ADDR'],
+                                   // 'domain' => $_SERVER['HTTP_HOST'],
+                                   'request' => 'INSERT',
+                                   'response' => RoadRunnerService::insert($sale),
+                               ];
+
+                               if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
+                                   return response()->json(
+                                       [
+                                           'status' => false,
+                                           'code' => 'ERROR',
+                                           'message' => "Road Runner: " . $roadrunner['response']['error'],
+                                       ],
+                                       500
+                                   );
+                               }
+                           }
+                   }
+                   $orderHistory = new OrderHistory();
+                   $orderHistory->order_id = $sale->id;
+                   $orderHistory->user_id = $request->user()->id;
+                   $orderHistory->historique = $request->affectation;
+                   $orderHistory->type = 'affectation';
+                   $orderHistory->note = 'Updated Status of Confirmation';
+                   $orderHistory->save();
+               }
+
+               $sale->save();
 
                 return response()->json(
                     [
