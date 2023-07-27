@@ -62,6 +62,8 @@ class ProductController extends Controller
     public function create(Request $request)
     {
         try {
+            // $request->deliveries = json_decode($request->deliveries, true);
+            // return response()->json($request->all());
 
             if (!$request->user()->can('create_product')) {
                 return response()->json(
@@ -117,14 +119,16 @@ class ProductController extends Controller
                 $extension = $image->getClientOriginalExtension();
                 $imagePath = "productImages/{$uniqueId}.{$extension}";
                 $image->storeAs('public', $imagePath);
-    
+
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => $imagePath,
                 ]);
             }
 
-            foreach($request->deliveries as $delivery ){
+            $deliveries = json_decode($request->deliveries, true) ?? [];
+
+            foreach($deliveries as $delivery ){
 
                 ProductDelivery::Create([
                     'delivery_id' => $delivery['delivery_id'],
@@ -132,8 +136,10 @@ class ProductController extends Controller
                 ]);
             }
 
+            $variations = json_decode($request->variations, true) ?? [];
+
             $quantityTotal = 0;
-            foreach ($request->variations as  $value) {
+            foreach ($variations as  $value) {
                 ProductVariation::create([
                     'product_id' => $product->id,
                     'product_ref' => $product->ref,
@@ -156,14 +162,13 @@ class ProductController extends Controller
 
             }
             DB::commit();
-            $product->fresh();
             return response()->json(
                 [
                     'status' => true,
                     'code' => 'PRODUCT_CREATED',
                     'message' => 'Product Created Successfully!',
                     'data' => [
-                        'product' => $product
+                        'product' => Product::find($product->id)
                     ]
                 ],
                 200
@@ -320,15 +325,15 @@ class ProductController extends Controller
 
             if ($request->hasFile('image')) {
                 // Delete the existing product image from the database and storage
-                $product->images()->delete();
-    
+                $product->product_image()->delete();
+
                 // Upload and associate the new image with the product
                 $image = $request->file('image');
                 $uniqueId = Str::uuid()->toString();
                 $extension = $image->getClientOriginalExtension();
                 $imagePath = "productImages/{$uniqueId}.{$extension}";
                 $image->storeAs('public', $imagePath);
-    
+
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => $imagePath,
@@ -336,12 +341,13 @@ class ProductController extends Controller
             }
 
             DB::beginTransaction();
-            
+
             // Get all existing product deliveries for the given product
             $existingDeliveries = ProductDelivery::where('product_id', $product->id)->get();
 
+            $deliveries = json_decode($request->deliveries, true) ?? [];
             // Get an array of delivery IDs from the new $request->deliveries
-            $newDeliveryIds = array_column($request->deliveries, 'delivery_id');
+            $newDeliveryIds = array_column($deliveries, 'delivery_id');
 
             // Loop through existing deliveries and delete those that are not in the new array
             foreach ($existingDeliveries as $existingDelivery) {
@@ -351,7 +357,7 @@ class ProductController extends Controller
             }
 
             // Loop through the new $request->deliveries and update or create records accordingly
-            foreach ($request->deliveries as $delivery) {
+            foreach ($deliveries as $delivery) {
                 ProductDelivery::updateOrCreate(
                     [
                         'delivery_id' => $delivery['delivery_id'],
@@ -364,8 +370,9 @@ class ProductController extends Controller
                 );
             }
 
+            $variations = json_decode($request->variations, true) ?? [];
             // all variations
-            $all_variations = collect($request->variations);
+            $all_variations = collect($variations);
 
             // old variations
             $old_variations = $product->variations;

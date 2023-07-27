@@ -27,6 +27,10 @@ class Product extends Model
         'description' => 'string'
     ];
 
+    protected $appends = [
+        'image'
+    ];
+
     protected $with = [ 'deliveries' ];
 
     public function variations(){
@@ -42,7 +46,11 @@ class Product extends Model
         return $this->hasMany(ProductDelivery::class,'product_id');
     }
 
-    public function image(){
-        return $this->hasOne(ProductImage::class, 'prodcut_id');
+    public function product_image(){
+        return $this->hasOne(ProductImage::class, 'product_id', 'id');
+    }
+
+    public function getImageAttribute() {
+        return !!$this->product_image ? $this->product_image->image_path : null;
     }
 }
