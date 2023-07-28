@@ -96,12 +96,22 @@ class OrderController extends Controller
         $order = Order::with(['items' => ['product', 'product_variation']])->where([['agente_id', $request->user()->id], ['confirmation', null]])->get();
 
         if (count($order) > 0) {
+            $checkOrder = Order::where('fullname', $order[0]->fullname)
+                    ->where('phone', $order[0]->phone)
+                    ->where('city', $order[0]->city)
+                    ->where('product_name', $order[0]->product_name)
+                    ->where('agente_id', $order[0]->agente_id)
+                    ->where('confirmation', null)
+                    ->get();
+
             return response()->json(
                 [
                     'status' => true,
                     'code' => 'SUCCESS',
                     'data' => [
-                        'orders' => $order
+                        'orders' => $order,
+                        'double' => $checkOrder->count() > 1,
+                        'double_orders' => $checkOrder
                     ]
                 ],
                 200
