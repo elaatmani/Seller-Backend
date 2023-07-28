@@ -34,7 +34,7 @@ class ClientController extends Controller
         'Delivered' => 'livrer',
         'Canceled' => 'annuler',
         'Returned' => 'retourner',
-        'Delivered & Return' => 'livrer',
+        'Delivered & Return' => 'livrer',
         'Paid' => 'paid'
     ];
 
