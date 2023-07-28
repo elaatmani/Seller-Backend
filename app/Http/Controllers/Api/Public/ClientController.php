@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
-    
-    
+
+
     public $statuses = [
         'New',
         'Picked Up',
@@ -22,7 +22,7 @@ class ClientController extends Controller
         'Delivered',
         'Canceled',
         'Returned',
-        'Delivered & Return',
+        'Delivered & Return',
         'Paid'
     ];
 
@@ -142,7 +142,7 @@ class ClientController extends Controller
                 try {
                     $idBefore = (int) substr($res['reference_id'], 3);
                     $id = $idBefore - 2000;
-                    
+
                     $order = Order::where('id', $id)->first();
 
                     $roadrunner = RoadRunnerRequest::create([

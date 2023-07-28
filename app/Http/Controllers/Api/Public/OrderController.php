@@ -185,6 +185,12 @@ class OrderController extends Controller
                 if ($request->confirmation != $sale->confirmation) {
                     $sale->confirmation = $request->confirmation;
 
+                    if ($request->confirmation === 'reporter') {
+                        $sale->reported_agente_date = $request->reported_agente_date;
+                        $sale->reported_agente_note = $request->reported_agente_note;
+                    }
+
+
                     $orderHistory = new OrderHistory();
                     $orderHistory->order_id = $sale->id;
                     $orderHistory->user_id = $request->user()->id;

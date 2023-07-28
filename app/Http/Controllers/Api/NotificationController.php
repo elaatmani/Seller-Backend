@@ -21,27 +21,27 @@ class NotificationController extends Controller
             $stockAlert = Product::whereHas('variations', function ($query) {
                 $query->where('quantity', '<=', DB::raw('stockAlert'));
             })->with('variations')->get();
-            
+
             $reportedSale = Order::where(function ($query) {
                 $query->where([
                         ['confirmation', '=', 'reporter'],
-                        ['reported_agente_date', '=', now()->toDateString()] // add condition for current date
+                        ['reported_agente_date', '=', now()->format('Y-m-d')] // add condition for current date
                     ])
                     ->orWhere([
                         ['delivery', '=', 'reporter'],
-                        ['reported_delivery_date', '=', now()->toDateString()] // add condition for current date
+                        ['reported_delivery_date', '=', now()->format('Y-m-d')] // add condition for current date
                     ]);
             })->get();
-            
-            
+
+
             $reportedOrderAgente = Order::where([
                 ['confirmation', '=', 'reporter'],
-                ['reported_agente_date', '=', now()->toDateString()] // add condition for current date
+                ['reported_agente_date', '=', now()->format('Y-m-d')] // add condition for current date
             ])->get();
 
             $reportedOrderDelivery = Order::where([
                 ['delivery', '=', 'reporter'],
-                ['reported_delivery_date', '=', now()->toDateString()] // add condition for current date
+                ['reported_delivery_date', '=', now()->format('Y-m-d')] // add condition for current date
             ])->get();
 
                 return response()->json(
@@ -57,7 +57,7 @@ class NotificationController extends Controller
                     ],
                     200
                 );
-           
+
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -78,7 +78,7 @@ class NotificationController extends Controller
      */
     public function agenteNotifications(Request $request){
         try {
-           
+
             if (!$request->user()->hasRole('agente')) {
                 return response()->json(
                     [
@@ -89,11 +89,11 @@ class NotificationController extends Controller
                     405
                 );
             }
-            
+
             $reportedOrderAgente = Order::where([
                 ['agente_id' , '=' , $request->user()->id],
                 ['confirmation', '=', 'reporter'],
-                ['reported_agente_date', '=', now()->toDateString()] // add condition for current date
+                ['reported_agente_date', '=', now()->format('Y-m-d')] // add condition for current date
             ])->get();
 
                 return response()->json(
@@ -106,7 +106,7 @@ class NotificationController extends Controller
                     ],
                     200
                 );
-           
+
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -128,7 +128,7 @@ class NotificationController extends Controller
      */
     public function deliveryNotifications(Request $request){
         try {
-           
+
             if (!$request->user()->hasRole('delivery')) {
                 return response()->json(
                     [
@@ -139,7 +139,7 @@ class NotificationController extends Controller
                     405
                 );
             }
-            
+
             $reportedOrderDelivery = Order::where([
                 ['affectation' , '=' , $request->user()->id],
                 ['delivery', '=', 'reporter'],
@@ -156,7 +156,7 @@ class NotificationController extends Controller
                     ],
                     200
                 );
-           
+
         } catch (\Throwable $th) {
             return response()->json(
                 [
@@ -172,5 +172,5 @@ class NotificationController extends Controller
 
 
 
-    
+
 }

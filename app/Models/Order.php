@@ -49,8 +49,8 @@ class Order extends Model
         'price' => 'float',
         'reported_agente_note' => 'string',
         'reported_delivery_note' => 'string',
-        'reported_agente_date' => 'date',
-        'reported_delivery_date' => 'date',
+        // 'reported_agente_date' => 'date',
+        // 'reported_delivery_date' => 'date',
         'delivery_date'  => 'datetime',
         'cmd'  => 'string',
         'double' => 'integer'
