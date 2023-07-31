@@ -30,7 +30,8 @@ class Order extends Model
         'delivery_date',
         'sheets_id',
         'cmd',
-        'product_name'
+        'product_name',
+        'dropped_at',
     ];
 
     protected $casts = [

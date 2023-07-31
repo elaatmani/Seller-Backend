@@ -1135,6 +1135,7 @@ class OrderController extends Controller
 
                     foreach ($checkOrder as $order) {
                         $order->agente_id = $request->user()->id;
+                        $order->dropped_at = now();
                         // $order->double = $firstOrder->id;
                         $order->save();
 
@@ -1152,6 +1153,7 @@ class OrderController extends Controller
                     // Continue with the original code without any modifications
                     DB::beginTransaction();
                     $AddOrder->agente_id = $request->user()->id;
+                    $AddOrder->dropped_at = now();
                     $AddOrder->save();
 
                     $orderHistory = new OrderHistory();

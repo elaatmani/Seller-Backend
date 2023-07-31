@@ -30,7 +30,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/sync', [GoogleSheetController::class, 'index']);
+// Route::get('/test', function() {
+//     return storage_path(Product::find(35)->image);
+// });
 
 Route::get('storage/productImages/{filename}', function ($filename) {
     $path = "/home/u594122495/domains/vldo.shop/public_html/api/storage/app/public/productImages/{$filename}";
@@ -40,6 +42,10 @@ Route::get('storage/productImages/{filename}', function ($filename) {
         abort(404);
     }
 });
+
+Route::get('/sync', [GoogleSheetController::class, 'index']);
+
+
 
 Route::get('/fact/{id}',[FactorisationController::class,'generatePDF']);
 
