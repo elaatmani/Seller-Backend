@@ -32,8 +32,14 @@ Route::get('/', function () {
 
 Route::get('/sync', [GoogleSheetController::class, 'index']);
 
-
-Route::get('/test', [GoogleSheetController::class, 'test']);
+Route::get('storage/productImages/{filename}', function ($filename) {
+    $path = "/home/u594122495/domains/vldo.shop/public_html/api/storage/app/public/productImages/{$filename}";
+    if (file_exists($path)) {
+        return response()->file($path);
+    } else {
+        abort(404);
+    }
+});
 
 Route::get('/fact/{id}',[FactorisationController::class,'generatePDF']);
 

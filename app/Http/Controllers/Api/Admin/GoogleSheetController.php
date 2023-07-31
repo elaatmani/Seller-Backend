@@ -15,16 +15,16 @@ class GoogleSheetController extends Controller
     public function index(Request $request) {
 
         try {
-            if (!$request->user()->can('show_all_sheets')) {
-                return response()->json(
-                    [
-                        'status' => false,
-                        'code' => 'NOT_ALLOWED',
-                        'message' => 'You Dont Have Access To See Sheets',
-                    ],
-                    405
-                );
-            }
+            // if (!$request->user()->can('show_all_sheets')) {
+            //     return response()->json(
+            //         [
+            //             'status' => false,
+            //             'code' => 'NOT_ALLOWED',
+            //             'message' => 'You Dont Have Access To See Sheets',
+            //         ],
+            //         405
+            //     );
+            // }
 
             $sheets = Sheet::where('auto_fetch', 1)->get();
             $sheet_helper = new SheetHelper();
