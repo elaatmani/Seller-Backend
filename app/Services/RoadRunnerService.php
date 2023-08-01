@@ -14,6 +14,10 @@ class RoadRunnerService
         return SteHelper::apiSte([ 'company' => 'Voldo' ], 'getcities/');
     }
 
+    public static function orders() {
+        return SteHelper::apiSte([ 'company' => 'Voldo' ], 'list/');
+    }
+
     public static function rates() {
         return SteHelper::apiSte([ 'company' => 'Voldo' ], 'getrates/');
     }

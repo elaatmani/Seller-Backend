@@ -219,4 +219,32 @@ class SaleController extends Controller
             );
         }
     }
+
+    public function newSales(Request $request) {
+        try {
+            $ids = $request->ids;
+            $relationship = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
+            $newOrders = Order::with($relationship)->whereNotIn('id', $ids)->get();
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'orders' => $newOrders
+                    ]
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
 }

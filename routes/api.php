@@ -133,6 +133,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Sales For Admin
     Route::get('/sales', [SaleController::class, 'index']);
+    Route::post('/sales/fresh', [SaleController::class, 'newSales']);
     Route::post('/sales/new', [SaleController::class, 'create']);
     Route::post('/sales/reset', [SaleController::class, 'saleReset']);
     Route::post('/sales/scan' , [OrderController::class , 'orderScanner']);

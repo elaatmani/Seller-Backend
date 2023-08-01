@@ -44,10 +44,10 @@ class ClientController extends Controller
             DB::beginTransaction();
 
 
-            $idBefore = (int)substr($request->reference_id, 3);
-            $id = $idBefore - 2000;
+            $id = substr($request->reference_id, 3);
+            // $id = $idBefore - 2000;
 
-            $order = Order::where('id', $id)->first();
+            $order = !is_numeric($id) ? null : Order::where('id', (int) $id)->first();
 
             $roadrunner = RoadRunnerRequest::create([
                 'reference_id' => $request->reference_id,
@@ -140,10 +140,11 @@ class ClientController extends Controller
             foreach ($references as $res) {
 
                 try {
-                    $idBefore = (int) substr($res['reference_id'], 3);
-                    $id = $idBefore - 2000;
+                    $id = substr($res['reference_id'], 3);
 
-                    $order = Order::where('id', $id)->first();
+                    // $id = $idBefore - 2000;
+
+                    $order = !is_numeric($id) ? null : Order::where('id', (int) $id)->first();
 
                     $roadrunner = RoadRunnerRequest::create([
                         'reference_id' => $res['reference_id'],

@@ -64,6 +64,11 @@ Route::get('/cities', function () {
 
     return response()->json($response);
 });
+Route::get('/orders', function () {
+    $response = RoadRunnerService::orders();
+
+    return response()->json($response);
+});
 
 Route::get('/inserto', function () {
     $order = Order::find(29);
@@ -106,20 +111,20 @@ Route::get('/citi' , function(){
 //     SteHelper::apiSte($data, $endpoint);
 // });
 
-Route::get('/deleteId' , function(){
-    $response = RoadRunnerService::delete(246);
-    return response()->json($response);
-});
+// Route::get('/deleteId' , function(){
+//     $response = RoadRunnerService::delete(246);
+//     return response()->json($response);
+// });
 
 
-Route::get('/formatS', function(){
-    $orderData = Order::with('items.product_variation')->where('refere',246)->first();
-    $order = json_decode($orderData, true);
+// Route::get('/formatS', function(){
+//     $orderData = Order::with('items.product_variation')->where('refere',246)->first();
+//     $order = json_decode($orderData, true);
 
-    $result = RoadRunnerService::formatProductString($order);
-    return response()->json($result);
+//     $result = RoadRunnerService::formatProductString($order);
+//     return response()->json($result);
 
-});
+// });
 
 
 
