@@ -46,8 +46,13 @@ class ClientController extends Controller
 
             $id = substr($request->reference_id, 3);
             // $id = $idBefore - 2000;
+            $prefix = substr($request->reference_id, 0, 3);
 
-            $order = !is_numeric($id) ? null : Order::where('id', (int) $id)->first();
+            if($prefix == 'vld' && is_numeric($id)) {
+                $order = Order::where('id', (int) $id)->first();
+            } else {
+                $order = null;
+            }
 
             $roadrunner = RoadRunnerRequest::create([
                 'reference_id' => $request->reference_id,
@@ -143,8 +148,13 @@ class ClientController extends Controller
                     $id = substr($res['reference_id'], 3);
 
                     // $id = $idBefore - 2000;
+                    $prefix = substr($request->reference_id, 0, 3);
 
-                    $order = !is_numeric($id) ? null : Order::where('id', (int) $id)->first();
+                    if($prefix == 'vld' && is_numeric($id)) {
+                        $order = Order::where('id', (int) $id)->first();
+                    } else {
+                        $order = null;
+                    }
 
                     $roadrunner = RoadRunnerRequest::create([
                         'reference_id' => $res['reference_id'],
