@@ -157,6 +157,8 @@ class OrderController extends Controller
                 'request' => "NONE",
                 'response' => NULL,
                 ];
+            DB::beginTransaction();
+
 
             $sale = Order::where('id', $id)->first();
 
@@ -176,16 +178,21 @@ class OrderController extends Controller
                     $orderHistory = new OrderHistory();
                     $orderHistory->order_id = $sale->id;
                     $orderHistory->user_id = $request->user()->id;
-                    $orderHistory->historique = $request->upsell;
+                    $orderHistory->historique = !!$request->upsell ? $request->upsell : 'Select';
                     $orderHistory->type = 'upsell';
                     $orderHistory->note = 'Updated Status of Upsell';
                     $orderHistory->save();
                 }
 
+                if ($sale->confirmation == 'reporter') {
+                    $sale->reported_agente_date = $request->reported_agente_date;
+                    $sale->reported_agente_note = $request->reported_agente_note;
+                }
+
                 if ($request->confirmation != $sale->confirmation) {
                     $sale->confirmation = $request->confirmation;
 
-                    if ($request->confirmation === 'reporter') {
+                    if ($sale->confirmation === 'reporter') {
                         $sale->reported_agente_date = $request->reported_agente_date;
                         $sale->reported_agente_note = $request->reported_agente_note;
                     }
@@ -194,9 +201,9 @@ class OrderController extends Controller
                     $orderHistory = new OrderHistory();
                     $orderHistory->order_id = $sale->id;
                     $orderHistory->user_id = $request->user()->id;
-                    $orderHistory->historique = $request->confirmation;
+                    $orderHistory->historique = !!$request->confirmation ? $request->confirmation : 'Select';
                     $orderHistory->type = 'confirmation';
-                    $orderHistory->note = 'Updated Status of C  onfirmation';
+                    $orderHistory->note = 'Updated Status of Confirmation';
                     $orderHistory->save();
                 }
 
@@ -252,7 +259,7 @@ class OrderController extends Controller
                                    [
                                        'status' => false,
                                        'code' => 'ERROR',
-                                       'message' => "Road Runner: " . $roadrunner['response']['error'],
+                                       'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
                                    ],
                                    500
                                );
@@ -261,8 +268,8 @@ class OrderController extends Controller
                    $sale->affectation = $request->affectation;
 
                     if ($request->affectation != null) {
-                        $sale->delivery = 'dispatch';
-                           if($request->affectation == 4){
+                            $sale->delivery = 'dispatch';
+                           if($request->affectation == 4 && $sale->confirmation == 'confirmer'){
                                $roadrunner = [
                                    // 'ip_address' => $_SERVER['SERVER_ADDR'],
                                    // 'domain' => $_SERVER['HTTP_HOST'],
@@ -271,11 +278,14 @@ class OrderController extends Controller
                                ];
 
                                if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
+                                    $sale->affectation = NULL;
+                                    $sale->delivery = NULL;
+                                    $sale->save();
                                    return response()->json(
                                        [
                                            'status' => false,
                                            'code' => 'ERROR',
-                                           'message' => "Road Runner: " . $roadrunner['response']['error'],
+                                           'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
                                        ],
                                        500
                                    );
@@ -285,13 +295,14 @@ class OrderController extends Controller
                    $orderHistory = new OrderHistory();
                    $orderHistory->order_id = $sale->id;
                    $orderHistory->user_id = $request->user()->id;
-                   $orderHistory->historique = $request->affectation;
+                   $orderHistory->historique = !!$request->affectation ? $request->affectation : 'Select';
                    $orderHistory->type = 'affectation';
-                   $orderHistory->note = 'Updated Status of Confirmation';
+                   $orderHistory->note = 'Updated Status of Affectation';
                    $orderHistory->save();
                }
 
                $sale->save();
+               DB::commit();
 
                 return response()->json(
                     [
@@ -892,11 +903,12 @@ class OrderController extends Controller
                     ];
 
                     if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
+
                         return response()->json(
                             [
                                 'status' => false,
                                 'code' => 'ERROR',
-                                'message' => "Road Runner: " . $roadrunner['response']['error'],
+                                'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
                             ],
                             500
                         );
@@ -918,11 +930,14 @@ class OrderController extends Controller
                         ];
 
                         if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
+                            $order->affectation = NULL;
+                            $order->delivery = NULL;
+                            $order->save();
                             return response()->json(
                                 [
                                     'status' => false,
                                     'code' => 'ERROR',
-                                    'message' => "Road Runner: " . $roadrunner['response']['error'],
+                                    'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
                                 ],
                                 500
                             );

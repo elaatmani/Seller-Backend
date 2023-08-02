@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\RoadRunnerService;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -56,16 +57,16 @@ class SaleController extends Controller
     {
         try {
 
-            if (!$request->user()->can('create_sale')) {
-                return response()->json(
-                    [
-                        'status' => false,
-                        'code' => 'NOT_ALLOWED',
-                        'message' => 'You Dont Have Access To Create Sale',
-                    ],
-                    405
-                );
-            }
+            // if (!$request->user()->can('create_sale')) {
+            //     return response()->json(
+            //         [
+            //             'status' => false,
+            //             'code' => 'NOT_ALLOWED',
+            //             'message' => 'You Dont Have Access To Create Sale',
+            //         ],
+            //         405
+            //     );
+            // }
 
 
             //Validated
@@ -96,6 +97,18 @@ class SaleController extends Controller
                 );
             }
 
+            if($request->affectation != null && $request->confirmation != 'confirmer') {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'ERROR',
+                        'message' => 'Cannot affect order without being confirmed.'
+                    ],
+                    500
+                );
+            }
+
+
             DB::beginTransaction();
             $sale = Order::create([
                 'fullname' => $request->fullname,
@@ -103,18 +116,20 @@ class SaleController extends Controller
                 'city' => $request->city,
                 'adresse' => $request->adresse,
                 'price' => $request->price,
-                'counts_from_warehouse' => $request->counts_from_warehouse
+                'agente_id' => auth()->id(),
+                'note' => $request->note,
+                'reported_agente_note' => $request->reported_agente_note,
+                'reported_agente_date' => $request->reported_agente_date,
+                'counts_from_warehouse' => $request->counts_from_warehouse,
+                'affectation' => $request->confirmation == 'confirmer' ? $request->affectation : null,
+                'confirmation' => $request->confirmation,
+                'note' => $request->note,
+                'delivery' => $request->affectation != null ? "dispatch" : null,
+                'upsell' => $request->upsell,
+                'sheets_id' => "created_by:" . auth()->id()
             ]);
 
-            // foreach ($request->orderItems as $orderItem) {
-            //     OrderItem::create([
-            //         'order_id' => $sale->id,
-            //         'product_id' => $orderItem['product_id'],
-            //         'product_ref' => $orderItem['product_ref'],
-            //         'product_variation_id' => $orderItem['product_variation_id'],
-            //         'quantity' => $orderItem['quantity']
-            //     ]);
-            // }
+
 
             $existingItems = collect($request->orderItems)->groupBy(function ($item) {
                 return  $item['product_id'] . '_' . $item['product_ref'] . '_' . $item['product_variation_id'];
@@ -135,9 +150,34 @@ class SaleController extends Controller
                     'price' => $orderItem['price']
                 ]);
             }
-            DB::commit();
+
 
             $sale = Order::with(['items' => ['product_variation.warehouse', 'product']])->where('id', $sale->id)->first();
+
+            if($sale->affectation == 4) {
+
+                $roadrunner = [
+                    // 'ip_address' => $_SERVER['SERVER_ADDR'],
+                    // 'domain' => $_SERVER['HTTP_HOST'],
+                    'request' => 'INSERT',
+                    'response' => RoadRunnerService::insert($sale),
+                ];
+
+                if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
+                     $sale->affectation = NULL;
+                     $sale->delivery = NULL;
+                     $sale->save();
+                    return response()->json(
+                        [
+                            'status' => false,
+                            'code' => 'ERROR',
+                            'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
+                        ],
+                        500
+                    );
+                }
+            }
+            DB::commit();
 
             return response()->json([
                 'status' => true,
@@ -148,6 +188,7 @@ class SaleController extends Controller
                 ]
             ], 200);
         } catch (\Throwable $th) {
+            DB::rollBack();
 
             return response()->json(
                 [

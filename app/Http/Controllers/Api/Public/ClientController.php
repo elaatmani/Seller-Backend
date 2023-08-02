@@ -18,9 +18,9 @@ class ClientController extends Controller
         'New',
         'Picked Up',
         'Transfer',
-        'Delayed',
+        'Delay',
         'Delivered',
-        'Canceled',
+        'Cancel',
         'Returned',
         'Delivered & Return',
         'Paid'
@@ -30,11 +30,11 @@ class ClientController extends Controller
         'New' => 'dispatch',
         'Picked Up' => 'expidier',
         'Transfer' => 'transfer',
-        'Delayed' => 'pas-de-reponse',
+        'Delay' => 'pas-de-reponse',
         'Delivered' => 'livrer',
-        'Canceled' => 'annuler',
+        'Cancel' => 'annuler',
         'Returned' => 'retourner',
-        'Delivered & Return' => 'livrer',
+        'Delivered & Return' => 'livrer-et-retourner',
         'Paid' => 'paid'
     ];
 
@@ -46,7 +46,7 @@ class ClientController extends Controller
 
             $id = substr($request->reference_id, 3);
             // $id = $idBefore - 2000;
-            $prefix = substr($request->reference_id, 0, 3);
+            $prefix = strtolower(substr($request->reference_id, 0, 3));
 
             if($prefix == 'vld' && is_numeric($id)) {
                 $order = Order::where('id', (int) $id)->first();
@@ -148,7 +148,7 @@ class ClientController extends Controller
                     $id = substr($res['reference_id'], 3);
 
                     // $id = $idBefore - 2000;
-                    $prefix = substr($request->reference_id, 0, 3);
+                    $prefix = strtolower(substr($res['reference_id'], 0, 3));
 
                     if($prefix == 'vld' && is_numeric($id)) {
                         $order = Order::where('id', (int) $id)->first();

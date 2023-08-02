@@ -12,8 +12,11 @@ use Illuminate\Support\Facades\Http;
 use App\Helpers\SteHelper;
 use App\Http\Controllers\Api\Public\OrderController;
 use App\Models\Order;
+use App\Models\OrderHistory;
+use App\Models\RoadRunnerRequest;
 use App\Services\RoadRunnerService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -128,3 +131,74 @@ Route::get('/citi' , function(){
 
 
 
+Route::get('/fix', function() {
+
+    $updated_orders = [];
+    $not_updated_orders = [];
+    // DB::beginTransaction();
+    try {
+        $requests = RoadRunnerRequest::distinct('reference_id')->where('reference_id', 'like', 'vld%')->get(['reference_id', 'status']);
+
+        // $id = substr("vld2228", 3);
+
+        // foreach($requests as $request) {
+
+        // }
+
+        $references = [
+            'New' => 'dispatch',
+            'Picked Up' => 'expidier',
+            'Transfer' => 'transfer',
+            'Delay' => 'pas-de-reponse',
+            'Delivered' => 'livrer',
+            'Cancel' => 'annuler',
+            'Returned' => 'retourner',
+            'Delivered & Return' => 'livrer-et-retourner',
+            'Paid' => 'paid'
+        ];
+
+
+        foreach($requests as $req) {
+            $max_id = RoadRunnerRequest::where('reference_id', $req->reference_id)->max('id');
+            $r = RoadRunnerRequest::where('id', $max_id)->first(['reference_id', 'status', 'created_at']);
+
+            $valid_status = in_array($r->status, array_flip($references));
+            $valid_prefix = strtolower(substr($r->reference_id, 0, 3)) == 'vld';
+            $id = substr($r->reference_id, 3);
+
+            if($valid_status && $valid_prefix && is_numeric($id)) {
+                $status = $references[$r->status];
+
+                $order =  Order::where('id', $id)->first();
+                if(!$order) {
+                    throw new Error($id);
+                }
+                if($order->id == $id) {
+                    $order->delivery = $status;
+                    $updated_orders[] = ['id' => $order->id, 'status' => $status];
+                    $orderHistory = new OrderHistory();
+                    $orderHistory->order_id = $id;
+                    $orderHistory->user_id = 4;
+                    $orderHistory->type = 'delivery';
+                    $orderHistory->historique = $status;
+                    $orderHistory->note = 'Updated Status of Delivery';
+                    $orderHistory->save();
+                    $order->save();
+                } else {
+                    $not_updated_orders[] = ['id' => $order->id];
+                }
+            } else {
+                $not_updated_orders[] = ['id' => $id];
+            }
+        }
+
+        // DB::commit();
+
+        // return collect($updated_orders)->where('status', 'Delay')->count();
+    } catch (\Throwable $th) {
+        $not_updated_orders[] = $th->getMessage();
+    }
+    return [ 'not' => $not_updated_orders, 'updated' => $updated_orders];
+
+
+});
