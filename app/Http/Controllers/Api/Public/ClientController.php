@@ -7,6 +7,7 @@ use App\Models\OrderHistory;
 use Illuminate\Http\Request;
 use App\Models\RoadRunnerRequest;
 use App\Http\Controllers\Controller;
+use App\Models\Factorisation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -95,6 +96,53 @@ class ClientController extends Controller
             $roadrunner->save();
 
             $order->delivery = $newStatus;
+            
+            if ($order->confirmation === 'confirmer' && $newStatus === 'livrer') {
+                $order->cmd = 'CMD-' . date('dmY-His', strtotime($order->created_at));
+                $order->delivery_date = now();
+                $existingFactorization = Factorisation::where('delivery_id', $order->affectation)
+                    ->where('close', false)
+                    ->first();
+
+                if ($existingFactorization) {
+                    // Update the existing factorization
+                    $existingFactorization->price += $order->price;
+                    $existingFactorization->commands_number += 1;
+                    $existingFactorization->save();
+
+                    $order->factorisation_id = $existingFactorization->id;
+                } else {
+                    // Create a new factorization
+                    $newFactorization = Factorisation::create([
+                        'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)),
+                        'delivery_id' => $order->affectation,
+                        'commands_number' => +1,
+                        'price' => $order->price,
+                    ]);
+
+                    $order->factorisation_id = $newFactorization->id;
+                }
+            }
+
+            if ($order->factorisation_id) {
+                if ($newStatus !== 'livrer') {
+                    $order->delivery_date = null;
+
+                    $oldFactorisation = Factorisation::find($order->factorisation_id);
+                    if ($oldFactorisation) {
+                        $oldFactorisation->price -= $order->price;
+                        $oldFactorisation->commands_number -= 1;
+                        $oldFactorisation->save();
+                        if ($oldFactorisation->commands_number == 0) {
+                            $oldFactorisation->delete();
+                        }
+                    }
+                    $order->factorisation_id = null;
+                }
+            }
+            // if($order->delivery == 'livrer'){
+
+            // }
             $order->save();
 
 
