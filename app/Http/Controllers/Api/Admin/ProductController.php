@@ -19,6 +19,7 @@ use App\Models\ProductAgente;
 use App\Models\ProductDelivery;
 use App\Models\ProductImage;
 use App\Models\User;
+use App\Repositories\ProductRepository;
 
 class ProductController extends Controller
 {
@@ -161,6 +162,10 @@ class ProductController extends Controller
                 }
 
             }
+
+            $offers = json_decode($request->offers, true) ?? [];
+            ProductRepository::createProductOffers($product->id, $offers);
+
             DB::commit();
             return response()->json(
                 [
@@ -168,7 +173,7 @@ class ProductController extends Controller
                     'code' => 'PRODUCT_CREATED',
                     'message' => 'Product Created Successfully!',
                     'data' => [
-                        'product' => Product::find($product->id)
+                        'product' => ProductHelper::with_tracking(Product::find($product->id))
                     ]
                 ],
                 200
@@ -446,6 +451,9 @@ class ProductController extends Controller
                     'stockAlert' => (int) $v['stockAlert']
                 ]);
             }
+
+            $offers = json_decode($request->offers, true) ?? [];
+            ProductRepository::updateProductOffers($product->id, $offers);
 
             DB::commit();
 

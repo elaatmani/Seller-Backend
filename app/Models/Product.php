@@ -31,7 +31,7 @@ class Product extends Model
         'image'
     ];
 
-    protected $with = [ 'deliveries' ];
+    protected $with = [ 'deliveries', 'offers' ];
 
     public function variations(){
         return $this->hasMany('App\Models\ProductVariation');
@@ -52,5 +52,9 @@ class Product extends Model
 
     public function getImageAttribute() {
         return !!$this->product_image ? $this->product_image->image_path : null;
+    }
+
+    public function offers() {
+        return $this->hasMany(ProductOffer::class);
     }
 }
