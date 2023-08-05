@@ -760,7 +760,7 @@ class OrderController extends Controller
             $order = Order::where('id', $id)->first();
 
             if ($order) {
-
+                // return RoadRunnerService::getPrice($order);
                 DB::beginTransaction();
                 $order->delivery = $request->delivery;
 
@@ -773,7 +773,7 @@ class OrderController extends Controller
 
                     if ($existingFactorization) {
                         // Update the existing factorization
-                        $existingFactorization->price += $order->price;
+                        $existingFactorization->price += RoadRunnerService::getPrice($order);
                         $existingFactorization->commands_number += 1;
                         $existingFactorization->save();
 
@@ -784,7 +784,7 @@ class OrderController extends Controller
                             'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)),
                             'delivery_id' => $order->affectation,
                             'commands_number' => +1,
-                            'price' => $order->price,
+                            'price' => RoadRunnerService::getPrice($order),
                         ]);
 
                         $order->factorisation_id = $newFactorization->id;
@@ -797,7 +797,7 @@ class OrderController extends Controller
 
                         $oldFactorisation = Factorisation::find($order->factorisation_id);
                         if ($oldFactorisation) {
-                            $oldFactorisation->price -= $order->price;
+                            $oldFactorisation->price -= RoadRunnerService::getPrice($order);
                             $oldFactorisation->commands_number -= 1;
                             $oldFactorisation->save();
                             if ($oldFactorisation->commands_number == 0) {
