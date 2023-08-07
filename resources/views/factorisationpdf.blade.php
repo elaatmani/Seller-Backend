@@ -91,7 +91,7 @@
       <td> {{ $sale->city }} </td>
       <td> x{{ count($sale->items->pluck('product')->pluck('name')) }} </td>
       {{-- <td> {{ $sale->delivery }} </td> --}}
-      <td> {{ $sale->price }} </td>
+      <td> {{ App\Services\RoadRunnerService::getPrice($sale) }} </td>
       <td> @foreach ($factorisation->delivery->deliveryPlaces as $deliveryPlace)
         @if ($deliveryPlace->city->name === $sale->city)
         {{ $deliveryPlace->fee }}
