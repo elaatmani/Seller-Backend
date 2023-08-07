@@ -265,7 +265,7 @@ class OrderController extends Controller
                                );
                            }
                        }
-                   $sale->affectation = $request->affectation;
+
 
                     if ($request->affectation != null) {
                             $sale->delivery = 'dispatch';
@@ -291,11 +291,18 @@ class OrderController extends Controller
                                    );
                                }
                            }
+                   } else {
+                    $sale->delivery = null;
                    }
+
+                   $sale->affectation = $request->affectation;
+
+                   $deliveryUser = User::find($request->affectation);
+                    $delivery = !!$request->affectation ? $deliveryUser->firstname . ' ' . $deliveryUser->lastname : 'Select';
                    $orderHistory = new OrderHistory();
                    $orderHistory->order_id = $sale->id;
                    $orderHistory->user_id = $request->user()->id;
-                   $orderHistory->historique = !!$request->affectation ? $request->affectation : 'Select';
+                   $orderHistory->historique = $delivery;
                    $orderHistory->type = 'affectation';
                    $orderHistory->note = 'Updated Status of Affectation';
                    $orderHistory->save();
@@ -326,6 +333,7 @@ class OrderController extends Controller
                 );
             }
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json(
                 [
                     'status' => false,
@@ -913,6 +921,9 @@ class OrderController extends Controller
                             500
                         );
                     }
+
+                    $order->delivery = null;
+                    $order->save();
                 }
                 $order->affectation = $request->affectation;
                 $orderHistory = new OrderHistory();

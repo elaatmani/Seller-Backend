@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\InventoryController;
 use App\Http\Controllers\Api\Admin\WarehouseController;
 use App\Http\Controllers\Api\Public\DashboardController;
+use App\Http\Controllers\Api\Public\FollowUpController;
 use App\Services\RoadRunnerService;
 
 /*
@@ -193,6 +194,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Dashboard
     Route::get('/dashboard/delivery', [DashboardController::class, 'delivery']);
     Route::get('/dashboard/agente', [DashboardController::class, 'agente']);
+
+    // Follow Up
+    Route::post('/followup', [FollowUpController::class, 'index']);
 
     Route::get('/test', function () {
         event(new NewNotification('Hello bro'));

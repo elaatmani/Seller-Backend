@@ -17,11 +17,19 @@ class OrderHistory extends Model
         'type'
     ];
 
+    protected $with = [
+        'affectation'
+    ];
+
     public function orders(){
         return $this->belongsTo(Order::class,'order_id');
     }
 
     public function users(){
         return $this->belongsTo(User::class,'user_id');
+    }
+
+    public function affectation() {
+        return $this->belongsTo(User::class, 'historique');
     }
 }

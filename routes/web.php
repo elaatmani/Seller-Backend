@@ -1,22 +1,25 @@
 <?php
 
-use App\Events\NewNotification;
-use App\Helpers\ProductHelper;
-use App\Http\Controllers\Api\Admin\FactorisationController;
-use App\Http\Controllers\Api\Admin\GoogleSheetController;
-use App\Models\Product;
 use App\Models\User;
-use App\Models\Warehouse;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http;
-use App\Helpers\SteHelper;
-use App\Http\Controllers\Api\Public\OrderController;
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\Warehouse;
+use App\Helpers\SteHelper;
 use App\Models\OrderHistory;
-use App\Models\RoadRunnerRequest;
-use App\Services\RoadRunnerService;
 use Illuminate\Http\Request;
+use App\Helpers\ProductHelper;
+use App\Events\NewNotification;
+use App\Models\RoadRunnerRequest;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
+use App\Services\RoadRunnerService;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Models\Permission;
+use App\Http\Controllers\Api\Public\OrderController;
+use App\Http\Controllers\Api\Admin\GoogleSheetController;
+use App\Http\Controllers\Api\Admin\FactorisationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -131,74 +134,95 @@ Route::get('/citi' , function(){
 
 
 
-Route::get('/fix', function() {
+// Route::get('/fix', function() {
 
-    $updated_orders = [];
-    $not_updated_orders = [];
-    // DB::beginTransaction();
-    try {
-        $requests = RoadRunnerRequest::distinct('reference_id')->where('reference_id', 'like', 'vld%')->get(['reference_id', 'status']);
+//     $updated_orders = [];
+//     $not_updated_orders = [];
+//     // DB::beginTransaction();
+//     try {
+//         $requests = RoadRunnerRequest::distinct('reference_id')->where('reference_id', 'like', 'vld%')->get(['reference_id', 'status']);
 
-        // $id = substr("vld2228", 3);
+//         // $id = substr("vld2228", 3);
 
-        // foreach($requests as $request) {
+//         // foreach($requests as $request) {
 
-        // }
+//         // }
 
-        $references = [
-            'New' => 'dispatch',
-            'Picked Up' => 'expidier',
-            'Transfer' => 'transfer',
-            'Delay' => 'pas-de-reponse',
-            'Delivered' => 'livrer',
-            'Cancel' => 'annuler',
-            'Returned' => 'retourner',
-            'Delivered & Return' => 'livrer-et-retourner',
-            'Paid' => 'paid'
-        ];
-
-
-        foreach($requests as $req) {
-            $max_id = RoadRunnerRequest::where('reference_id', $req->reference_id)->max('id');
-            $r = RoadRunnerRequest::where('id', $max_id)->first(['reference_id', 'status', 'created_at']);
-
-            $valid_status = in_array($r->status, array_flip($references));
-            $valid_prefix = strtolower(substr($r->reference_id, 0, 3)) == 'vld';
-            $id = substr($r->reference_id, 3);
-
-            if($valid_status && $valid_prefix && is_numeric($id)) {
-                $status = $references[$r->status];
-
-                $order =  Order::where('id', $id)->first();
-                if(!$order) {
-                    throw new Error($id);
-                }
-                if($order->id == $id) {
-                    $order->delivery = $status;
-                    $updated_orders[] = ['id' => $order->id, 'status' => $status];
-                    $orderHistory = new OrderHistory();
-                    $orderHistory->order_id = $id;
-                    $orderHistory->user_id = 4;
-                    $orderHistory->type = 'delivery';
-                    $orderHistory->historique = $status;
-                    $orderHistory->note = 'Updated Status of Delivery';
-                    $orderHistory->save();
-                    $order->save();
-                } else {
-                    $not_updated_orders[] = ['id' => $order->id];
-                }
-            } else {
-                $not_updated_orders[] = ['id' => $id];
-            }
-        }
-
-        // DB::commit();
-
-        // return collect($updated_orders)->where('status', 'Delay')->count();
-    } catch (\Throwable $th) {
-        $not_updated_orders[] = $th->getMessage();
-    }
-    return [ 'not' => $not_updated_orders, 'updated' => $updated_orders];
+//         $references = [
+//             'New' => 'dispatch',
+//             'Picked Up' => 'expidier',
+//             'Transfer' => 'transfer',
+//             'Delay' => 'pas-de-reponse',
+//             'Delivered' => 'livrer',
+//             'Cancel' => 'annuler',
+//             'Returned' => 'retourner',
+//             'Delivered & Return' => 'livrer-et-retourner',
+//             'Paid' => 'paid'
+//         ];
 
 
+//         foreach($requests as $req) {
+//             $max_id = RoadRunnerRequest::where('reference_id', $req->reference_id)->max('id');
+//             $r = RoadRunnerRequest::where('id', $max_id)->first(['reference_id', 'status', 'created_at']);
+
+//             $valid_status = in_array($r->status, array_flip($references));
+//             $valid_prefix = strtolower(substr($r->reference_id, 0, 3)) == 'vld';
+//             $id = substr($r->reference_id, 3);
+
+//             if($valid_status && $valid_prefix && is_numeric($id)) {
+//                 $status = $references[$r->status];
+
+//                 $order =  Order::where('id', $id)->first();
+//                 if(!$order) {
+//                     throw new Error($id);
+//                 }
+//                 if($order->id == $id) {
+//                     $order->delivery = $status;
+//                     $updated_orders[] = ['id' => $order->id, 'status' => $status];
+//                     $orderHistory = new OrderHistory();
+//                     $orderHistory->order_id = $id;
+//                     $orderHistory->user_id = 4;
+//                     $orderHistory->type = 'delivery';
+//                     $orderHistory->historique = $status;
+//                     $orderHistory->note = 'Updated Status of Delivery';
+//                     $orderHistory->save();
+//                     $order->save();
+//                 } else {
+//                     $not_updated_orders[] = ['id' => $order->id];
+//                 }
+//             } else {
+//                 $not_updated_orders[] = ['id' => $id];
+//             }
+//         }
+
+//         // DB::commit();
+
+//         // return collect($updated_orders)->where('status', 'Delay')->count();
+//     } catch (\Throwable $th) {
+//         $not_updated_orders[] = $th->getMessage();
+//     }
+//     return [ 'not' => $not_updated_orders, 'updated' => $updated_orders];
+
+
+// });
+
+
+Route::get('add-user', function() {
+    $role = Role::create([
+        'name' => 'follow-up'
+    ]);
+
+    $permission = Permission::create(['name' => 'follow_up_orders']);
+    $role->givePermissionTo($permission);
+
+    $user = User::create([
+        'firstname' => 'followup',
+        'lastname' => 'followup',
+        'email' => 'followup@gmail.com',
+        'phone' => '12345678',
+        'password' => Hash::make('followup'),
+        'status' => 1
+    ]);
+
+    $user->assignRole('follow-up');
 });
