@@ -259,6 +259,7 @@ class OrderController extends Controller
                                    [
                                        'status' => false,
                                        'code' => 'ERROR',
+                                       'response' => $roadrunner,
                                        'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
                                    ],
                                    500
@@ -289,7 +290,8 @@ class OrderController extends Controller
                                             [
                                                 'status' => false,
                                                 'code' => 'ERROR',
-                                                'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
+                                                'response' => $roadrunner,
+                                                'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'The city is not valid.' : $roadrunner['response']['error']),
                                             ],
                                             500
                                         );
@@ -923,6 +925,7 @@ class OrderController extends Controller
                             [
                                 'status' => false,
                                 'code' => 'ERROR',
+                                'response' => $roadrunner,
                                 'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
                             ],
                             500
@@ -957,7 +960,8 @@ class OrderController extends Controller
                                     [
                                         'status' => false,
                                         'code' => 'ERROR',
-                                        'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
+                                        'response' => $roadrunner,
+                                        'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'City is not valid.' : $roadrunner['response']['error']),
                                     ],
                                     500
                                 );
