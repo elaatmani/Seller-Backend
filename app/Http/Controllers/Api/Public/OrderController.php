@@ -280,17 +280,23 @@ class OrderController extends Controller
                                ];
 
                                if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
-                                    $sale->affectation = NULL;
-                                    $sale->delivery = NULL;
+
+                                    if(optional($roadrunner['response']['error']) != "Can not add order, you may change reference ID") {
+                                        $sale->affectation = NULL;
+                                        $sale->delivery = NULL;
+                                        $sale->save();
+                                        return response()->json(
+                                            [
+                                                'status' => false,
+                                                'code' => 'ERROR',
+                                                'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
+                                            ],
+                                            500
+                                        );
+                                    }
+
+                                    $sale->affectation = $request->affectation;
                                     $sale->save();
-                                   return response()->json(
-                                       [
-                                           'status' => false,
-                                           'code' => 'ERROR',
-                                           'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
-                                       ],
-                                       500
-                                   );
                                }
                            }
                    } else {
@@ -942,18 +948,24 @@ class OrderController extends Controller
                         ];
 
                         if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
-                            $order->affectation = NULL;
-                            $order->delivery = NULL;
+
+                            if(optional($roadrunner['response']['error']) != "Can not add order, you may change reference ID") {
+                                $order->affectation = NULL;
+                                $order->delivery = NULL;
+                                $order->save();
+                                return response()->json(
+                                    [
+                                        'status' => false,
+                                        'code' => 'ERROR',
+                                        'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
+                                    ],
+                                    500
+                                );
+                            }
+
+                            $order->affectation = $request->affectation;
                             $order->save();
-                            return response()->json(
-                                [
-                                    'status' => false,
-                                    'code' => 'ERROR',
-                                    'message' => "Road Runner: " . ($roadrunner['response'] == false ? 'Something went wrong' : $roadrunner['response']['error']),
-                                ],
-                                500
-                            );
-                        }
+                       }
                     }
 
                     $deliveryUser = User::find($request->affectation);
