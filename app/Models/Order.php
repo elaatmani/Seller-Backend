@@ -62,7 +62,8 @@ class Order extends Model
     protected $appends = [
         'is_done',
         'has_doubles',
-        'is_double'
+        'is_double',
+        'delivery_fullname'
     ];
 
 
@@ -87,9 +88,13 @@ class Order extends Model
         return $this->hasMany(Order::class, 'double', 'id');
     }
 
-    // public function origin() {
-    //     return $this->belongsTo(Order::class, 'id', 'double');
-    // }
+    public function delivery_user() {
+        return $this->belongsTo(User::class, 'affectation', 'id');
+    }
+
+    public function getDeliveryFullnameAttribute() {
+        return !$this->delivery_user ? null : $this->delivery_user->firstname . ' ' . $this->delivery_user->firstname;
+    }
 
     public function getHasDoublesAttribute() {
         return $this->doubles->count() > 0;
