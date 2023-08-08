@@ -266,6 +266,8 @@ class OrderController extends Controller
                            }
                        }
 
+                       $sale->affectation = $request->affectation;
+
 
                     if ($request->affectation != null) {
                             $sale->delivery = 'dispatch';
@@ -295,7 +297,6 @@ class OrderController extends Controller
                     $sale->delivery = null;
                    }
 
-                   $sale->affectation = $request->affectation;
 
                    $deliveryUser = User::find($request->affectation);
                     $delivery = !!$request->affectation ? $deliveryUser->firstname . ' ' . $deliveryUser->lastname : 'Select';
