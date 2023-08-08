@@ -220,8 +220,10 @@ class OrderController extends Controller
                     return  $item['product_id'] . '_' . $item['product_ref'] . '_' . $item['product_variation_id'];
                 })->map(function ($groupedItems) {
                     $sumQuantity = collect($groupedItems)->sum('quantity');
+                    $sumPrice = collect($groupedItems)->sum('price');
                     $firstItem = $groupedItems[0];
                     $firstItem['quantity'] = $sumQuantity;
+                    $firstItem['price'] = $sumPrice;
                     return $firstItem;
                 })->values()->toArray();
 

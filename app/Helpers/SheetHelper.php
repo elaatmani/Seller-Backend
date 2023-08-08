@@ -95,7 +95,7 @@ class SheetHelper {
                 'phone' => $phone,
                 'city' => $city,
                 'adresse' => $adresse,
-                'price' => (float) $price,
+                'price' => 0,
                 'sheets_id' => self::order_sheet_id($sheet, $o['Order ID']),
                 'counts_from_warehouse' => true,
                 'product_name' => $product_name
@@ -105,7 +105,7 @@ class SheetHelper {
                 $arr = explode('\n', $quantity);
 
                 // return $product->variations->first()->id;
-
+                $check = 0;
                 foreach($arr as $q) {
                     try {
 
@@ -114,8 +114,10 @@ class SheetHelper {
                             'product_id' => $product->id,
                             'product_ref' => $product->ref,
                             'product_variation_id' => $product->variations->first()->id,
-                            'quantity' => (int) $q
+                            'quantity' => (int) $q,
+                            'price' => $check == 0 ? (float) $price : 0
                         ]);
+                        $check = 1;
                     } catch (\Exception $th) {
                         return $th->getMessage();
                     }
