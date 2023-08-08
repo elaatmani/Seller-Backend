@@ -281,7 +281,7 @@ class OrderController extends Controller
 
                                if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
 
-                                    if(optional($roadrunner['response']['error']) != "Can not add order, you may change reference ID") {
+                                    if(data_get($roadrunner, 'response.error') != "Can not add order, you may change reference ID") {
                                         $sale->affectation = NULL;
                                         $sale->delivery = NULL;
                                         $sale->save();
@@ -949,7 +949,7 @@ class OrderController extends Controller
 
                         if(($roadrunner['response'] == false) || (is_array($roadrunner['response']) && array_key_exists('error', $roadrunner['response']))) {
 
-                            if(optional($roadrunner['response']['error']) != "Can not add order, you may change reference ID") {
+                            if(data_get($roadrunner, 'response.error') != "Can not add order, you may change reference ID") {
                                 $order->affectation = NULL;
                                 $order->delivery = NULL;
                                 $order->save();
