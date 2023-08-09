@@ -11,6 +11,24 @@ use Illuminate\Support\Facades\DB;
 
 class OrderRepository implements OrderRepositoryInterface {
 
+    public $confirmations = [
+        null => 'New',
+        'day-one-call-one'=> 'No reply 1 / day1',
+        'day-one-call-two' =>'No reply 2 / day1',
+        'day-one-call-three' =>'No reply 3 / day1',
+        'day-two-call-one' =>'No reply 1 / day2',
+        'day-two-call-two' =>'No reply 2 / day2',
+        'day-two-call-three' =>'No reply 3 / day2',
+        'day-three-call-one' =>'No reply 1 / day3',
+        'day-three-call-two' =>'No reply 2 / day3',
+        'day-three-call-three' =>'No reply 3 / day3',
+        'reporter' =>'Reported',
+        'annuler' =>'Canceled',
+        'wrong-number' =>'Wrong number',
+        'confirmer' =>'Confirmed',
+        'double' =>'Double',
+    ];
+
     public function all() {
 
     }
@@ -44,15 +62,25 @@ class OrderRepository implements OrderRepositoryInterface {
     {
         $orders = DB::table('orders')->groupBy('confirmation')->selectRaw("confirmation, count('confirmation') as total")->get();
 
-        // $confirmed = $orders->where('confirmation', 'confirmer')->count();
-        // $cancelled = $orders->where('confirmation', 'annuler')->count();
+        $total = $orders->sum('total');
 
-        return $orders;
+        $statistics = $orders->map(function($c) use($total) {
+            return [
+                'name' => $this->confirmations[$c->confirmation],
+                'confirmation' => $c->confirmation,
+                'total' => $c->total,
+                'percent' => round(($c->total * 100) / $total, 2),
+            ];
+        });
 
-        // return [
-        //     'confirmed' => $confirmed,
-        //     'cancelled' => $cancelled
-        // ];
+        $show = [null, 'confirmer', 'annuler', 'double'];
+        $response = [
+            'data' => $statistics,
+            'show' => $show
+        ];
+
+        return $response;
+
     }
 
 }
