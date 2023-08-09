@@ -4,35 +4,33 @@ namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Repositories\Interfaces\OrderRepositoryInterface;
 use Illuminate\Http\Request;
 
 class FollowUpController extends Controller
 {
+
+    private $orderRepository;
+
+    public function __construct(OrderRepositoryInterface $orderRepository)
+    {
+        $this->orderRepository = $orderRepository;
+    }
+
+
     public function index(Request $request) {
-        // $orders = Order::paginate(5);
 
+        $sortBy = $request->input('sort_by');
+        $sortOrder = $request->input('sort_order');
+        $perPage = $request->input('per_page');
 
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortOrder = $request->input('sort_order', 'desc');
-        $perPage = $request->input('per_page', 10); // Number of records per page
-
-        // Get the query builder instance for the 'users' table
-        $query = Order::query();
-
-        $validSortOrders = ['asc', 'desc'];
-        if (!in_array($sortOrder, $validSortOrders)) {
-            $sortOrder = 'desc'; // Set default if the provided sort order is invalid
-        }
-
-        // Apply the sorting to the query
-        $query->orderBy($sortBy, $sortOrder);
-
-        // Retrieve the paginated results
-        $orders = $query->paginate($perPage);
+        $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder);
+        $statistics = $this->orderRepository->followUpStatistics(1);
 
         return response()->json([
             'code' => 'SUCCESS',
             'data' => [
+                'statistics' => $statistics,
                 'orders' => $orders
             ]
             ]);
