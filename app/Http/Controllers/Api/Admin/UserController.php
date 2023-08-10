@@ -1073,4 +1073,25 @@ class UserController extends Controller
             200
         );
     }
+
+    /**
+     * Show Online Users.
+     * @return \Illuminate\Http\Response
+     */
+    public function deliveries()
+    {
+        $role = Role::where('name', 'delivery')->first();
+        $deliveries = $role->users->map(fn($u) => ['id' => $u->id, 'name' => $u->firstname . ' ' . $u->lastname]);
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => [
+                    'deliveries' => $deliveries
+                ]
+            ],
+            200
+        );
+    }
 }

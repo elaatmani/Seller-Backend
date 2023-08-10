@@ -42,4 +42,13 @@ class ProductVariation extends Model
         return  $this->belongsTo(Warehouse::class, 'warehouse_id');
     }
 
+    public function formatForOrder() {
+        return [
+            'id' => $this->id,
+            'size' => $this->size,
+            'color' => $this->color,
+            'warehouse_id' => $this->warehouse_id
+        ];
+    }
+
 }

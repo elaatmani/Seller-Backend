@@ -68,6 +68,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/cities', [UserController::class, 'allCities']);
     // Route::get('/cities', [RoadRunnerService::class, 'cities']);
     Route::get('/delevries', [UserController::class, 'delevries']);
+    Route::get('/deliveries', [UserController::class, 'deliveries']);
     Route::get('/agents', [UserController::class, 'agents']);
     Route::get('/online', [UserController::class, 'onlineUsers']);
 
@@ -118,6 +119,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Product
     Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/for-order', [ProductController::class, 'productsForOrder']);
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::post('/products/new', [ProductController::class, 'create']);
     Route::post('/products/update/{id}', [ProductController::class, 'update']);
@@ -197,6 +199,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Follow Up
     Route::post('/followup', [FollowUpController::class, 'index']);
+    Route::post('/followup/{id}/update', [FollowUpController::class, 'update']);
 
     Route::get('/test', function () {
         event(new NewNotification('Hello bro'));

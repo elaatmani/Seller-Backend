@@ -54,6 +54,22 @@ class ProductController extends Controller
         );
     }
 
+    public function productsForOrder() {
+
+        $products = ProductRepository::productsForOrder();
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => [
+                    'products' => $products,
+                ],
+            ],
+            200
+        );
+    }
+
 
     /**
      * Show the form for creating a new resource.

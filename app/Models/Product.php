@@ -57,4 +57,15 @@ class Product extends Model
     public function offers() {
         return $this->hasMany(ProductOffer::class);
     }
+
+    public function formatForOrder() {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'ref' => $this->ref,
+            'variations' => $this->variations->map->formatForOrder(),
+            'image' => $this->image,
+            'available' => $this->deliveries->map(fn($d) => $d->delivery_id)
+        ];
+    }
 }

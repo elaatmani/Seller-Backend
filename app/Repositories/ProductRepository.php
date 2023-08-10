@@ -2,9 +2,14 @@
 
 namespace App\Repositories;
 
+use App\Models\Product;
 use App\Models\ProductOffer;
 
 class ProductRepository {
+
+    public static function productsForOrder() {
+        return  Product::get()->map->formatForOrder();
+    }
 
 
     public static function createProductOffers($id, $offers) {

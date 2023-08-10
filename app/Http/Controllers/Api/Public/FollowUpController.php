@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Order;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use Illuminate\Http\Request;
@@ -34,5 +35,10 @@ class FollowUpController extends Controller
                 'orders' => $orders
             ]
             ]);
+    }
+
+
+    public function update(UpdateOrderRequest $request, $id) {
+        return $request->validated();
     }
 }

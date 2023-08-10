@@ -53,7 +53,9 @@ class OrderRepository implements OrderRepositoryInterface {
         return $orders;
     }
 
-    public function create($data) {
+
+    public function update($id, $data) {
+        $order = Order::where('id', $id)->first();
 
     }
 
@@ -80,7 +82,6 @@ class OrderRepository implements OrderRepositoryInterface {
         ];
 
         return $response;
-
     }
 
 }
