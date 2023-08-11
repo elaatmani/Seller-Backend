@@ -33,6 +33,18 @@ class OrderRepository implements OrderRepositoryInterface {
 
     }
 
+
+    public function whereCount($where, $callbak = null) {
+        $query = Order::query();
+        $query->where($where);
+
+        if($callbak != null) {
+            $callbak($query);
+        }
+
+        return $query->count();
+    }
+
     public function paginate(int $perPage = 10, string $sortBy = 'created_at', string $sortOrder = 'desc') {
          // Number of records per page
 
@@ -55,8 +67,28 @@ class OrderRepository implements OrderRepositoryInterface {
 
 
     public function update($id, $data) {
+        DB::beginTransaction();
         $order = Order::where('id', $id)->first();
 
+        $order->update($data);
+
+        $items = $data['items'];
+        $itemsIds = collect($items)->map(fn($i) => $i['id'])->values()->toArray();
+
+        OrderItem::where('order_id', $id)->whereNotIn('id', $itemsIds)->delete();
+
+        foreach($items as $item) {
+            OrderItem::updateOrCreate(
+                [
+                    'id' => $item['id'],
+                    'order_id' => $id,
+                ],
+                $item
+            );
+        }
+        $order = $order->fresh();
+        DB::commit();
+        return $order;
     }
 
 
@@ -82,6 +114,29 @@ class OrderRepository implements OrderRepositoryInterface {
         ];
 
         return $response;
+    }
+
+
+    public function agentOrdersPaginate(array $where = [], int $perPage = 10, string $sortBy = 'created_at', string $sortOrder = 'desc') {
+         // Number of records per page
+
+        // Get the query builder instance for the 'users' table
+        $query = Order::query();
+
+        $validSortOrders = ['asc', 'desc'];
+        if (!in_array($sortOrder, $validSortOrders)) {
+            $sortOrder = 'desc'; // Set default if the provided sort order is invalid
+        }
+
+        $query->where($where);
+
+        // Apply the sorting to the query
+        $query->orderBy($sortBy, $sortOrder);
+
+        // Retrieve the paginated results
+        $orders = $query->paginate($perPage);
+
+        return $orders;
     }
 
 }

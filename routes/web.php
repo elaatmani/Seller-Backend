@@ -20,6 +20,7 @@ use Spatie\Permission\Models\Permission;
 use App\Http\Controllers\Api\Public\OrderController;
 use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
+use App\Services\RoadRunner;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,7 +67,8 @@ Route::get('/fact/{id}',[FactorisationController::class,'generatePDF']);
 //     return response()->json($response);
 // });
 Route::get('/cities', function () {
-    $response = RoadRunnerService::cities();
+
+    $response = RoadRunner::cities();
 
     return response()->json($response);
 });

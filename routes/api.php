@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Public\OrderController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\InventoryController;
 use App\Http\Controllers\Api\Admin\WarehouseController;
+use App\Http\Controllers\Api\Public\AgentController;
 use App\Http\Controllers\Api\Public\DashboardController;
 use App\Http\Controllers\Api\Public\FollowUpController;
 use App\Services\RoadRunnerService;
@@ -198,12 +199,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/dashboard/agente', [DashboardController::class, 'agente']);
 
     // Follow Up
-    Route::post('/followup', [FollowUpController::class, 'index']);
-    Route::post('/followup/{id}/update', [FollowUpController::class, 'update']);
+    Route::post('/v1/followup/orders', [FollowUpController::class, 'index']);
+    Route::post('/v1/followup/orders/{id}/update', [FollowUpController::class, 'update']);
 
-    Route::get('/test', function () {
-        event(new NewNotification('Hello bro'));
-    });
+    // Agent orders
+    Route::post('/v1/agent/orders', [AgentController::class, 'index']);
+    Route::get('/v1/agent/orders/counts', [AgentController::class, 'counts']);
+    Route::post('/v1/agent/orders/{id}/update', [AgentController::class, 'update']);
 });
 
 // Auto fetch

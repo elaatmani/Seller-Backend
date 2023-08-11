@@ -1081,7 +1081,13 @@ class UserController extends Controller
     public function deliveries()
     {
         $role = Role::where('name', 'delivery')->first();
-        $deliveries = $role->users->map(fn($u) => ['id' => $u->id, 'name' => $u->firstname . ' ' . $u->lastname]);
+        $deliveries = $role->users->map(fn($u) =>
+            [
+                'id' => $u->id,
+                'name' => $u->firstname . ' ' . $u->lastname,
+                'has' => $u->productsDelivery->map(fn($p) => $p->product_id)
+            ]
+        );
 
         return response()->json(
             [

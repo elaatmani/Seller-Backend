@@ -65,7 +65,8 @@ class Product extends Model
             'ref' => $this->ref,
             'variations' => $this->variations->map->formatForOrder(),
             'image' => $this->image,
-            'available' => $this->deliveries->map(fn($d) => $d->delivery_id)
+            'available_with' => $this->deliveries->map(fn($d) => $d->delivery_id),
+            'offeres' => $this->offers
         ];
     }
 }

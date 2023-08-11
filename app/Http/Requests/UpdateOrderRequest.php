@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Rules\CityExists;
 use App\Rules\OrderAffectation;
+use App\Rules\OrderItems;
 use App\Rules\OrderNote;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
@@ -31,10 +32,11 @@ class UpdateOrderRequest extends FormRequest
         return [
             'fullname' => ['required'],
             'phone' => ['required'],
+            'adresse' => [ 'required' ],
             'city' => ['required', new CityExists($this->input('confirmation'))],
             'note' => [new OrderNote($this->input('confirmation'))],
             'affectation' => [new OrderAffectation($this->input('confirmation'))],
-            // 'items' => 'required',
+            'items' => ['required', new OrderItems()],
         ];
     }
 
