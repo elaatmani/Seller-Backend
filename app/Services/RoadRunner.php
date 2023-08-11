@@ -26,7 +26,7 @@ class RoadRunner
             'X-Access-Token' => 'oHD-w3=GD3sKBZcLF]CMb#!rjj)Azs;-?wnZsqf43:0WlQO:8U%&-Y-dpzCgua5HJT?tyxJ={Q{+9hJ[dN?|t?-tZ7F[J1'
             ])->post(self::endpoint($endpoint), $params);
 
-        if ($response->successful()) {
+        if ($response->successful() && $response->json() != false) {
             // Order created successfully.
             $responseData = [
                 'success' => true,
