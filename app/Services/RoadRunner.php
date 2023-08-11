@@ -28,13 +28,23 @@ class RoadRunner
 
         if ($response->successful()) {
             // Order created successfully.
-            $responseData = $response->json();
+            $responseData = [
+                'success' => true,
+                'response' => $response->json(),
+                'code' => $response->status()
+            ];
+
             return $responseData;
         }
+
+        return [
+            'success' => false,
+            'response' => $response->json(),
+            'code' => $response->status()
+        ];
         // Handle API error.
-        $errorResponse = $response->json();
-        // throw new Exception($errorResponse);
-        return $response->status();
+        // throw new Exception(json_encode($errorResponse));
+        // return $errorResponse;
     }
 
     public static function endpoint($path) {
@@ -92,7 +102,7 @@ class RoadRunner
             "note" => self::formatProductString($order)
         );
 
-        return SteHelper::apiSte($data, 'insert/');
+        return self::http('insert/', $data);
     }
 
     public static function delete($id)
@@ -101,7 +111,7 @@ class RoadRunner
             "reference_id" => self::encodeId($id)
         );
 
-        return SteHelper::apiSte($data, 'delete/');
+        return self::http('delete/', $data);
     }
 
     public static function getPrice($order) {
@@ -125,7 +135,7 @@ class RoadRunner
                 $variationSize = isset($item['product_variation']['size']) ? $item['product_variation']['size'] : '';
                 $variationColor = isset($item['product_variation']['color']) ? $item['product_variation']['color'] : '';
 
-                $result .= "[product=\"$productName\";quantity=$quantity;variation=$variationSize/$variationColor], ";
+                $result .= "[product=\"$productName\";quantity=$quantity;variation=$variationSize/$variationColor]";
             }
 
             $result = rtrim($result, ', '); // Remove the trailing comma and space
