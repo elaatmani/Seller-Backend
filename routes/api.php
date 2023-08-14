@@ -204,6 +204,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/v1/followup/orders/{id}/update', [FollowUpController::class, 'update']);
 
     // Agent orders
+    Route::post('/v1/agent/statistics', [AgentController::class, 'statistics']);
     Route::post('/v1/agent/orders', [AgentController::class, 'index']);
     Route::get('/v1/agent/orders/counts', [AgentController::class, 'counts']);
     Route::post('/v1/agent/orders/{id}/update', [AgentController::class, 'update']);

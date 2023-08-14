@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Public;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\StatisticsService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
@@ -17,12 +18,26 @@ class AgentController extends Controller
         $this->orderRepository = $orderRepository;
     }
 
+    public function statistics() {
+        $orders = $this->orderRepository->all()->where('agente_id', auth()->id());
+
+        $statistics = StatisticsService::agent($orders);
+
+        return response()->json([
+            'code' => 'SUCCESS',
+            'data' => [
+                'statistics' => $statistics
+            ]
+        ]);
+    }
+
 
     public function index(Request $request) {
 
         $sortBy = $request->input('sort_by');
         $sortOrder = $request->input('sort_order');
         $perPage = $request->input('per_page');
+        $filters = $request->input('filters');
         $search = $request->input('search');
         $confirmation = $request->input('confirmation');
 
@@ -35,11 +50,28 @@ class AgentController extends Controller
             ['note', 'LIKE', "%$search%"],
         ];
 
+        $toFilter = [];
+
+        if(is_array($filters)){
+            foreach($filters as $f => $v) {
+                if($v == 'all') continue;
+                if($f == 'created_at') {
+
+                    $toFilter[] = [$f, 'like', "%$v%"];
+                } else {
+                    $toFilter[] = [$f, $v];
+                }
+            }
+        }
+
         $where = [
             // check if only confirmed orders or else
             ['confirmation', $confirmation == 'confirmer' ? '=' : '!=', 'confirmer'],
-            ['agente_id', '=', auth()->id(), ]
+            ['agente_id', '=', auth()->id(), ],
+            ...$toFilter
         ];
+
+
 
         $orders = $this->orderRepository->paginate($where, $orWhere, $perPage, $sortBy, $sortOrder);
         $statistics = $this->orderRepository->agentStatistics(auth()->id());

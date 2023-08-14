@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http;
 class RoadRunner
 {
 
-    const NOTIFY_ROADRUNNER = true;
+    const NOTIFY_ROADRUNNER = false;
     const ROADRUNNER_ID = 4;
     const TEST_URL = "https://systemtunes.com/apivoldo/";
     const LIVE_URL = "https://roadrunner-lb.com/api/vooldo/";
