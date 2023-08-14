@@ -5,6 +5,8 @@ namespace App\Observers;
 use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Services\OrderHistoryService;
+use App\Services\RoadRunner;
+use Exception;
 
 class OrderObserver
 {
@@ -36,6 +38,8 @@ class OrderObserver
         $newAttributes = $order->getAttributes(); // New values
 
         OrderHistoryService::observe($order);
+        $result = RoadRunner::sync($order);
+
 
     }
 

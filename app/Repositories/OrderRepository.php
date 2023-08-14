@@ -27,10 +27,11 @@ class OrderRepository implements OrderRepositoryInterface {
         'wrong-number' =>'Wrong number',
         'confirmer' =>'Confirmed',
         'double' =>'Double',
+        'reconfirmer' => 'Reconfirmed'
     ];
 
     public function all() {
-
+        return Order::query()->get();
     }
 
 
@@ -45,7 +46,13 @@ class OrderRepository implements OrderRepositoryInterface {
         return $query->count();
     }
 
-    public function paginate(int $perPage = 10, string $sortBy = 'created_at', string $sortOrder = 'desc') {
+    public function paginate(
+        array $where = [],
+        array $orWhere = [],
+        int $perPage = 10,
+        string $sortBy = 'created_at',
+        string $sortOrder = 'desc'
+    ) {
          // Number of records per page
 
         // Get the query builder instance for the 'users' table
@@ -55,6 +62,12 @@ class OrderRepository implements OrderRepositoryInterface {
         if (!in_array($sortOrder, $validSortOrders)) {
             $sortOrder = 'desc'; // Set default if the provided sort order is invalid
         }
+
+        foreach($orWhere as $w) {
+            $query->orWhere($w[0], $w[1], $w[2]);
+        }
+
+        $query->where($where);
 
         // Apply the sorting to the query
         $query->orderBy($sortBy, $sortOrder);
@@ -67,7 +80,6 @@ class OrderRepository implements OrderRepositoryInterface {
 
 
     public function update($id, $data) {
-        DB::beginTransaction();
         $order = Order::where('id', $id)->first();
 
         $order->update($data);
@@ -87,14 +99,44 @@ class OrderRepository implements OrderRepositoryInterface {
             );
         }
         $order = $order->fresh();
-        DB::commit();
         return $order;
     }
 
 
     public function followUpStatistics($userId)
     {
-        $orders = DB::table('orders')->groupBy('confirmation')->selectRaw("confirmation, count('confirmation') as total")->get();
+        $orders = DB::table('orders')
+        // ->where('followup_id', $userId)
+        ->groupBy('followup_confirmation')
+        ->selectRaw("followup_confirmation, count('followup_confirmation') as total")->get();
+
+        $total = $orders->sum('total');
+
+        $statistics = $orders->map(function($c) use($total) {
+            return [
+                'name' => $this->confirmations[$c->followup_confirmation],
+                'confirmation' => $c->followup_confirmation,
+                'total' => $c->total,
+                'percent' => round(($c->total * 100) / $total, 2),
+            ];
+        });
+
+        $show = [ '*' ];
+        $response = [
+            'data' => $statistics,
+            'show' => $show
+        ];
+
+        return $response;
+    }
+
+
+    public function agentStatistics($userId)
+    {
+        $orders = DB::table('orders')
+        ->where('agente_id', $userId)
+        ->groupBy('confirmation')
+        ->selectRaw("confirmation, count('confirmation') as total")->get();
 
         $total = $orders->sum('total');
 
@@ -107,7 +149,7 @@ class OrderRepository implements OrderRepositoryInterface {
             ];
         });
 
-        $show = [null, 'confirmer', 'annuler', 'double'];
+        $show = [ '*' ];
         $response = [
             'data' => $statistics,
             'show' => $show
@@ -116,27 +158,5 @@ class OrderRepository implements OrderRepositoryInterface {
         return $response;
     }
 
-
-    public function agentOrdersPaginate(array $where = [], int $perPage = 10, string $sortBy = 'created_at', string $sortOrder = 'desc') {
-         // Number of records per page
-
-        // Get the query builder instance for the 'users' table
-        $query = Order::query();
-
-        $validSortOrders = ['asc', 'desc'];
-        if (!in_array($sortOrder, $validSortOrders)) {
-            $sortOrder = 'desc'; // Set default if the provided sort order is invalid
-        }
-
-        $query->where($where);
-
-        // Apply the sorting to the query
-        $query->orderBy($sortBy, $sortOrder);
-
-        // Retrieve the paginated results
-        $orders = $query->paginate($perPage);
-
-        return $orders;
-    }
 
 }

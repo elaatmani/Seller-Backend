@@ -27,6 +27,19 @@ class OrderHistoryService
             ]);
         }
 
+        if ($oldAttributes['followup_confirmation'] != $newAttributes['followup_confirmation']) {
+            $oldFollowupConfirmation = !$oldAttributes['followup_confirmation'] ? 'New' : $oldAttributes['followup_confirmation'];
+            $newFollowupConfirmation = !$newAttributes['followup_confirmation'] ? 'New' : $newAttributes['followup_confirmation'];
+
+            OrderHistory::create([
+                'order_id' => $order->id,
+                'user_id' => request()->user()->id,
+                'type' => 'reconfirmation',
+                'historique' => $newAttributes['followup_confirmation'],
+                'note' => $oldFollowupConfirmation . ' -> ' . $newFollowupConfirmation
+            ]);
+        }
+
         if ($oldAttributes['delivery'] != $newAttributes['delivery']) {
             $oldDelivery = !$oldAttributes['delivery'] ? 'Select' : $oldAttributes['delivery'];
             $newDelivery = !$newAttributes['delivery'] ? 'Select' : $newAttributes['delivery'];

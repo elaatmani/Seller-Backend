@@ -23,19 +23,32 @@ class AgentController extends Controller
         $sortBy = $request->input('sort_by');
         $sortOrder = $request->input('sort_order');
         $perPage = $request->input('per_page');
+        $search = $request->input('search');
         $confirmation = $request->input('confirmation');
 
+        $orWhere = !$search ? [] : [
+            ['id', 'LIKE', "%$search%"],
+            ['fullname', 'LIKE', "%$search%"],
+            ['phone', 'LIKE', "%$search%"],
+            ['adresse', 'LIKE', "%$search%"],
+            ['city', 'LIKE', "%$search%"],
+            ['note', 'LIKE', "%$search%"],
+        ];
+
         $where = [
+            // check if only confirmed orders or else
             ['confirmation', $confirmation == 'confirmer' ? '=' : '!=', 'confirmer'],
             ['agente_id', '=', auth()->id(), ]
         ];
 
-        $orders = $this->orderRepository->agentOrdersPaginate($where, $perPage, $sortBy, $sortOrder);
+        $orders = $this->orderRepository->paginate($where, $orWhere, $perPage, $sortBy, $sortOrder);
+        $statistics = $this->orderRepository->agentStatistics(auth()->id());
 
         return response()->json([
             'code' => 'SUCCESS',
             'data' => [
-                'orders' => $orders
+                'orders' => $orders,
+                'statistics' => $statistics
             ]
         ]);
     }

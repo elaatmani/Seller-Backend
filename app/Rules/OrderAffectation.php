@@ -3,10 +3,12 @@
 namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class OrderAffectation implements Rule
 {
     protected $confirmation;
+    protected $user;
     /**
      * Create a new rule instance.
      *
@@ -15,6 +17,7 @@ class OrderAffectation implements Rule
     public function __construct($confirmation)
     {
         $this->confirmation = $confirmation;
+        $this->user = Auth::user();
     }
 
     /**
@@ -26,6 +29,10 @@ class OrderAffectation implements Rule
      */
     public function passes($attribute, $value)
     {
+        if($this->user->hasRole('follow-up')) {
+            return true;
+        }
+
         return $value != null ? $this->confirmation == 'confirmer' : true;
     }
 

@@ -199,6 +199,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/dashboard/agente', [DashboardController::class, 'agente']);
 
     // Follow Up
+    Route::post('/v1/followup/statistics', [FollowUpController::class, 'statistics']);
     Route::post('/v1/followup/orders', [FollowUpController::class, 'index']);
     Route::post('/v1/followup/orders/{id}/update', [FollowUpController::class, 'update']);
 

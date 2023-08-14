@@ -80,7 +80,7 @@ Route::get('/orders', function () {
 
 Route::get('/inserto', function () {
     $order = Order::find(29);
-    $response = RoadRunnerService::insert($order);
+    $response = RoadRunner::insert($order);
     // $response = $order;
     return response()->json([
         'status' => true,

@@ -32,18 +32,26 @@ class Order extends Model
         'cmd',
         'product_name',
         'dropped_at',
+        'followup_id',
+        'followup_confirmation',
+        'followup_reported_note',
+        'followup_reported_date'
     ];
 
     protected $casts = [
         'counts_from_warehouse' => 'boolean',
         'fullname' => 'string',
         'agente_id' => 'integer',
+        'confirmation' => 'string',
         'factorisation_id',
         'upsell' => 'string',
         'phone' => 'string',
         'city' => 'string',
         'adresse' => 'string',
-        'confirmation' => 'string',
+        'followup_id' => 'integer',
+        'followup_confirmation' => 'string',
+        // 'followup_reported_date' => 'date',
+        'followup_reported_note' => 'string',
         'affectation' => 'integer',
         'delivery' => 'string',
         'note' => 'string',

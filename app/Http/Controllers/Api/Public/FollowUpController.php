@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
+use App\Services\StatisticsService;
+use Carbon\Carbon;
 
 class FollowUpController extends Controller
 {
@@ -20,20 +22,66 @@ class FollowUpController extends Controller
     }
 
 
+    public function statistics() {
+        $orders = $this->orderRepository->all();
+
+        $statistics = StatisticsService::followup($orders);
+
+        return response()->json([
+            'code' => 'SUCCESS',
+            'data' => [
+                'statistics' => $statistics
+            ]
+        ]);
+    }
+
     public function index(Request $request) {
 
         $sortBy = $request->input('sort_by');
         $sortOrder = $request->input('sort_order');
         $perPage = $request->input('per_page');
+        $filters = $request->input('filters');
+        $search = $request->input('search');
+        $followUpCondition = [['delivery', 'annuler'],['confirmation', 'confirmer']];
 
-        $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder);
+        $orWhere = !$search ? [] : [
+            ['id', 'LIKE', "%$search%"],
+            ['fullname', 'LIKE', "%$search%"],
+            ['phone', 'LIKE', "%$search%"],
+            ['adresse', 'LIKE', "%$search%"],
+            ['city', 'LIKE', "%$search%"],
+            ['note', 'LIKE', "%$search%"],
+        ];
+
+        $toFilter = [];
+
+        if(is_array($filters)){
+            foreach($filters as $f => $v) {
+                if($v == 'all') continue;
+                if($f == 'created_at') {
+
+                    $toFilter[] = [$f, 'like', "%$v%"];
+                } else {
+                    $toFilter[] = [$f, $v];
+                }
+            }
+        }
+
+        $where = [
+            ...$followUpCondition,
+            ...$toFilter
+        ];
+
+
+        $orders = $this->orderRepository->paginate($where, $orWhere, $perPage, $sortBy, $sortOrder);
         $statistics = $this->orderRepository->followUpStatistics(1);
 
         return response()->json([
             'code' => 'SUCCESS',
             'data' => [
+                'filters' => $toFilter,
                 'statistics' => $statistics,
-                'orders' => $orders
+                'orders' => $orders,
             ]
             ]);
     }
@@ -42,8 +90,11 @@ class FollowUpController extends Controller
     public function update(UpdateOrderRequest $request, $id) {
 
         try {
+            DB::beginTransaction();
+
             $order = $this->orderRepository->update($id, $request->all());
 
+            DB::commit();
             return [
                 'code' => 'SUCCESS',
                 'data' => [

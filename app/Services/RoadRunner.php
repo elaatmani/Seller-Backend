@@ -11,14 +11,46 @@ use Illuminate\Support\Facades\Http;
 class RoadRunner
 {
 
+    const NOTIFY_ROADRUNNER = true;
+    const ROADRUNNER_ID = 4;
     const TEST_URL = "https://systemtunes.com/apivoldo/";
     const LIVE_URL = "https://roadrunner-lb.com/api/vooldo/";
-    const TEST = true;
+    const TEST_MODE = true;
+
+
+    public static function sync(&$order) {
+        if(!self::NOTIFY_ROADRUNNER) return true;
+
+        $oldAttributes = $order->getOriginal(); // Old values
+        $newAttributes = $order->getAttributes(); // New values
+        // $order->note = 'from observer';
+        // throw new Exception('hello from sync');
+        if(
+            $oldAttributes['affectation'] != self::ROADRUNNER_ID
+            && $newAttributes['affectation'] == self::ROADRUNNER_ID
+            && $newAttributes['confirmation'] == "confirmer"
+        ) {
+            $response = self::insert($order);
+
+            if($response['success'] && $response['code'] == 200) return true;
+            throw new Exception(json_encode($response['response']));
+
+        }
+
+        if(
+            $oldAttributes['affectation'] == self::ROADRUNNER_ID
+            && $newAttributes['affectation'] != self::ROADRUNNER_ID
+        ) {
+            $response = self::delete($order['id']);
+
+            if($response['success'] && $response['code'] == 200) return true;
+            throw new Exception(json_encode($response['response']));
+        }
+
+        return false;
+    }
 
     public static function http($endpoint, $params) {
-
-
-
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
@@ -26,7 +58,7 @@ class RoadRunner
             'X-Access-Token' => 'oHD-w3=GD3sKBZcLF]CMb#!rjj)Azs;-?wnZsqf43:0WlQO:8U%&-Y-dpzCgua5HJT?tyxJ={Q{+9hJ[dN?|t?-tZ7F[J1'
             ])->post(self::endpoint($endpoint), $params);
 
-        if ($response->successful() && $response->json() != false) {
+        if ($response->successful()) {
             // Order created successfully.
             $responseData = [
                 'success' => true,
@@ -42,13 +74,11 @@ class RoadRunner
             'response' => $response->json(),
             'code' => $response->status()
         ];
-        // Handle API error.
-        // throw new Exception(json_encode($errorResponse));
-        // return $errorResponse;
     }
 
+
     public static function endpoint($path) {
-        if(self::TEST) return self::TEST_URL . $path;
+        if(self::TEST_MODE) return self::TEST_URL . $path;
         return self::LIVE_URL . $path;
     }
 
