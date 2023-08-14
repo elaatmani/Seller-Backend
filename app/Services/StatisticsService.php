@@ -88,10 +88,10 @@ class StatisticsService
 
         $new = [
             'id' => 2,
-            'title' => 'New',
+            'title' => 'Reported',
             'value' => $reported,
             'percentage' => $orders->count() > 0  ? ($reported * 100) / $orders->count() : 0,
-            'icon' => 'mdi-bell',
+            'icon' => 'mdi-clock-outline',
             'color' => '#14b8a6'
         ];
 
@@ -116,7 +116,7 @@ class StatisticsService
         $earnings = [
             'id' => 5,
             'title' => 'Earnings',
-            'value' => '1.3k',
+            'value' => '0',
             'percentage' => $orders->count() > 0  ? (0 * 100) / $orders->count() : 0,
             'icon' => 'mdi-currency-usd',
             'symbol' => '$',

@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\Http;
 class RoadRunner
 {
 
-    const NOTIFY_ROADRUNNER = false;
+    const NOTIFY_ROADRUNNER = true;
     const ROADRUNNER_ID = 4;
     const TEST_URL = "https://systemtunes.com/apivoldo/";
     const LIVE_URL = "https://roadrunner-lb.com/api/vooldo/";
-    const TEST_MODE = true;
+    const TEST_MODE = false;
 
 
     public static function sync(&$order) {
