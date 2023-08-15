@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\NewNotification;
+use App\Http\Controllers\Api\Admin\AdminController;
 use App\Services\RoadRunnerService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
@@ -198,6 +199,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Dashboard
     Route::get('/dashboard/delivery', [DashboardController::class, 'delivery']);
     Route::get('/dashboard/agente', [DashboardController::class, 'agente']);
+
+    // Follow Up
+    Route::post('/v1/admin/statistics', [AdminController::class, 'statistics']);
+    Route::post('/v1/admin/orders', [AdminController::class, 'index']);
+    Route::post('/v1/admin/orders/{id}/update', [AdminController::class, 'update']);
 
     // Follow Up
     Route::post('/v1/followup/statistics', [FollowUpController::class, 'statistics']);

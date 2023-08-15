@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-
+use App\Models\Order;
 use App\Models\OrderHistory;
 use Illuminate\Support\Facades\Http;
 
@@ -152,6 +152,12 @@ class StatisticsService
 
 
         return [$all, $new, $reconfirmed, $earnings, $noAnswer, $cancelled, $doubles, $upsell];
+    }
+
+
+    public static function admin() {
+        $orders = Order::latest();
+
     }
 
 }

@@ -265,14 +265,16 @@ class SaleController extends Controller
         try {
             $ids = $request->ids;
             $relationship = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
-            $newOrders = Order::with($relationship)->whereNotIn('id', $ids)->get();
+            $newOrders = count($ids) > 0 ? Order::with($relationship)->whereNotIn('id', $ids)->get() : [];
+            $count = Order::count();
 
             return response()->json(
                 [
                     'status' => true,
                     'code' => 'SUCCESS',
                     'data' => [
-                        'orders' => $newOrders
+                        'count' => $count,
+                        'orders' => $newOrders,
                     ]
                 ],
                 200
