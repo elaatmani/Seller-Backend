@@ -1,23 +1,24 @@
 <?php
 
 use App\Events\NewNotification;
-use App\Http\Controllers\Api\Admin\SheetController;
-use App\Http\Controllers\Api\Admin\FactorisationController;
-use App\Http\Controllers\Api\Admin\GoogleSheetController;
+use App\Services\RoadRunnerService;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Cookie;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\SaleController;
 use App\Http\Controllers\Api\Admin\ShopController;
 use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Admin\SheetController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\Public\AgentController;
 use App\Http\Controllers\Api\Public\OrderController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Admin\InventoryController;
 use App\Http\Controllers\Api\Admin\WarehouseController;
-use App\Http\Controllers\Api\Public\AgentController;
-use App\Http\Controllers\Api\Public\DashboardController;
 use App\Http\Controllers\Api\Public\FollowUpController;
-use App\Services\RoadRunnerService;
+use App\Http\Controllers\Api\Public\DashboardController;
+use App\Http\Controllers\Api\Admin\GoogleSheetController;
+use App\Http\Controllers\Api\Admin\FactorisationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -214,3 +215,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 Route::post('/sync', [GoogleSheetController::class, 'sync']);
 //User Logout
 Route::get('/auth/logout', [AuthController::class, 'logoutUser']);
+Route::get('/auth/clear', function() {
+    foreach ($_COOKIE as $key => $value) {
+        Cookie::queue(Cookie::forget($key));
+    }
+});
