@@ -38,6 +38,9 @@ class OrderObserver
         $newAttributes = $order->getAttributes(); // New values
 
         OrderHistoryService::observe($order);
+        if(request()->user()->hasRole('admin')) {
+            throw new Exception('Error admin');
+        };
         // RoadRunner::sync($order);
 
 

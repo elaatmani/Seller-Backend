@@ -17,6 +17,10 @@ class RoadRunner
     const LIVE_URL = "https://roadrunner-lb.com/api/vooldo/";
     const TEST_MODE = false;
 
+    const ERRORS = [
+        "Can not add order, you may change reference ID"
+    ];
+
 
     public static function sync(&$order) {
         if(!self::NOTIFY_ROADRUNNER) return true;
@@ -33,6 +37,8 @@ class RoadRunner
             $response = self::insert($order);
 
             if($response['success'] && $response['code'] == 200) return true;
+            if(data_get($response, 'error') == "Can not add order, you may change reference ID") return true;
+
             throw new Exception(json_encode($response['response']));
 
         }
