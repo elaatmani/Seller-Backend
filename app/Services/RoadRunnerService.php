@@ -76,8 +76,11 @@ class RoadRunnerService
                 $variationSize = isset($item['product_variation']['size']) ? $item['product_variation']['size'] : '';
                 $variationColor = isset($item['product_variation']['color']) ? $item['product_variation']['color'] : '';
 
-                $result .= "[product=\"$productName\";quantity=$quantity;variation=$variationSize/$variationColor], ";
+                $result .= "[product=\"$productName\";quantity=\"$quantity\";variation=\"$variationSize $variationColor\"],]";
             }
+
+            $note = $order['note'];
+            $result .= " [NOTE=\" $note \"]";
 
             $result = rtrim($result, ', '); // Remove the trailing comma and space
         }
