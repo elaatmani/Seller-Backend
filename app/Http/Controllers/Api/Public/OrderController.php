@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Api\Public;
 
-use App\Http\Controllers\Controller;
-use App\Models\Factorisation;
+use App\Models\User;
 use App\Models\Order;
-use App\Models\OrderHistory;
-use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\OrderItem;
+use Illuminate\Support\Str;
+use App\Models\OrderHistory;
+use Illuminate\Http\Request;
+use App\Models\Factorisation;
 use App\Models\ProductAgente;
 use App\Models\ProductVariation;
-use App\Models\User;
-use App\Services\RoadRunnerService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Services\RoadRunnerService;
+use App\Http\Controllers\Controller;
 
 class OrderController extends Controller
 {
@@ -174,14 +174,6 @@ class OrderController extends Controller
 
                 if ($request->upsell != $sale->upsell) {
                     $sale->upsell = $request->upsell;
-
-                    $orderHistory = new OrderHistory();
-                    $orderHistory->order_id = $sale->id;
-                    $orderHistory->user_id = $request->user()->id;
-                    $orderHistory->historique = !!$request->upsell ? $request->upsell : 'Select';
-                    $orderHistory->type = 'upsell';
-                    $orderHistory->note = 'Updated Status of Upsell';
-                    $orderHistory->save();
                 }
 
                 if ($sale->confirmation == 'reporter') {
@@ -197,14 +189,6 @@ class OrderController extends Controller
                         $sale->reported_agente_note = $request->reported_agente_note;
                     }
 
-
-                    $orderHistory = new OrderHistory();
-                    $orderHistory->order_id = $sale->id;
-                    $orderHistory->user_id = $request->user()->id;
-                    $orderHistory->historique = !!$request->confirmation ? $request->confirmation : 'Select';
-                    $orderHistory->type = 'confirmation';
-                    $orderHistory->note = 'Updated Status of Confirmation';
-                    $orderHistory->save();
                 }
 
 
@@ -310,13 +294,7 @@ class OrderController extends Controller
 
                    $deliveryUser = User::find($request->affectation);
                     $delivery = !!$request->affectation ? $deliveryUser->firstname . ' ' . $deliveryUser->lastname : 'Select';
-                   $orderHistory = new OrderHistory();
-                   $orderHistory->order_id = $sale->id;
-                   $orderHistory->user_id = $request->user()->id;
-                   $orderHistory->historique = $delivery;
-                   $orderHistory->type = 'affectation';
-                   $orderHistory->note = 'Updated Status of Affectation';
-                   $orderHistory->save();
+
                }
 
                $sale->save();
@@ -468,13 +446,7 @@ class OrderController extends Controller
                 $order->save();
 
 
-                $orderHistory = new OrderHistory();
-                $orderHistory->order_id = $id;
-                $orderHistory->user_id = $request->user()->id;
-                $orderHistory->type = 'confirmation';
-                $orderHistory->historique = $request->confirmation;
-                $orderHistory->note = 'Updated Status of Confirmation';
-                $orderHistory->save();
+
                 DB::commit();
 
 
@@ -598,13 +570,7 @@ class OrderController extends Controller
 
                 $order->save();
 
-                $orderHistory = new OrderHistory();
-                $orderHistory->order_id = $id;
-                $orderHistory->user_id = $request->user()->id;
-                $orderHistory->type = 'confirmation';
-                $orderHistory->historique = $request->confirmation;
-                $orderHistory->note = 'Updated Status of Confirmation';
-                $orderHistory->save();
+
                 DB::commit();
 
 
@@ -851,13 +817,7 @@ class OrderController extends Controller
                 $order->save();
 
 
-                $orderHistory = new OrderHistory();
-                $orderHistory->order_id = $id;
-                $orderHistory->user_id = $request->user()->id;
-                $orderHistory->type = 'delivery';
-                $orderHistory->historique = $request->delivery;
-                $orderHistory->note = 'Updated Status of Delivery';
-                $orderHistory->save();
+
                 DB::commit();
                 return response()->json(
                     [
@@ -938,10 +898,7 @@ class OrderController extends Controller
                     $order->save();
                 }
                 $order->affectation = $request->affectation;
-                $orderHistory = new OrderHistory();
-                $orderHistory->order_id = $id;
-                $orderHistory->user_id = $request->user()->id;
-                $orderHistory->type = 'affectation';
+
                 if ($request->affectation != null) {
                     $order->delivery = 'dispatch';
                     if($request->affectation == 4){
@@ -976,13 +933,10 @@ class OrderController extends Controller
 
                     $deliveryUser = User::find($request->affectation);
                     $delivery = $deliveryUser->firstname . ' ' . $deliveryUser->lastname;
-                    $orderHistory->historique = $delivery;
                 } else {
                     $order->delivery = null;
                 }
                 $order->save();
-                $orderHistory->note = 'Updated Status of Affectation';
-                $orderHistory->save();
                 DB::commit();
                 return response()->json(
                     [
@@ -1037,13 +991,6 @@ class OrderController extends Controller
                 $order->save();
 
 
-                $orderHistory = new OrderHistory();
-                $orderHistory->order_id = $id;
-                $orderHistory->user_id = $request->user()->id;
-                $orderHistory->historique = $request->upsell;
-                $orderHistory->type = 'upsell';
-                $orderHistory->note = 'Updated Status of Upsell';
-                $orderHistory->save();
                 DB::commit();
                 return response()->json(
                     [
@@ -1184,12 +1131,6 @@ class OrderController extends Controller
                         // $order->double = $firstOrder->id;
                         $order->save();
 
-                        $orderHistory = new OrderHistory();
-                        $orderHistory->order_id = $order->id;
-                        $orderHistory->user_id = $request->user()->id;
-                        $orderHistory->type = 'responsibility';
-                        $orderHistory->note = 'Got the Order';
-                        $orderHistory->save();
                     }
 
                     DB::commit();
@@ -1201,12 +1142,6 @@ class OrderController extends Controller
                     $AddOrder->dropped_at = now();
                     $AddOrder->save();
 
-                    $orderHistory = new OrderHistory();
-                    $orderHistory->order_id = $AddOrder->id;
-                    $orderHistory->user_id = $request->user()->id;
-                    $orderHistory->type = 'responsibility';
-                    $orderHistory->note = 'Got the Order';
-                    $orderHistory->save();
                     DB::commit();
                 }
             } else {

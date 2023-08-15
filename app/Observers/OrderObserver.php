@@ -38,7 +38,7 @@ class OrderObserver
         $newAttributes = $order->getAttributes(); // New values
 
         OrderHistoryService::observe($order);
-        $result = RoadRunner::sync($order);
+        // RoadRunner::sync($order);
 
 
     }
