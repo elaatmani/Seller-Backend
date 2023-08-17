@@ -155,8 +155,142 @@ class StatisticsService
     }
 
 
-    public static function admin() {
-        $orders = Order::latest();
+    public static function admin($request) {
+        $orders = Order::query();
+
+        $created_from = $request->created_from;
+        $created_to = $request->created_to;
+        $dropped_from = $request->dropped_from;
+        $dropped_to = $request->dropped_to;
+        $affectation = $request->affectation;
+        $confirmation = $request->confirmation;
+        $delivery = $request->delivery;
+        $product_id = $request->product_id;
+        $agente_id = $request->agente_id;
+
+        $orders
+        ->when(!!$created_from, fn($q) => $q->whereDate('created_at', '>=', $created_from))
+        ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to))
+        ->when(!!$dropped_from, fn($q) => $q->whereDate('dropped_at', '>=', $dropped_from))
+        ->when(!!$dropped_to, fn($q) => $q->whereDate('dropped_at', '<=', $dropped_to))
+        ->when($affectation != 'all', fn($q) => $q->where('affectation', '=', $affectation))
+        ->when($confirmation != 'all', fn($q) => $q->where('confirmation', '=', $confirmation))
+        ->when($delivery != 'all', fn($q) => $q->where('delivery', '=', $delivery))
+        ->when($agente_id != 'all', fn($q) => $q->where('agente_id', '=', $agente_id))
+        ->when($product_id != 'all', fn($q) => $q->whereHas('items', fn($oq) => $oq->where('product_id', $product_id)));
+
+        $orders = $orders->get();
+
+        $confirmations = [
+        ];
+
+        $allCount = $orders->count();
+        $all = [
+            'id' => 1,
+            'title' => 'Orders',
+            'value' => $allCount,
+            'icon' => 'mdi-package-variant-closed',
+            'color' => '#6b7280'
+        ];
+        $confirmations[] = $all;
+
+
+        $confirmedCount = $orders->where('confirmation', 'confirmer')->count();
+        $confirmed = [
+            'id' => 2,
+            'title' => 'Confirmed',
+            'value' => $confirmedCount,
+            'percentage' => $orders->count() > 0  ? ($confirmedCount * 100) / $orders->count() : 0,
+            // 'icon' => 'mdi-check-all',
+            'icon' => 'mdi-phone-check',
+            'color' => '#4ade80'
+        ];
+        $confirmations[] = $confirmed;
+
+
+        $newCount = $orders->where('confirmation', null)->count();
+        $new = [
+            'id' => 3,
+            'title' => 'New',
+            'value' => $newCount,
+            'percentage' => $orders->count() > 0  ? ($newCount * 100) / $orders->count() : 0,
+            'icon' => 'mdi-new-box',
+            'color' => '#475569'
+        ];
+        $confirmations[] = $new;
+
+
+        $reportedCount = $orders->where('confirmation', 'reporter')->count();
+        $reported = [
+            'id' => 4,
+            'title' => 'Reported',
+            'value' => $reportedCount,
+            'percentage' => $orders->count() > 0  ? ($reportedCount * 100) / $orders->count() : 0,
+            'icon' => 'mdi-clock-outline',
+            'color' => '#a855f7'
+        ];
+        $confirmations[] = $reported;
+
+
+        $noAnswerConfirmations = ['day-one-call-one', 'day-one-call-two', 'day-one-call-three', 'day-two-call-one', 'day-two-call-two', 'day-two-call-three', 'day-three-call-one', 'day-three-call-two', 'day-three-call-three'];
+        $noAnswerCount = $orders->whereIn('confirmation', $noAnswerConfirmations)->count();
+        $noAnswer = [
+            'id' => 5,
+            'title' => 'No Answer',
+            'value' => $noAnswerCount,
+            'percentage' => $orders->count() > 0  ? ($noAnswerCount * 100) / $orders->count() : 0,
+            'icon' => 'mdi-phone-missed',
+            'color' => '#fbbf24'
+        ];
+        $confirmations[] = $noAnswer;
+
+
+        $cancelledCount = $orders->where('confirmation', 'annuler')->count();
+        $cancelled = [
+            'id' => 6,
+            'title' => 'Cancelled',
+            'value' => $cancelledCount,
+            'percentage' => $orders->count() > 0  ? ($cancelledCount * 100) / $orders->count() : 0,
+            'icon' => 'mdi-cancel',
+            'color' => '#f43f5e'
+        ];
+        $confirmations[] = $cancelled;
+
+
+        $doubledCount = $orders->where('confirmation', 'double')->count();
+        $double = [
+            'id' => 7,
+            'title' => 'Double',
+            'value' => $doubledCount,
+            'percentage' => $orders->count() > 0  ? ($doubledCount * 100) / $orders->count() : 0,
+            'icon' => 'mdi-selection-multiple',
+            'color' => '#8b5cf6'
+        ];
+        $confirmations[] = $double;
+
+
+        $wrondNumberCount = $orders->where('confirmation', 'wrong-number')->count();
+        $wrongNumber = [
+            'id' => 8,
+            'title' => 'Wrong Number',
+            'value' => $wrondNumberCount,
+            'percentage' => $orders->count() > 0  ? ($wrondNumberCount * 100) / $orders->count() : 0,
+            'icon' => 'mdi-phone-remove',
+            'color' => '#db2777'
+        ];
+        $confirmations[] = $wrongNumber;
+
+
+
+
+        $statistics = [
+            'confirmations' => $confirmations,
+            'delivery' => []
+        ];
+
+
+
+        return $statistics;
 
     }
 

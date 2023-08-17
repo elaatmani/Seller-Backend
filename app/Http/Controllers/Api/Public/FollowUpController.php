@@ -73,7 +73,7 @@ class FollowUpController extends Controller
         ];
 
 
-        $orders = $this->orderRepository->paginate($where, $orWhere, $perPage, $sortBy, $sortOrder);
+        $orders = $this->orderRepository->paginate($where, $orWhere, $perPage, $sortBy, $sortOrder, []);
         $statistics = $this->orderRepository->followUpStatistics(1);
 
         return response()->json([

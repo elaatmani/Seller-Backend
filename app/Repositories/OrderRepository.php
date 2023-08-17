@@ -51,7 +51,8 @@ class OrderRepository implements OrderRepositoryInterface {
         array $orWhere = [],
         int $perPage = 10,
         string $sortBy = 'created_at',
-        string $sortOrder = 'desc'
+        string $sortOrder = 'desc',
+        $whereDate = []
     ) {
          // Number of records per page
 
@@ -66,6 +67,11 @@ class OrderRepository implements OrderRepositoryInterface {
         foreach($orWhere as $w) {
             $query->orWhere($w[0], $w[1], $w[2]);
         }
+
+        foreach($whereDate as $wd) {
+            $query->whereDate($wd[0], $wd[1], $wd[2]);
+        }
+        // $q->whereDate('created_at', '=', Carbon::today()->toDateString());
 
         $query->where($where);
 
@@ -100,6 +106,35 @@ class OrderRepository implements OrderRepositoryInterface {
         }
         $order = $order->fresh();
         return $order;
+    }
+
+
+    public function adminStatistics()
+    {
+        return null;
+        $orders = DB::table('orders');
+        $newOrders = $orders->where('confirmation', null)->count();
+
+        // ->selectRaw("followup_confirmation, count('followup_confirmation') as total")->get();
+
+        $total = $orders->sum('total');
+
+        $statistics = $orders->map(function($c) use($total) {
+            return [
+                'name' => $this->confirmations[$c->followup_confirmation],
+                'confirmation' => $c->followup_confirmation,
+                'total' => $c->total,
+                'percent' => round(($c->total * 100) / $total, 2),
+            ];
+        });
+
+        $show = [ '*' ];
+        $response = [
+            'data' => $statistics,
+            'show' => $show
+        ];
+
+        return $response;
     }
 
 

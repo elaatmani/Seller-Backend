@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -51,6 +53,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+
     public function role()
     {
         return $this->belongsTo('Spatie\Permission\Models\Role');
@@ -80,6 +83,10 @@ class User extends Authenticatable
 
     public function productsDelivery(){
         return $this->hasMany(ProductDelivery::class,'delivery_id');
+    }
+
+    public function getActiveAttribute() {
+        return !!$this->last_action ? Carbon::make($this->last_action)->diffForHumans() : null;
     }
 
 }

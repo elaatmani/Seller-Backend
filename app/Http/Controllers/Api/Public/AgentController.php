@@ -73,7 +73,7 @@ class AgentController extends Controller
 
 
 
-        $orders = $this->orderRepository->paginate($where, $orWhere, $perPage, $sortBy, $sortOrder);
+        $orders = $this->orderRepository->paginate($where, $orWhere, $perPage, $sortBy, $sortOrder, []);
         $statistics = $this->orderRepository->agentStatistics(auth()->id());
 
         return response()->json([

@@ -58,6 +58,7 @@ class UserController extends Controller
                             'updated_at' => $user->updated_at,
                             'role' => $user->roles->first(),
                             'role_name' => $user->roles->pluck('name')->first(),
+                            'active' => $user->active
                         ];
                     })
                 ],

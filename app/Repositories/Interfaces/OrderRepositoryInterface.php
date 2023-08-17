@@ -10,7 +10,9 @@ interface OrderRepositoryInterface {
 
     public function whereCount($where, $callback = null);
 
-    public function paginate(array $where, array $orWhere, int $perPage, string $sortBy, string $sortOrder);
+    public function paginate(array $where, array $orWhere, int $perPage, string $sortBy, string $sortOrder, $whereDate);
+
+    public function adminStatistics();
 
     public function followUpStatistics($userId);
 

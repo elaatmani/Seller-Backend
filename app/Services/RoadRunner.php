@@ -39,7 +39,7 @@ class RoadRunner
             if($response['success'] && $response['code'] == 200) return true;
             if(data_get($response, 'error') == "Can not add order, you may change reference ID") return true;
 
-            throw new Exception(json_encode($response['response']));
+            // throw new Exception(json_encode($response['response']));
 
         }
 
@@ -50,7 +50,7 @@ class RoadRunner
             $response = self::delete($order['id']);
 
             if($response['success'] && $response['code'] == 200) return true;
-            throw new Exception(json_encode($response['response']));
+            // throw new Exception(json_encode($response['response']));
         }
 
         return false;
