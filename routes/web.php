@@ -37,6 +37,22 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/road-orders', function() {
+    return RoadRunner::orders();
+});
+
+Route::get('/road', function() {
+    $order_ids = OrderHistory::whereDate('created_at', '2023-08-16')
+    ->whereNotIn('user_id', array(4, 8, 18, 12, 17, 13, 11, 15))
+    ->get()->pluck('order_id')->toArray();
+
+
+
+    $order = Order::whereIn('id', $order_ids)->where('affectation', 4)->first();
+    if(!$order) return 'not found';
+    return RoadRunner::insert($order);
+});
+
 // Route::get('/test', function() {
 //     return storage_path(Product::find(35)->image);
 // });
