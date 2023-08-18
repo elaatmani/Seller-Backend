@@ -50,7 +50,8 @@ class RoadRunner
             $response = self::delete($order['id']);
 
             if($response['success'] && $response['code'] == 200) return true;
-            // throw new Exception(json_encode($response['response']));
+            if(data_get($response, 'response.0.error') == 'Unavailable ID.') return true;
+            throw new Exception(json_encode($response['response']));
         }
 
         return false;
