@@ -112,7 +112,13 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'access_to_sheets', 'description' => 'Access to sheets management']);
 
 
-
+        //Seller
+        Permission::create(['name' => 'show_all_sellers', 'description' => 'View all sellers']);
+        Permission::create(['name' => 'create_seller', 'description' => 'Create a new seller']);
+        Permission::create(['name' => 'update_seller', 'description' => 'Update a seller']);
+        Permission::create(['name' => 'view_seller', 'description' => 'View a specific seller']);
+        Permission::create(['name' => 'delete_seller', 'description' => 'Delete a seller']);
+        Permission::create(['name' => 'access_to_sellers', 'description' => 'Access to sellers management']);
 
         // create roles and assign created permissions NEW
 
@@ -224,7 +230,47 @@ class RolesAndPermissionsSeeder extends Seeder
 
 
 
-
+          // // For Seller
+          $role = Role::create(['name' => 'seller']);
+          $role->givePermissionTo([
+              'show_all_sheets',
+              'create_sheet',
+              'update_sheet',
+              'view_sheet',
+              'delete_sheet',
+              'access_to_sheets',
+  
+              'show_all_sales',
+              'view_sale',
+              'create_sale',
+              'update_sale',
+              'delete_sale',
+              'access_to_sales',
+  
+              
+              'show_all_products',
+              'view_product',
+              'create_product',
+              'update_product',
+              'delete_product',
+              'access_to_products',
+  
+              'show_all_users',
+              'view_user',
+              'create_user',
+              'update_user',
+              'delete_user',
+              'update_user_status',
+              'access_to_users',
+  
+              'show_all_factorisations',
+              'update_factorisation',
+              'delete_factorisation',
+              'view_factorisation',
+              'access_to_factorisations'
+          ]);
+  
+  
         //------------------------------------------------------------------------------------------------------------------------------//
         // create permissions OLD
 

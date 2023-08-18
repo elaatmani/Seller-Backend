@@ -32,7 +32,10 @@ class SaleController extends Controller
             );
         }
         $relationship = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
-        $orders = Order::orderBy('id', 'DESC')->with($relationship)->get();
+        
+        $orders = Order::orderBy('id', 'DESC')->with($relationship)->when(!auth()->user()->hasRole('admin'), function ($query) {
+            return $query->where('user_id', auth()->id());
+        })->get();
 
         return response()->json(
             [

@@ -10,6 +10,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'fullname',
         'agente_id',
         'factorisation_id',
@@ -39,6 +40,7 @@ class Order extends Model
     ];
 
     protected $casts = [
+        'user_id' => 'integer', 
         'counts_from_warehouse' => 'boolean',
         'fullname' => 'string',
         'agente_id' => 'integer',

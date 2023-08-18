@@ -28,7 +28,9 @@ class SheetController extends Controller
         //     );
         // }
 
-        $sheets = Sheet::all();
+        $sheets = Sheet::when(!auth()->user()->hasRole('admin'), function ($query) {
+            return $query->where('user_id', auth()->id());
+        })->get();
 
         return response()->json(
             [
@@ -87,7 +89,7 @@ class SheetController extends Controller
                 );
             }
 
-            $sheet = Sheet::create($sheetValidator->validated());
+            $sheet = Sheet::create([...$sheetValidator->validated(),'user_id'=>auth()->id()]);
 
             return response()->json([
                 'status' => true,

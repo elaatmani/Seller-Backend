@@ -15,12 +15,16 @@ return new class extends Migration
     {
         Schema::create('sheets', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
             $table->string('name')->nullable();
             $table->string('sheet_id');
             $table->string('sheet_name');
             $table->boolean('auto_fetch')->default(true);
             $table->boolean('active')->default(false);
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
         });
     }
 

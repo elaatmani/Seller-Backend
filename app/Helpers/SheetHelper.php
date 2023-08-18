@@ -91,6 +91,7 @@ class SheetHelper {
             $product = Product::where('ref', $sku)->first();
 
             $order = Order::create([
+                'user_id' => $sheet->user_id,
                 'fullname' => $fullname,
                 'phone' => $phone,
                 'city' => $city,

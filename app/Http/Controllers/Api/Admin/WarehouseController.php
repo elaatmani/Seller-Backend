@@ -21,16 +21,16 @@ class WarehouseController extends Controller
     {
         try {
 
-            if (!$request->user()->can('show_all_warehouses')) {
-                return response()->json(
-                    [
-                        'status' => false,
-                        'code' => 'NOT_ALLOWED',
-                        'message' => 'You Dont Have Access To See Warehouses',
-                    ],
-                    405
-                );
-            }
+            // if (!$request->user()->can('show_all_warehouses')) {
+            //     return response()->json(
+            //         [
+            //             'status' => false,
+            //             'code' => 'NOT_ALLOWED',
+            //             'message' => 'You Dont Have Access To See Warehouses',
+            //         ],
+            //         405
+            //     );
+            // }
 
             $warehouses = Warehouse::all();
 

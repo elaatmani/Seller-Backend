@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
             $table->string('sheets_id')->nullable(); // generated unique id for the row
-
             $table->string('fullname');
             $table->unsignedBigInteger('factorisation_id')->nullable();
             $table->string('agente_id')->nullable();
@@ -43,6 +43,8 @@ return new class extends Migration
             $table->timestamps();
 
             // $table->foreign('factorisation_id')->on('factorisations')->references('id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
         });
     }
 

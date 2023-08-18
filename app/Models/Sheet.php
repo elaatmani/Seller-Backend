@@ -10,6 +10,7 @@ class Sheet extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'name',
         'sheet_id',
         'sheet_name',

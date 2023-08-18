@@ -54,6 +54,18 @@ class UserSeeder extends Seeder
         ]);
 
         $Ste->assignRole('delivery');
+
+         $seller = User::create([
+            'firstname' => 'Seller',
+            'lastname' => 'Seller',
+            'email' => 'seller@gmail.com',
+            'phone' => '12345678',
+            'password' => Hash::make('seller'),
+            'status' => 1
+        ]);
+
+        $seller->assignRole('seller');
+        
         // $Ste = User::create([
         //     'firstname' => 'ste',
         //     'lastname' => 'ste',

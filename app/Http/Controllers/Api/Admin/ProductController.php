@@ -20,6 +20,7 @@ use App\Models\ProductDelivery;
 use App\Models\ProductImage;
 use App\Models\User;
 use App\Repositories\ProductRepository;
+// use Spatie\Permission\Models\Role;
 
 class ProductController extends Controller
 {
@@ -30,6 +31,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+      
         if (!$request->user()->can('show_all_products')) {
             return response()->json(
                 [
@@ -40,8 +42,15 @@ class ProductController extends Controller
                 405
             );
         }
-        $products = Product::with('variations','variations.warehouse')->get()->map(fn($product) => ProductHelper::with_state($product));
+        // return auth()->user()->hasRole('admin') ? 'admin' : "non";
+        $products = Product::with('variations', 'variations.warehouse')
+        ->when(!auth()->user()->hasRole('admin'), function ($query) {
+            return $query->where('user_id', auth()->id());
+        })
+        ->get()
+        ->map(fn($product) => ProductHelper::with_state($product));
 
+   
         return response()->json(
             [
                 'status' => true,
@@ -120,6 +129,7 @@ class ProductController extends Controller
 
             DB::beginTransaction();
             $product = Product::create([
+                'user_id' => auth()->id(),
                 'name' => $request->name,
                 'ref' => $request->ref,
                 'buying_price' => $request->buying_price,

@@ -11,6 +11,7 @@ class Product extends Model
 
 
     protected $fillable = [
+        'user_id',
         'name',
         'ref',
         'selling_price',
@@ -20,6 +21,7 @@ class Product extends Model
 
 
     protected $casts = [
+        'user_id' => 'integer',
         'name' => 'string',
         'ref' => 'string',
         'selling_price' => 'float',
