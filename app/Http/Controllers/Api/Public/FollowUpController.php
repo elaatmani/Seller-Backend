@@ -42,6 +42,7 @@ class FollowUpController extends Controller
         $perPage = $request->input('per_page');
         $filters = $request->input('filters');
         $search = $request->input('search');
+
         $followUpCondition = [['delivery', '=', 'annuler'],['confirmation', '=', 'confirmer']];
 
         $orWhere = !$search ? [] : [

@@ -349,7 +349,7 @@ class StatisticsService
             'value' => $noanswerCount,
             'percentage' => $deliveryOrders->count() > 0  ? ($noanswerCount * 100) / $deliveryOrders->count() : 0,
             'icon' => 'mdi-account-cancel',
-            'color' => '#facc15'
+            'color' => '#eab308'
         ];
         $delivery[] = $noanswer;
 
@@ -368,7 +368,8 @@ class StatisticsService
 
         $statistics = [
             'confirmations' => $confirmations,
-            'delivery' => $delivery
+            'delivery' => $delivery,
+            'revenue' => []
         ];
 
 
