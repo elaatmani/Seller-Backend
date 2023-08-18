@@ -37,9 +37,12 @@ class RoadRunner
             $response = self::insert($order);
 
             if($response['success'] && $response['code'] == 200) return true;
-            if(data_get($response, 'error') == "Can not add order, you may change reference ID") return true;
+            if(data_get($response, 'response.error') == "Can not add order, you may change reference ID") return true;
+            if(data_get($response, 'response.0.error') == "Some fields are empty!") {
 
-            // throw new Exception(json_encode($response['response']));
+            };
+
+            throw new Exception(json_encode($response['response']));
 
         }
 
