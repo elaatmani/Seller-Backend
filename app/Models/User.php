@@ -89,4 +89,8 @@ class User extends Authenticatable
         return !!$this->last_action ? Carbon::make($this->last_action)->diffForHumans() : null;
     }
 
+    public function getFullnameAttribute() {
+        return $this->firstname . ' ' . $this->lastname;
+    }
+
 }

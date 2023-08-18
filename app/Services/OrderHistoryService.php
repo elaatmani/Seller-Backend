@@ -4,6 +4,7 @@ namespace App\Services;
 
 
 use App\Models\OrderHistory;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
 class OrderHistoryService
@@ -37,6 +38,19 @@ class OrderHistoryService
                 'type' => 'reconfirmation',
                 'historique' => $newAttributes['followup_confirmation'],
                 'note' => $oldFollowupConfirmation . ' -> ' . $newFollowupConfirmation
+            ]);
+        }
+
+        if ($oldAttributes['affectation'] != $newAttributes['affectation']) {
+            $oldAffectation = !$oldAttributes['affectation'] ? 'Select' : User::where('id', $oldAttributes['affectation'])->fullname;
+            $newAffectation = !$newAttributes['affectation'] ? 'Select' : User::where('id', $newAttributes['affectation'])->fullname;
+
+            OrderHistory::create([
+                'order_id' => $order->id,
+                'user_id' => request()->user()->id,
+                'type' => 'affectation',
+                'historique' => $oldAffectation . ' -> ' . $newAffectation,
+                'note' => $oldAffectation . ' -> ' . $newAffectation
             ]);
         }
 
