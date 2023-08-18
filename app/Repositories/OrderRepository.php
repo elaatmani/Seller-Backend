@@ -2,14 +2,16 @@
 
 namespace App\Repositories;
 
+use Carbon\Carbon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderHistory;
-use App\Repositories\Interfaces\OrderRepositoryInterface;
-use App\Services\RoadRunnerService;
 use Illuminate\Support\Facades\DB;
+use App\Services\RoadRunnerService;
+use App\Repositories\Interfaces\OrderRepositoryInterface;
 
 class OrderRepository implements OrderRepositoryInterface {
+
 
     public $confirmations = [
         null => 'New',
@@ -47,12 +49,10 @@ class OrderRepository implements OrderRepositoryInterface {
     }
 
     public function paginate(
-        array $where = [],
-        array $orWhere = [],
         int $perPage = 10,
         string $sortBy = 'created_at',
         string $sortOrder = 'desc',
-        $whereDate = []
+        array $options = []
     ) {
          // Number of records per page
 
@@ -64,16 +64,18 @@ class OrderRepository implements OrderRepositoryInterface {
             $sortOrder = 'desc'; // Set default if the provided sort order is invalid
         }
 
-        foreach($orWhere as $w) {
+        foreach(data_get($options, 'orWhere', []) as $w) {
             $query->orWhere($w[0], $w[1], $w[2]);
         }
 
-        foreach($whereDate as $wd) {
-            $query->whereDate($wd[0], $wd[1], $wd[2]);
+        foreach(data_get($options, 'whereDate', []) as $wd) {
+            if(!$wd[2]) continue;
+            $query->whereDate($wd[0], $wd[1], Carbon::make($wd[2])->toDate());
         }
-        // $q->whereDate('created_at', '=', Carbon::today()->toDateString());
 
-        $query->where($where);
+        foreach(data_get($options, 'where', []) as $w ) {
+            $query->where($w[0], $w[1], $w[2]);
+        }
 
         // Apply the sorting to the query
         $query->orderBy($sortBy, $sortOrder);

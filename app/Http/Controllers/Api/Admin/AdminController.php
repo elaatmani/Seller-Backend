@@ -53,32 +53,38 @@ class AdminController extends Controller
             ['note', 'LIKE', "%$search%"],
         ];
 
-        $toFilter = [];
 
         $filtersDate = Arr::only($filters, ['created_from', 'created_to', 'dropped_from', 'dropped_to']);
         $filters = Arr::only($filters, ['confirmation', 'delivery', 'affectation', 'agente_id', 'upsell']);
+
+        $toFilter = [];
         if(is_array($filters)){
             foreach($filters as $f => $v) {
                 if($v == 'all') continue;
-                $toFilter[] = [$f, $v];
+                $toFilter[] = [$f, '=', $v];
             }
         }
 
-        $where = [
-            ...$toFilter
-        ];
-
         $whereDate = [
+            ['created_at', '>=', $filtersDate['created_from']],
+            ['created_at', '<=', $filtersDate['created_to']],
+            ['dropped_at', '>=', $filtersDate['dropped_from']],
+            ['dropped_at', '<=', $filtersDate['dropped_to']],
+
         ];
 
-        if(!!$filtersDate['created_from']) $whereDate[] = ['created_at', '>=', Carbon::make($filtersDate['created_from'])->toDate()];
-        if(!!$filtersDate['created_to']) $whereDate[] = ['created_at', '<=', Carbon::make($filtersDate['created_to'])->toDate()];
-        if(!!$filtersDate['dropped_from']) $whereDate[] = ['dropped_at', '>=', Carbon::make($filtersDate['dropped_from'])->toDate()];
-        if(!!$filtersDate['dropped_to']) $whereDate[] = ['dropped_at', '<=', Carbon::make($filtersDate['dropped_to'])->toDate()];
+        // if(!!$filtersDate['created_from']) $whereDate[] = ['created_at', '>=', Carbon::make($filtersDate['created_from'])->toDate()];
+        // if(!!$filtersDate['created_to']) $whereDate[] = ['created_at', '<=', Carbon::make($filtersDate['created_to'])->toDate()];
+        // if(!!$filtersDate['dropped_from']) $whereDate[] = ['dropped_at', '>=', Carbon::make($filtersDate['dropped_from'])->toDate()];
+        // if(!!$filtersDate['dropped_to']) $whereDate[] = ['dropped_at', '<=', Carbon::make($filtersDate['dropped_to'])->toDate()];
 
+        $options = [
+            'whereDate' => $whereDate,
+            'where' => $toFilter,
+            'orWhere' => $orWhere,
+        ];
 
-
-        $orders = $this->orderRepository->paginate($where, $orWhere, $perPage, $sortBy, $sortOrder, $whereDate);
+        $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder, $options);
         $statistics = $this->orderRepository->adminStatistics();
 
         return response()->json([

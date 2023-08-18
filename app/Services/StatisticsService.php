@@ -183,8 +183,8 @@ class StatisticsService
 
         $orders = $orders->get();
 
-        $confirmations = [
-        ];
+        $confirmations = [];
+        $delivery = [];
 
         $allCount = $orders->count();
         $all = [
@@ -205,7 +205,7 @@ class StatisticsService
             'percentage' => $orders->count() > 0  ? ($confirmedCount * 100) / $orders->count() : 0,
             // 'icon' => 'mdi-check-all',
             'icon' => 'mdi-phone-check',
-            'color' => '#4ade80'
+            'color' => '#10b981'
         ];
         $confirmations[] = $confirmed;
 
@@ -283,11 +283,92 @@ class StatisticsService
         $confirmations[] = $wrongNumber;
 
 
+        $deliveryOrders = $orders->where('confirmation', 'confirmer');
+
+        $all = [
+            'id' => 1,
+            'title' => 'Confirmed',
+            'value' => $deliveryOrders->count(),
+            'icon' => 'mdi-check-circle-outline',
+            'color' => '#6b7280'
+        ];
+        $delivery[] = $all;
+
+
+        $deliveredCount = $deliveryOrders->where('delivery', 'livrer')->count();
+        $delivered = [
+            'id' => 2,
+            'title' => 'Delivered',
+            'value' => $deliveredCount,
+            'percentage' => $deliveryOrders->count() > 0  ? ($deliveredCount * 100) / $deliveryOrders->count() : 0,
+            'icon' => 'mdi-truck-check',
+            'color' => '#10b981'
+        ];
+        $delivery[] = $delivered;
+
+
+        $shippedCount = $deliveryOrders->where('delivery', 'expidier')->count();
+        $shipped = [
+            'id' => 3,
+            'title' => 'Shipped',
+            'value' => $shippedCount,
+            'percentage' => $deliveryOrders->count() > 0  ? ($shippedCount * 100) / $deliveryOrders->count() : 0,
+            'icon' => 'mdi-truck-fast-outline',
+            'color' => '#f97316'
+        ];
+        $delivery[] = $shipped;
+
+        $transferCount = $deliveryOrders->where('delivery', 'transfer')->count();
+        $transferred = [
+            'id' => 7,
+            'title' => 'Transferred',
+            'value' => $transferCount,
+            'percentage' => $deliveryOrders->count() > 0  ? ($transferCount * 100) / $deliveryOrders->count() : 0,
+            'icon' => 'mdi-dolly',
+            'color' => '#a855f7'
+        ];
+        $delivery[] = $transferred;
+
+
+        $reportedCount = $deliveryOrders->where('delivery', 'reporter')->count();
+        $reported = [
+            'id' => 4,
+            'title' => 'Reported',
+            'value' => $reportedCount,
+            'percentage' => $deliveryOrders->count() > 0  ? ($reportedCount * 100) / $deliveryOrders->count() : 0,
+            'icon' => 'mdi-calendar-clock',
+            'color' => '#38bdf8'
+        ];
+        $delivery[] = $reported;
+
+
+        $noanswerCount = $deliveryOrders->where('delivery', 'pas-de-reponse')->count();
+        $noanswer = [
+            'id' => 5,
+            'title' => 'No Answer',
+            'value' => $noanswerCount,
+            'percentage' => $deliveryOrders->count() > 0  ? ($noanswerCount * 100) / $deliveryOrders->count() : 0,
+            'icon' => 'mdi-account-cancel',
+            'color' => '#facc15'
+        ];
+        $delivery[] = $noanswer;
+
+
+        $cancelledCount = $deliveryOrders->where('delivery', 'annuler')->count();
+        $cancelled = [
+            'id' => 6,
+            'title' => 'Cancelled',
+            'value' => $cancelledCount,
+            'percentage' => $deliveryOrders->count() > 0  ? ($cancelledCount * 100) / $deliveryOrders->count() : 0,
+            'icon' => 'mdi-close-circle',
+            'color' => '#f43f5e'
+        ];
+        $delivery[] = $cancelled;
 
 
         $statistics = [
             'confirmations' => $confirmations,
-            'delivery' => []
+            'delivery' => $delivery
         ];
 
 
