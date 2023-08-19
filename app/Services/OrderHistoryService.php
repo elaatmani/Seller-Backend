@@ -14,36 +14,38 @@ class OrderHistoryService
         $oldAttributes = $order->getOriginal(); // Old values
         $newAttributes = $order->getAttributes(); // New values
 
-        if ($oldAttributes['confirmation'] != $newAttributes['confirmation']) {
+        $oldConfirmation = data_get($oldAttributes, 'confirmation', 'New');
+        $newConfirmation = data_get($newAttributes, 'confirmation', 'New');
 
-            $oldConfirmation = !$oldAttributes['confirmation'] ? 'New' : $oldAttributes['confirmation'];
-            $newConfirmation = !$newAttributes['confirmation'] ? 'New' : $newAttributes['confirmation'];
+        $oldAffectation = data_get($oldAttributes, 'affectation');
+        $newAffectation = data_get($newAttributes, 'affectation');
 
+        $oldDelivery = data_get($oldAttributes, 'delivery', 'Select');
+        $newDelivery = data_get($newAttributes, 'delivery', 'Select');
+
+        $oldReconfirmation = data_get($oldAttributes, 'reconfirmation', 'New');
+        $newReconfirmation = data_get($newAttributes, 'reconfirmation', 'New');
+
+        $oldUpsell = data_get($oldAttributes, 'upsell', 'Select');
+        $newUpsell = data_get($newAttributes, 'upsell', 'Select');
+
+        $oldAgentId = data_get($oldAttributes, 'agente_id', 'None');
+        $newAgentId = data_get($newAttributes, 'agente_id', 'None');
+
+
+        if ($oldConfirmation != $newConfirmation) {
             OrderHistory::create([
                 'order_id' => $order->id,
                 'user_id' => request()->user()->id,
                 'type' => 'confirmation',
-                'historique' => $newAttributes['confirmation'],
+                'historique' => $oldConfirmation . ' -> ' . $newConfirmation,
                 'note' => $oldConfirmation . ' -> ' . $newConfirmation
             ]);
         }
 
-        if ($oldAttributes['followup_confirmation'] != $newAttributes['followup_confirmation']) {
-            $oldFollowupConfirmation = !$oldAttributes['followup_confirmation'] ? 'New' : $oldAttributes['followup_confirmation'];
-            $newFollowupConfirmation = !$newAttributes['followup_confirmation'] ? 'New' : $newAttributes['followup_confirmation'];
-
-            OrderHistory::create([
-                'order_id' => $order->id,
-                'user_id' => request()->user()->id,
-                'type' => 'reconfirmation',
-                'historique' => $newAttributes['followup_confirmation'],
-                'note' => $oldFollowupConfirmation . ' -> ' . $newFollowupConfirmation
-            ]);
-        }
-
-        if ($oldAttributes['affectation'] != $newAttributes['affectation']) {
-            $oldAffectation = !$oldAttributes['affectation'] ? 'Select' : User::where('id', $oldAttributes['affectation'])->first()->fullname;
-            $newAffectation = !$newAttributes['affectation'] ? 'Select' : User::where('id', $newAttributes['affectation'])->first()->fullname;
+        if ($oldAffectation != $newAffectation) {
+            $oldAffectation = !$oldAffectation ? 'Select' : User::where('id', $oldAffectation)->first()->fullname;
+            $newAffectation = !$newAffectation ? 'Select' : User::where('id', $newAffectation)->first()->fullname;
 
             OrderHistory::create([
                 'order_id' => $order->id,
@@ -54,39 +56,45 @@ class OrderHistoryService
             ]);
         }
 
-        if ($oldAttributes['delivery'] != $newAttributes['delivery']) {
-            $oldDelivery = !$oldAttributes['delivery'] ? 'Select' : $oldAttributes['delivery'];
-            $newDelivery = !$newAttributes['delivery'] ? 'Select' : $newAttributes['delivery'];
 
+        if ($oldReconfirmation != $newReconfirmation) {
+            OrderHistory::create([
+                'order_id' => $order->id,
+                'user_id' => request()->user()->id,
+                'type' => 'reconfirmation',
+                'historique' => $newReconfirmation,
+                'note' => $oldReconfirmation . ' -> ' . $newReconfirmation
+            ]);
+        }
+
+
+        if ($oldDelivery != $newDelivery) {
             OrderHistory::create([
                 'order_id' => $order->id,
                 'user_id' => request()->user()->id,
                 'type' => 'delivery',
-                'historique' => $newAttributes['delivery'],
+                'historique' => $oldDelivery . ' -> ' . $newDelivery,
                 'note' => $oldDelivery . ' -> ' . $newDelivery
             ]);
         }
 
-        if ($oldAttributes['upsell'] != $newAttributes['upsell']) {
-            $oldUpsell = !$oldAttributes['upsell'] ? 'Select' : $oldAttributes['upsell'];
-            $newUpsell = !$newAttributes['upsell'] ? 'Select' : $newAttributes['upsell'];
-
+        if ($oldUpsell != $oldUpsell) {
             OrderHistory::create([
                 'order_id' => $order->id,
                 'user_id' => request()->user()->id,
                 'type' => 'upsell',
-                'historique' => $newAttributes['upsell'],
+                'historique' => $oldUpsell . ' -> ' . $newUpsell,
                 'note' => $oldUpsell . ' -> ' . $newUpsell
             ]);
         }
 
-        if ($oldAttributes['agente_id'] != $newAttributes['agente_id']) {
+        if ($oldAgentId != $newAgentId) {
             OrderHistory::create([
                 'order_id' => $order->id,
                 'user_id' => request()->user()->id,
                 'type' => 'responsibility',
-                'historique' => $newAttributes['agente_id'],
-                'note' => $oldAttributes['agente_id'] . ' -> ' . $newAttributes['agente_id'],
+                'historique' => $oldAgentId . ' -> ' . $newAgentId,
+                'note' => $oldAgentId . ' -> ' . $newAgentId,
             ]);
         }
     }

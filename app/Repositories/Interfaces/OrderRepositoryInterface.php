@@ -8,6 +8,8 @@ interface OrderRepositoryInterface {
 
     public function update($id, $data);
 
+    public function create($data);
+
     public function whereCount($where, $callback = null);
 
     public function paginate(int $perPage, string $sortBy, string $sortOrder, array $options = []);

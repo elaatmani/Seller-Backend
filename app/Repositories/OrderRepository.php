@@ -115,6 +115,27 @@ class OrderRepository implements OrderRepositoryInterface {
     }
 
 
+    public function create($data) {
+
+        $order = Order::create([
+            ...$data,
+            'delivery' => data_get($data, 'affectation') != null ? 'dispatch' : null
+        ]);
+
+
+        $items = $data['items'];
+
+        foreach($items as $item) {
+            OrderItem::create([
+                ...$item,
+                'order_id' => $order->id
+            ]);
+        }
+        $order = $order->fresh();
+        return $order;
+    }
+
+
     public function adminStatistics()
     {
         return null;

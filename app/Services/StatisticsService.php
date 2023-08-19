@@ -369,11 +369,26 @@ class StatisticsService
         $delivery[] = $cancelled;
 
 
-        $deliveredRevenue = [
-            'id' => 2,
+        $AllRevenue = [
+            'id' => 1,
             'title' => 'Revenue',
             'value' => 0,
             'icon' => 'mdi-currency-usd',
+            'color' => '#22c55e'
+        ];
+
+        $orders
+        ->where('confirmation', 'confirmer')
+        ->map(function($o) use(&$AllRevenue) {
+            $AllRevenue['value'] += self::getPrice($o);
+        });
+
+
+        $deliveredRevenue = [
+            'id' => 2,
+            'title' => 'Delivered',
+            'value' => 0,
+            'icon' => 'mdi-check-all',
             'color' => '#22c55e'
         ];
 
@@ -385,20 +400,15 @@ class StatisticsService
         });
 
 
-        // $deliveredRevenue = 0;
-        // $deliveredOrders = $orders
-        // ->where('confirmation', 'confirmer')
-        // ->where('delivery', 'livrer')
-        // ->map(function($o) use(&$total) {
-        //     $total += self::getPrice($o);
-        // });
+
 
 
         $statistics = [
             'confirmations' => $confirmations,
             'delivery' => $delivery,
             'revenue' => [
-                // $deliveredRevenue
+                $AllRevenue,
+                $deliveredRevenue
             ]
         ];
 

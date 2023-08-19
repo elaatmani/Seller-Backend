@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\StatisticsService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Http\Requests\CreateOrderRequest;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -99,10 +100,42 @@ class AdminController extends Controller
 
     public function update(UpdateOrderRequest $request, $id) {
 
-        try {
+        // try {
             DB::beginTransaction();
 
             $order = $this->orderRepository->update($id, $request->all());
+
+            DB::commit();
+            return [
+                'code' => 'SUCCESS',
+                'data' => [
+                    'order' => $order
+                ]
+            ];
+
+        // } catch (\Throwable $th) {
+
+        //     // rollback transaction on error
+        //     DB::rollBack();
+
+        //     return response()->json(
+        //         [
+        //             'status' => false,
+        //             'code' => 'SERVER_ERROR',
+        //             'message' => $th->getMessage(),
+        //         ],
+        //         500
+        //     );
+        // }
+    }
+
+
+    public function create(CreateOrderRequest $request) {
+
+        try {
+            DB::beginTransaction();
+
+            $order = $this->orderRepository->create($request->all());
 
             DB::commit();
             return [
