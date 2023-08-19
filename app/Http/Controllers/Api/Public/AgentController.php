@@ -59,7 +59,7 @@ class AgentController extends Controller
 
                     $toFilter[] = [$f, 'like', "%$v%"];
                 } else {
-                    $toFilter[] = [$f, $v];
+                    $toFilter[] = [$f, '=', $v];
                 }
             }
         }
@@ -71,9 +71,13 @@ class AgentController extends Controller
             ...$toFilter
         ];
 
+        $options = [
+            'where' => $where,
+            'orWhere' => $orWhere
+        ];
 
 
-        $orders = $this->orderRepository->paginate($where, $orWhere, $perPage, $sortBy, $sortOrder, []);
+        $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder, $options);
         $statistics = $this->orderRepository->agentStatistics(auth()->id());
 
         return response()->json([

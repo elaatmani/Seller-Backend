@@ -42,7 +42,8 @@ class FollowUpController extends Controller
         $perPage = $request->input('per_page');
         $filters = $request->input('filters');
         $search = $request->input('search');
-        $followUpCondition = [['delivery', 'annuler'],['confirmation', 'confirmer']];
+
+        $followUpCondition = [['delivery', '=', 'annuler'],['confirmation', '=', 'confirmer']];
 
         $orWhere = !$search ? [] : [
             ['id', 'LIKE', "%$search%"],
@@ -62,7 +63,7 @@ class FollowUpController extends Controller
 
                     $toFilter[] = [$f, 'like', "%$v%"];
                 } else {
-                    $toFilter[] = [$f, $v];
+                    $toFilter[] = [$f, '=', $v];
                 }
             }
         }
@@ -72,8 +73,13 @@ class FollowUpController extends Controller
             ...$toFilter
         ];
 
+        $options = [
+            'where' => $where,
+            'orWhere' => $orWhere
+        ];
 
-        $orders = $this->orderRepository->paginate($where, $orWhere, $perPage, $sortBy, $sortOrder, []);
+
+        $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder, $options);
         $statistics = $this->orderRepository->followUpStatistics(1);
 
         return response()->json([

@@ -2,15 +2,17 @@
 
 namespace App\Repositories;
 
+use Carbon\Carbon;
 use App\Models\Order;
 use Carbon\Carbon;
 use App\Models\OrderItem;
 use App\Models\OrderHistory;
-use App\Repositories\Interfaces\OrderRepositoryInterface;
-use App\Services\RoadRunnerService;
 use Illuminate\Support\Facades\DB;
+use App\Services\RoadRunnerService;
+use App\Repositories\Interfaces\OrderRepositoryInterface;
 
 class OrderRepository implements OrderRepositoryInterface {
+
 
     public $confirmations = [
         null => 'New',
@@ -88,6 +90,10 @@ class OrderRepository implements OrderRepositoryInterface {
 
     public function update($id, $data) {
         $order = Order::where('id', $id)->first();
+
+        if($data['affectation'] != null) {
+            $data['delivery'] = 'dispatch';
+        }
 
         $order->update($data);
 

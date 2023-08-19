@@ -37,9 +37,12 @@ class RoadRunner
             $response = self::insert($order);
 
             if($response['success'] && $response['code'] == 200) return true;
-            if(data_get($response, 'error') == "Can not add order, you may change reference ID") return true;
+            if(data_get($response, 'response.error') == "Can not add order, you may change reference ID") return true;
+            if(data_get($response, 'response.0.error') == "Some fields are empty!") {
 
-            // throw new Exception(json_encode($response['response']));
+            };
+
+            throw new Exception(json_encode($response['response']));
 
         }
 
@@ -50,7 +53,8 @@ class RoadRunner
             $response = self::delete($order['id']);
 
             if($response['success'] && $response['code'] == 200) return true;
-            // throw new Exception(json_encode($response['response']));
+            if(data_get($response, 'response.0.error') == 'Unavailable ID.') return true;
+            throw new Exception(json_encode($response['response']));
         }
 
         return false;
@@ -155,7 +159,7 @@ class RoadRunner
         $total = array_reduce($order['items']->values()->toArray(), function($sum, $item) {
             return $sum + (!$item['price'] ? 0 : $item['price']);
         }, 0);
-            return floatval(!$order['price'] ? 0 : $order['price']) + floatval($total);
+            return round(floatval(!$order['price'] ? 0 : $order['price']) + floatval($total), 2);
     }
 
 

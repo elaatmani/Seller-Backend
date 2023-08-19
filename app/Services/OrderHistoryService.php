@@ -42,8 +42,8 @@ class OrderHistoryService
         }
 
         if ($oldAttributes['affectation'] != $newAttributes['affectation']) {
-            $oldAffectation = !$oldAttributes['affectation'] ? 'Select' : User::where('id', $oldAttributes['affectation'])->fullname;
-            $newAffectation = !$newAttributes['affectation'] ? 'Select' : User::where('id', $newAttributes['affectation'])->fullname;
+            $oldAffectation = !$oldAttributes['affectation'] ? 'Select' : User::where('id', $oldAttributes['affectation'])->first()->fullname;
+            $newAffectation = !$newAttributes['affectation'] ? 'Select' : User::where('id', $newAttributes['affectation'])->first()->fullname;
 
             OrderHistory::create([
                 'order_id' => $order->id,
