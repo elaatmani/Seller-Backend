@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Admin;
+namespace App\Http\Controllers\Api\Seller;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -12,9 +12,8 @@ use App\Repositories\Interfaces\OrderRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 
-class AdminController extends Controller
+class SellerController extends Controller
 {
-
     private $orderRepository;
 
     public function __construct(OrderRepositoryInterface $orderRepository)
@@ -65,6 +64,8 @@ class AdminController extends Controller
             }
         }
 
+        $toFilter[] = ['user_id', '=' , auth()->id()];
+
         $whereDate = [
             ['created_at', '>=', $filtersDate['created_from']],
             ['created_at', '<=', $filtersDate['created_to']],
@@ -73,6 +74,7 @@ class AdminController extends Controller
 
         ];
 
+      
         // if(!!$filtersDate['created_from']) $whereDate[] = ['created_at', '>=', Carbon::make($filtersDate['created_from'])->toDate()];
         // if(!!$filtersDate['created_to']) $whereDate[] = ['created_at', '<=', Carbon::make($filtersDate['created_to'])->toDate()];
         // if(!!$filtersDate['dropped_from']) $whereDate[] = ['dropped_at', '>=', Carbon::make($filtersDate['dropped_from'])->toDate()];

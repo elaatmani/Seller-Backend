@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('factorisations', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
             $table->string('factorisation_id')->unique();
             $table->unsignedBigInteger('delivery_id');
             $table->boolean('close')->default(false);
@@ -29,6 +30,8 @@ return new class extends Migration
 
 
             $table->foreign('delivery_id')->on('users')->references('id')->onDelete('cascade');
+            $table->foreign('user_id')->on('users')->references('id')->onDelete('cascade');
+
         });
     }
 

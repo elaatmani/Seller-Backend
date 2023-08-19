@@ -20,6 +20,8 @@ use App\Http\Controllers\Api\Public\FollowUpController;
 use App\Http\Controllers\Api\Public\DashboardController;
 use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
+use App\Http\Controllers\Api\Seller\SellerController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -122,7 +124,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Product
     Route::get('/products', [ProductController::class, 'index']);
-    Route::get('/products/for-order', [ProductController::class, 'productsForOrder']);
+    Route::get('/products/for-order/{id?}', [ProductController::class, 'productsForOrder']);
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::post('/products/new', [ProductController::class, 'create']);
     Route::post('/products/update/{id}', [ProductController::class, 'update']);
@@ -215,6 +217,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/v1/agent/orders', [AgentController::class, 'index']);
     Route::get('/v1/agent/orders/counts', [AgentController::class, 'counts']);
     Route::post('/v1/agent/orders/{id}/update', [AgentController::class, 'update']);
+
+    //Seller
+    Route::post('/v1/seller/statistics', [SellerController::class, 'statistics']);
+    Route::post('/v1/seller/orders', [SellerController::class, 'index']);
+    Route::get('/v1/seller/orders/counts', [SellerController::class, 'counts']);
+    Route::post('/v1/seller/orders/{id}/update', [SellerController::class, 'update']);
 });
 
 // Auto fetch

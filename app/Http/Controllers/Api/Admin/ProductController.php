@@ -63,9 +63,9 @@ class ProductController extends Controller
         );
     }
 
-    public function productsForOrder() {
+    public function productsForOrder($id = null) {
 
-        $products = ProductRepository::productsForOrder();
+        $products = ProductRepository::productsForOrder($id);
 
         return response()->json(
             [

@@ -114,14 +114,16 @@ class RolesAndPermissionsSeeder extends Seeder
 
         //Seller
         Permission::create(['name' => 'show_all_sellers', 'description' => 'View all sellers']);
+        Permission::create(['name' => 'show_seller_sales', 'description' => 'View seller sales']);
         Permission::create(['name' => 'create_seller', 'description' => 'Create a new seller']);
         Permission::create(['name' => 'update_seller', 'description' => 'Update a seller']);
         Permission::create(['name' => 'view_seller', 'description' => 'View a specific seller']);
         Permission::create(['name' => 'delete_seller', 'description' => 'Delete a seller']);
         Permission::create(['name' => 'access_to_sellers', 'description' => 'Access to sellers management']);
+        Permission::create(['name' => 'access_to_seller_sales', 'description' => 'Access to sellers sales management']);
 
         // create roles and assign created permissions NEW
-
+        
 
         // for admin
         $role = Role::create(['name' => 'admin']);
@@ -240,12 +242,12 @@ class RolesAndPermissionsSeeder extends Seeder
               'delete_sheet',
               'access_to_sheets',
   
-              'show_all_sales',
+              'show_seller_sales',
               'view_sale',
               'create_sale',
               'update_sale',
               'delete_sale',
-              'access_to_sales',
+              'access_to_seller_sales',
   
               
               'show_all_products',
@@ -268,6 +270,9 @@ class RolesAndPermissionsSeeder extends Seeder
               'delete_factorisation',
               'view_factorisation',
               'access_to_factorisations'
+
+             
+             
           ]);
   
   

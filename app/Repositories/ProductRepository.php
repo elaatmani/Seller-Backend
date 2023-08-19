@@ -7,8 +7,8 @@ use App\Models\ProductOffer;
 
 class ProductRepository {
 
-    public static function productsForOrder() {
-        return  Product::get()->map->formatForOrder();
+    public static function productsForOrder($id = null) {
+        return  Product::when($id !=null,fn($q) => $q->where('user_id', $id))->get()->map->formatForOrder();
     }
 
 
