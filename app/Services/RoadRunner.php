@@ -159,7 +159,7 @@ class RoadRunner
         $total = array_reduce($order['items']->values()->toArray(), function($sum, $item) {
             return $sum + (!$item['price'] ? 0 : $item['price']);
         }, 0);
-            return floatval(!$order['price'] ? 0 : $order['price']) + floatval($total);
+            return round(floatval(!$order['price'] ? 0 : $order['price']) + floatval($total), 2);
     }
 
 

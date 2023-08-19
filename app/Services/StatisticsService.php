@@ -78,6 +78,8 @@ class StatisticsService
             'day-three-call-three',
         ])->count();
 
+        $totalCount = $orders->where('confirmation', '!=', 'double')->count();
+
         $all = [
             'id' => 1,
             'title' => 'All Orders',
@@ -90,7 +92,7 @@ class StatisticsService
             'id' => 2,
             'title' => 'Reported',
             'value' => $reported,
-            'percentage' => $orders->count() > 0  ? ($reported * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($reported * 100) / $totalCount : 0,
             'icon' => 'mdi-clock-outline',
             'color' => '#14b8a6'
         ];
@@ -99,7 +101,7 @@ class StatisticsService
             'id' => 3,
             'title' => 'Confirmed',
             'value' => $confirmed,
-            'percentage' => $orders->count() > 0  ? ($confirmed * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($confirmed * 100) / $totalCount : 0,
             'icon' => 'mdi-check-all',
             'color' => '#06b6d4'
         ];
@@ -108,7 +110,7 @@ class StatisticsService
             'id' => 4,
             'title' => 'No Answer',
             'value' => $noAnswer,
-            'percentage' => $orders->count() > 0  ? ($noAnswer * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($noAnswer * 100) / $totalCount : 0,
             'icon' => 'mdi-phone-alert',
             'color' => '#facc15'
         ];
@@ -117,7 +119,7 @@ class StatisticsService
             'id' => 5,
             'title' => 'Earnings',
             'value' => '0',
-            'percentage' => $orders->count() > 0  ? (0 * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? (0 * 100) / $totalCount : 0,
             'icon' => 'mdi-currency-usd',
             'symbol' => '$',
             'color' => '#34d399'
@@ -127,7 +129,7 @@ class StatisticsService
             'id' => 6,
             'title' => 'Cancelled',
             'value' => $cancelled,
-            'percentage' => $orders->count() > 0  ? ($cancelled * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($cancelled * 100) / $totalCount : 0,
             'icon' => 'mdi-cancel',
             'color' => '#f43f5e'
         ];
@@ -136,7 +138,7 @@ class StatisticsService
             'id' => 7,
             'title' => 'Upsell',
             'value' => $upsells,
-            'percentage' => $orders->count() > 0  ? ($upsells * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($upsells * 100) / $totalCount : 0,
             'icon' => 'mdi-transfer-up',
             'color' => '#fb923c'
         ];
@@ -145,7 +147,7 @@ class StatisticsService
             'id' => 8,
             'title' => 'Double',
             'value' => $doubles,
-            'percentage' => $orders->count() > 0  ? ($doubles * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($doubles * 100) / $totalCount : 0,
             'icon' => 'mdi-selection-multiple',
             'color' => '#a78bfa'
         ];
@@ -185,6 +187,7 @@ class StatisticsService
 
         $confirmations = [];
         $delivery = [];
+        $totalCount = $orders->where('confirmation', '!=', 'double')->count();
 
         $allCount = $orders->count();
         $all = [
@@ -202,7 +205,7 @@ class StatisticsService
             'id' => 2,
             'title' => 'Confirmed',
             'value' => $confirmedCount,
-            'percentage' => $orders->count() > 0  ? ($confirmedCount * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($confirmedCount * 100) / $totalCount : 0,
             // 'icon' => 'mdi-check-all',
             'icon' => 'mdi-phone-check',
             'color' => '#10b981'
@@ -215,7 +218,7 @@ class StatisticsService
             'id' => 3,
             'title' => 'New',
             'value' => $newCount,
-            'percentage' => $orders->count() > 0  ? ($newCount * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($newCount * 100) / $totalCount : 0,
             'icon' => 'mdi-new-box',
             'color' => '#475569'
         ];
@@ -227,7 +230,7 @@ class StatisticsService
             'id' => 4,
             'title' => 'Reported',
             'value' => $reportedCount,
-            'percentage' => $orders->count() > 0  ? ($reportedCount * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($reportedCount * 100) / $totalCount : 0,
             'icon' => 'mdi-clock-outline',
             'color' => '#a855f7'
         ];
@@ -240,7 +243,7 @@ class StatisticsService
             'id' => 5,
             'title' => 'No Answer',
             'value' => $noAnswerCount,
-            'percentage' => $orders->count() > 0  ? ($noAnswerCount * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($noAnswerCount * 100) / $totalCount : 0,
             'icon' => 'mdi-phone-missed',
             'color' => '#fbbf24'
         ];
@@ -252,7 +255,7 @@ class StatisticsService
             'id' => 6,
             'title' => 'Cancelled',
             'value' => $cancelledCount,
-            'percentage' => $orders->count() > 0  ? ($cancelledCount * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($cancelledCount * 100) / $totalCount : 0,
             'icon' => 'mdi-cancel',
             'color' => '#f43f5e'
         ];
@@ -264,7 +267,7 @@ class StatisticsService
             'id' => 7,
             'title' => 'Double',
             'value' => $doubledCount,
-            'percentage' => $orders->count() > 0  ? ($doubledCount * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($doubledCount * 100) / $totalCount : 0,
             'icon' => 'mdi-selection-multiple',
             'color' => '#8b5cf6'
         ];
@@ -276,7 +279,7 @@ class StatisticsService
             'id' => 8,
             'title' => 'Wrong Number',
             'value' => $wrondNumberCount,
-            'percentage' => $orders->count() > 0  ? ($wrondNumberCount * 100) / $orders->count() : 0,
+            'percentage' => $totalCount > 0  ? ($wrondNumberCount * 100) / $totalCount : 0,
             'icon' => 'mdi-phone-remove',
             'color' => '#db2777'
         ];
@@ -366,16 +369,49 @@ class StatisticsService
         $delivery[] = $cancelled;
 
 
+        $deliveredRevenue = [
+            'id' => 2,
+            'title' => 'Revenue',
+            'value' => 0,
+            'icon' => 'mdi-currency-usd',
+            'color' => '#22c55e'
+        ];
+
+        $orders
+        ->where('confirmation', 'confirmer')
+        ->where('delivery', 'livrer')
+        ->map(function($o) use(&$deliveredRevenue) {
+            $deliveredRevenue['value'] += self::getPrice($o);
+        });
+
+
+        // $deliveredRevenue = 0;
+        // $deliveredOrders = $orders
+        // ->where('confirmation', 'confirmer')
+        // ->where('delivery', 'livrer')
+        // ->map(function($o) use(&$total) {
+        //     $total += self::getPrice($o);
+        // });
+
+
         $statistics = [
             'confirmations' => $confirmations,
             'delivery' => $delivery,
-            'revenue' => []
+            'revenue' => [
+                // $deliveredRevenue
+            ]
         ];
 
-
-
         return $statistics;
+    }
 
+
+    public static function getPrice($order) {
+        if (!$order) return 0;
+        $total = array_reduce($order['items']->values()->toArray(), function($sum, $item) {
+            return $sum + (!$item['price'] ? 0 : $item['price']);
+        }, 0);
+            return floatval(!$order['price'] ? 0 : $order['price']) + floatval($total);
     }
 
 }
