@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Public;
 
 use App\Models\Order;
-use App\Models\OrderHistory;
 use Illuminate\Http\Request;
 use App\Models\RoadRunnerRequest;
 use App\Http\Controllers\Controller;
@@ -84,19 +83,12 @@ class ClientController extends Controller
             } else {
                 $newStatus = $this->references[$request->status];
 
-                $orderHistory = new OrderHistory();
-                $orderHistory->order_id = $order->id;
-                $orderHistory->user_id = auth()->user()->id;
-                $orderHistory->type = 'delivery';
-                $orderHistory->historique = $newStatus;
-                $orderHistory->note = 'Updated Status of Delivery';
-                $orderHistory->save();
             }
 
             $roadrunner->save();
 
             $order->delivery = $newStatus;
-            
+
             if ($order->confirmation === 'confirmer' && $newStatus === 'livrer') {
                 $order->cmd = 'CMD-' . date('dmY-His', strtotime($order->created_at));
                 $order->delivery_date = now();
@@ -238,13 +230,6 @@ class ClientController extends Controller
                     } else {
                         $newStatus = $this->references[$res['status']];
 
-                        $orderHistory = new OrderHistory();
-                        $orderHistory->order_id = $order->id;
-                        $orderHistory->user_id = auth()->user()->id;
-                        $orderHistory->type = 'delivery';
-                        $orderHistory->historique = $newStatus;
-                        $orderHistory->note = 'Updated Status of Delivery';
-                        $orderHistory->save();
                     }
 
                     $roadrunner->save();
@@ -256,13 +241,13 @@ class ClientController extends Controller
                         $existingFactorization = Factorisation::where('delivery_id', $order->affectation)
                             ->where('close', false)
                             ->first();
-        
+
                         if ($existingFactorization) {
                             // Update the existing factorization
                             $existingFactorization->price += $order->price;
                             $existingFactorization->commands_number += 1;
                             $existingFactorization->save();
-        
+
                             $order->factorisation_id = $existingFactorization->id;
                         } else {
                             // Create a new factorization
@@ -272,15 +257,15 @@ class ClientController extends Controller
                                 'commands_number' => +1,
                                 'price' => $order->price,
                             ]);
-        
+
                             $order->factorisation_id = $newFactorization->id;
                         }
                     }
-        
+
                     if ($order->factorisation_id) {
                         if ($newStatus !== 'livrer') {
                             $order->delivery_date = null;
-        
+
                             $oldFactorisation = Factorisation::find($order->factorisation_id);
                             if ($oldFactorisation) {
                                 $oldFactorisation->price -= $order->price;
