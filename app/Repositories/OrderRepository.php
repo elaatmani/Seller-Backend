@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use Carbon\Carbon;
 use App\Models\Order;
-use Carbon\Carbon;
 use App\Models\OrderItem;
 use App\Models\OrderHistory;
 use Illuminate\Support\Facades\DB;
@@ -199,6 +198,34 @@ class OrderRepository implements OrderRepositoryInterface {
 
         return $response;
     }
+
+    public function sellerStatistics($userId)
+    {
+        $orders = DB::table('orders')
+        ->where('user_id', $userId)
+        ->groupBy('confirmation')
+        ->selectRaw("confirmation, count('confirmation') as total")->get();
+
+        $total = $orders->sum('total');
+
+        $statistics = $orders->map(function($c) use($total) {
+            return [
+                'name' => $this->confirmations[$c->confirmation],
+                'confirmation' => $c->confirmation,
+                'total' => $c->total,
+                'percent' => round(($c->total * 100) / $total, 2),
+            ];
+        });
+
+        $show = [ '*' ];
+        $response = [
+            'data' => $statistics,
+            'show' => $show
+        ];
+
+        return $response;
+    }
+
 
 
 }

@@ -24,7 +24,7 @@ class SellerController extends Controller
     public function statistics(Request $request) {
 
 
-        $statistics = StatisticsService::admin($request);
+        $statistics = StatisticsService::seller($request);
 
         return response()->json([
             'code' => 'SUCCESS',
@@ -87,7 +87,7 @@ class SellerController extends Controller
         ];
 
         $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder, $options);
-        $statistics = $this->orderRepository->adminStatistics();
+        $statistics = $this->orderRepository->sellerStatistics(auth()->id());
 
         return response()->json([
             'code' => 'SUCCESS',

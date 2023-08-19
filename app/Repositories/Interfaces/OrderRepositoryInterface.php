@@ -16,6 +16,8 @@ interface OrderRepositoryInterface {
 
     public function followUpStatistics($userId);
 
+    public function sellerStatistics($userId);
+
     public function agentStatistics($userId);
 
     // public function agentOrdersPaginate(array $where, int $perPage, string $sortBy, string $sortOrder);
