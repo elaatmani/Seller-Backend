@@ -63,69 +63,70 @@ class SheetHelper {
         $newOrders = [];
         $productNotFoundOrders = [];
         $alreadyExistsOrders = [];
+
         foreach($orders as $o) {
+            try {
+                $fullname = array_key_exists('Full name', $o) ? $o['Full name'] : '';
+                $phone = array_key_exists('Phone', $o) ? $o['Phone'] : '';
+                $city = array_key_exists('City', $o) ? $o['City'] : '';
+                $adresse = array_key_exists('ADRESS', $o) ? $o['ADRESS'] : '';
+                $price = array_key_exists('Total charge', $o) ? $o['Total charge'] : '';
+                $quantity = array_key_exists('Total quantity', $o) ? $o['Total quantity'] : '';
+                $sku = array_key_exists('SKU', $o) ? $o['SKU'] : '';
+                $product_name = array_key_exists('Product name', $o) ? $o['Product name'] : '';
 
-            $fullname = array_key_exists('Full name', $o) ? $o['Full name'] : '';
-            $phone = array_key_exists('Phone', $o) ? $o['Phone'] : '';
-            $city = array_key_exists('City', $o) ? $o['City'] : '';
-            $adresse = array_key_exists('ADRESS', $o) ? $o['ADRESS'] : '';
-            $price = array_key_exists('Total charge', $o) ? $o['Total charge'] : '';
-            $quantity = array_key_exists('Total quantity', $o) ? $o['Total quantity'] : '';
-            $sku = array_key_exists('SKU', $o) ? $o['SKU'] : '';
-            $product_name = array_key_exists('Product name', $o) ? $o['Product name'] : '';
+                $product_exists = DB::table('products')->where('ref', $sku)->exists();
 
-            $product_exists = Product::where('ref', $sku)->first();
+                if(!$sku) continue;
+                if(!$product_exists) {
+                    $productNotFoundOrders[] = $o;
+                    continue;
+                };
 
-            if(!$sku) continue;
-            if(!$product_exists) {
-                $productNotFoundOrders[] = $o;
-                continue;
-            };
+                $order_exists = DB::table('orders')->where('sheets_id', self::order_sheet_id($sheet, $o['Order ID']))->exists();
+                if(!!$order_exists) {
+                    $alreadyExistsOrders[] = $o;
+                    continue;
+                };
 
-            $order_exists = Order::where('sheets_id', self::order_sheet_id($sheet, $o['Order ID']))->first();
-            if(!!$order_exists) {
-                $alreadyExistsOrders[] = $o;
-                continue;
-            };
+                $product = Product::where('ref', $sku)->first();
 
-            $product = Product::where('ref', $sku)->first();
+                $order = Order::create([
+                    'fullname' => $fullname,
+                    'phone' => $phone,
+                    'city' => $city,
+                    'adresse' => $adresse,
+                    'price' => 0,
+                    'sheets_id' => self::order_sheet_id($sheet, $o['Order ID']),
+                    'counts_from_warehouse' => true,
+                    'product_name' => $product_name
+                ]);
 
-            $order = Order::create([
-                'fullname' => $fullname,
-                'phone' => $phone,
-                'city' => $city,
-                'adresse' => $adresse,
-                'price' => 0,
-                'sheets_id' => self::order_sheet_id($sheet, $o['Order ID']),
-                'counts_from_warehouse' => true,
-                'product_name' => $product_name
-            ]);
+                if(isset($product)) {
+                    $arr = explode('\n', $quantity);
 
-            if(isset($product)) {
-                $arr = explode('\n', $quantity);
-
-                // return $product->variations->first()->id;
-                $check = 0;
-                foreach($arr as $q) {
-                    try {
-
-                        OrderItem::create([
-                            'order_id' => $order->id,
-                            'product_id' => $product->id,
-                            'product_ref' => $product->ref,
-                            'product_variation_id' => $product->variations->first()->id,
-                            'quantity' => (int) $q,
-                            'price' => $check == 0 ? (float) $price : 0
-                        ]);
-                        $check = 1;
-                    } catch (\Exception $th) {
-                        return $th->getMessage();
+                    // return $product->variations->first()->id;
+                    $check = 0;
+                    foreach($arr as $q) {
+                            OrderItem::create([
+                                'order_id' => $order->id,
+                                'product_id' => $product->id,
+                                'product_ref' => $product->ref,
+                                'product_variation_id' => $product->variations->first()->id,
+                                'quantity' => (int) $q,
+                                'price' => $check == 0 ? (float) $price : 0
+                            ]);
+                            $check = 1;
                     }
                 }
+
+                $relationship = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
+                $newOrders[] = $order->fresh()->load($relationship);
+
+            } catch (\Throwable $th) {
+                continue;
             }
 
-            $relationship = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
-            $newOrders[] = $order->fresh()->load($relationship);
         }
         DB::commit();
         return $newOrders;

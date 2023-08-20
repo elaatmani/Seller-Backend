@@ -9,6 +9,7 @@ use App\Models\OrderHistory;
 use Illuminate\Http\Request;
 use App\Helpers\ProductHelper;
 use App\Events\NewNotification;
+use App\Helpers\SheetHelper;
 use App\Models\RoadRunnerRequest;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -20,6 +21,7 @@ use Spatie\Permission\Models\Permission;
 use App\Http\Controllers\Api\Public\OrderController;
 use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
+use App\Models\Sheet;
 use App\Services\RoadRunner;
 
 /*
@@ -36,6 +38,8 @@ use App\Services\RoadRunner;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('check-sheet/{id}', [GoogleSheetController::class, 'save_orders']);
 
 Route::get('/road-orders', function() {
     return RoadRunner::orders();
