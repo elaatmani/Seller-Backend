@@ -203,6 +203,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Follow Up
     Route::post('/v1/admin/statistics', [AdminController::class, 'statistics']);
     Route::post('/v1/admin/orders', [AdminController::class, 'index']);
+    Route::post('/v1/admin/orders/export', [AdminController::class, 'export']);
     Route::post('/v1/admin/orders/create', [AdminController::class, 'create']);
     Route::post('/v1/admin/orders/{id}/update', [AdminController::class, 'update']);
 

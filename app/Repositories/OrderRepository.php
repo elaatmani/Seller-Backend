@@ -32,8 +32,28 @@ class OrderRepository implements OrderRepositoryInterface {
         'reconfirmer' => 'Reconfirmed'
     ];
 
-    public function all() {
-        return Order::query()->get();
+    public function all($options = []) {
+        $query = Order::query();
+
+        foreach(data_get($options, 'orWhere', []) as $w) {
+            $query->orWhere($w[0], $w[1], $w[2]);
+        }
+
+        foreach(data_get($options, 'whereDate', []) as $wd) {
+            if(!$wd[2]) continue;
+            $query->whereDate($wd[0], $wd[1], Carbon::make($wd[2])->toDate());
+        }
+
+        foreach(data_get($options, 'where', []) as $w ) {
+            $query->where($w[0], $w[1], $w[2]);
+        }
+
+        if(data_get($options, 'get', true)) {
+            return $query->get();
+        }
+
+        return $query;
+
     }
 
 
@@ -55,26 +75,15 @@ class OrderRepository implements OrderRepositoryInterface {
         array $options = []
     ) {
          // Number of records per page
+        $options['get'] = false;
 
         // Get the query builder instance for the 'users' table
-        $query = Order::query();
+        $query = $this->all($options);
 
         $validSortOrders = ['asc', 'desc'];
+
         if (!in_array($sortOrder, $validSortOrders)) {
             $sortOrder = 'desc'; // Set default if the provided sort order is invalid
-        }
-
-        foreach(data_get($options, 'orWhere', []) as $w) {
-            $query->orWhere($w[0], $w[1], $w[2]);
-        }
-
-        foreach(data_get($options, 'whereDate', []) as $wd) {
-            if(!$wd[2]) continue;
-            $query->whereDate($wd[0], $wd[1], Carbon::make($wd[2])->toDate());
-        }
-
-        foreach(data_get($options, 'where', []) as $w ) {
-            $query->where($w[0], $w[1], $w[2]);
         }
 
         // Apply the sorting to the query
@@ -138,22 +147,39 @@ class OrderRepository implements OrderRepositoryInterface {
 
     public function adminStatistics()
     {
-        return null;
-        $orders = DB::table('orders');
-        $newOrders = $orders->where('confirmation', null)->count();
-
-        // ->selectRaw("followup_confirmation, count('followup_confirmation') as total")->get();
+        $orders = DB::table('orders')->groupBy('confirmation')->selectRaw("confirmation, count('confirmation') as total")->get();
 
         $total = $orders->sum('total');
 
+        $noAnswers = [
+            'day-one-call-one',
+            'day-one-call-two',
+            'day-one-call-three',
+            'day-two-call-one',
+            'day-two-call-two',
+            'day-two-call-three',
+            'day-three-call-one',
+            'day-three-call-two',
+            'day-three-call-three',
+        ];
+
+        $noAnswer = $orders->whereIn('confirmation', $noAnswers);
+
         $statistics = $orders->map(function($c) use($total) {
             return [
-                'name' => $this->confirmations[$c->followup_confirmation],
-                'confirmation' => $c->followup_confirmation,
+                'name' => $this->confirmations[$c->confirmation],
+                'confirmation' => $c->confirmation,
                 'total' => $c->total,
                 'percent' => round(($c->total * 100) / $total, 2),
             ];
-        });
+        })->whereNotIn('confirmation', $noAnswers);
+
+        $statistics[] = [
+                'name' => 'No Answer',
+                'confirmation' => 'day-one-call-one',
+                'total' => $noAnswer->sum('total'),
+                'percent' => round(($noAnswer->sum('total') * 100) / $total, 2),
+        ];
 
         $show = [ '*' ];
         $response = [
