@@ -1,3 +1,37 @@
+@php
+$totalFees = 0;
+$upselled = 0;
+@endphp
+
+@foreach ($salesSeller as $sale)
+@if ($sale->upsell)
+$upselled++
+@endif
+@foreach ($sale->delivery_user->deliveryPlaces as $deliveryPlace)
+@if ($deliveryPlace->city->name === $sale->city)
+@php
+$totalFees += $deliveryPlace->fee;
+@endphp
+@endif
+@endforeach
+@endforeach
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,8 +42,9 @@
   <title>Document</title>
   <style>
     * {
-        font-family: Arial, Helvetica, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
     }
+
     .infos {
       margin-top: -400px;
       margin-left: 450px;
@@ -24,16 +59,17 @@
       margin-top: -10px;
     }
 
-    table{
+    table {
       text-align: center;
       border-collapse: collapse;
     }
 
-    td{
+    td {
       font-size: small;
       padding: 6px;
     }
-    .total{
+
+    .total {
       margin-top: 10px;
       margin-left: 77.4%;
     }
@@ -84,7 +120,7 @@
     </tr>
     @foreach ($salesSeller as $sale)
     <tr>
-      <td> {{ $sale->id }} </td>
+      <td>{{ substr($sale->sheets_id, strrpos($sale->sheets_id, '***') + 4) }}</td>
       <td> {{ $sale->cmd }} </td>
       <td> {{ $sale->delivery_date }} </td>
       <td> {{ $sale->phone }} </td>
@@ -104,30 +140,22 @@
   <table class="total" border="2px">
     <tr>
       <th>Total Brut :</th>
-      <td>{{ $factorisation->price }}</td>
+      <td>{{ $factorisation->price }} $</td>
+    </tr>
+    <tr>
+      <th>Frais de <br> Livraison : </th>
+      <td>{{ $totalFees }} $</td>
     </tr>
     <tr>
       <th>Frais :</th>
-      <td> @php
-        $totalFees = 0;
-        @endphp
+      <td>
 
-        @foreach ($salesSeller as $sale)
-        @foreach ($sale->delivery_user->deliveryPlaces as $deliveryPlace)
-        @if ($deliveryPlace->city->name === $sale->city)
-        @php
-        $totalFees += $deliveryPlace->fee;
-        @endphp
-        @endif
-        @endforeach
-        @endforeach
-
-        {{ $totalFees }} $
+        {{ number_format((($factorisation->price + $totalFees) * 0.04) + ($factorisation->commands_number * 8) + ($upselled * 2), 2)}} $
       </td>
-      <tr>
-        <th>Total Net :</th>
-        <td>{{ $factorisation->price - $totalFees}} $</td>
-      </tr>
+    <tr>
+      <th>Total Net :</th>
+      <td>{{ $factorisation->price - number_format((($factorisation->price + $totalFees) * 0.04) + ($factorisation->commands_number * 8) + ($upselled * 2), 2)}} $</td>
+    </tr>
     </tr>
   </table>
 </body>
