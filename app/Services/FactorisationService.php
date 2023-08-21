@@ -38,7 +38,7 @@ class FactorisationService
                     ->where('close', false)
                     ->first();
 
-                if ($existingDeliveryFactorization && $existingSellerFactorization) {
+                if ($existingDeliveryFactorization) {
                     // Update the existing factorization
                     $existingDeliveryFactorization->price += RoadRunnerService::getPrice($order);
                     $existingDeliveryFactorization->commands_number += 1;
@@ -47,12 +47,17 @@ class FactorisationService
                     $order->factorisation_id = $existingDeliveryFactorization->id;
 
 
+                }
+                if ($existingSellerFactorization) {
+
+
                     $existingSellerFactorization->price += RoadRunnerService::getPrice($order);
                     $existingSellerFactorization->commands_number += 1;
                     $existingSellerFactorization->save();
 
                     $order->seller_factorisation_id = $existingSellerFactorization->id;
-                }elseif(!$existingDeliveryFactorization) {
+                }
+                if(!$existingDeliveryFactorization) {
                     // Create a new factorization
                     $newFactorization = Factorisation::create([
                         'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-DL',
@@ -62,7 +67,9 @@ class FactorisationService
                         'price' => RoadRunnerService::getPrice($order),
                     ]);
                     $order->factorisation_id = $newFactorization->id;
-                }elseif(!$existingSellerFactorization){   
+                    
+                }
+                if(!$existingSellerFactorization){   
                     $newSellerFactorization = Factorisation::create([
                         'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-SL',
                         'type'=> 'seller',
