@@ -46,6 +46,7 @@ class OrderObserver
         OrderHistoryService::observe($order);
         if($user->hasRole('admin') || $user->hasRole('follow-up')) {
             // throw new Exception('Error admin');
+
             RoadRunner::sync($order);
         };
 
