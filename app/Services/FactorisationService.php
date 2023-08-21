@@ -61,6 +61,7 @@ class FactorisationService
                         'commands_number' => +1,
                         'price' => RoadRunnerService::getPrice($order),
                     ]);
+                    $order->factorisation_id = $newFactorization->id;
                 }elseif(!$existingSellerFactorization){   
                     $newSellerFactorization = Factorisation::create([
                         'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-SL',
@@ -70,7 +71,6 @@ class FactorisationService
                         'price' => RoadRunnerService::getPrice($order),
                     ]);
 
-                    $order->factorisation_id = $newSellerFactorization->id;
                     $order->seller_factorisation_id = $newSellerFactorization->id;
                 }
             
