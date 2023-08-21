@@ -31,7 +31,9 @@ class FactorisationController extends Controller
             );
         }
 
-        $factorisation = Factorisation::with('delivery')->get();
+        $factorisation = Factorisation::when(!auth()->user()->hasRole('admin'), function ($query) {
+            return $query->where('user_id', auth()->id())->where('close',1);
+        })->with('delivery','seller')->get();
 
         return response()->json(
             [
@@ -411,10 +413,23 @@ class FactorisationController extends Controller
     public function generatePDF($id)
     {
 
-        $factorisation = Factorisation::with('delivery', 'delivery.deliveryPlaces', 'delivery.deliveryPlaces.city')->where('id', $id)->first(); // Retrieve the user based on the ID
-        // dd($factorisation->id);
-        $sales = Order::with('items', 'items.product')->where('factorisation_id', $factorisation->id)->get();
+       
+        $factorisation = Factorisation::with('seller','delivery', 'delivery.deliveryPlaces', 'delivery.deliveryPlaces.city')
+        ->where('id', $id)
+        ->first(); // Retrieve the user based on the ID
 
+        $salesDelivery = Order::with('items', 'items.product')
+            ->where('factorisation_id', $factorisation->id)
+            ->get();
+
+            
+        $salesSeller = Order::with('delivery_user','delivery_user.deliveryPlaces','delivery_user.deliveryPlaces.city','items', 'items.product')
+        ->where('seller_factorisation_id', $factorisation->id)
+        ->get();
+
+        // dd($salesSeller);
+
+        // dd($salesSeller);
         // $factorisation = $factorisation->chunk(20);
         // $sales = $sales->chunk(20);
 
@@ -422,7 +437,14 @@ class FactorisationController extends Controller
             'Content-Type' => 'application/pdf',
         ];
         // return view('factorisationpdf')->with(compact('factorisation','sales'));
-        $pdf = PDF::loadView('factorisationpdf', compact('factorisation', 'sales'));
-        return  $pdf->stream($factorisation->factorisation_id . '.pdf');
+        if($factorisation->type == "delivery"){
+        $pdf = PDF::loadView('factorisationpdf', compact('factorisation', 'salesDelivery'));
+        }else{
+            
+        $pdf = PDF::loadView('factorisationsellerpdf', compact('factorisation', 'salesSeller'));
+        }
+        
+        
+            return  $pdf->stream($factorisation->factorisation_id . '.pdf');
     }
 }

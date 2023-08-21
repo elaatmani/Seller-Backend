@@ -99,7 +99,7 @@ class OrderRepository implements OrderRepositoryInterface {
     public function update($id, $data) {
         $order = Order::where('id', $id)->first();
 
-        if($data['affectation'] != null) {
+        if($data['affectation'] != null && $data['delivery'] == null) {
             $data['delivery'] = 'dispatch';
         }
 

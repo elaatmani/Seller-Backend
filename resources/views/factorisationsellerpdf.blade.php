@@ -48,7 +48,7 @@
 
         <li>
 
-          <h4>Livreur: <strong> {{ucfirst($factorisation->delivery->firstname)}} {{ucfirst($factorisation->delivery->lastname)}} </strong></h4>
+          <h4>Seller: <strong> {{ucfirst($factorisation->seller->firstname)}} {{ucfirst($factorisation->seller->lastname)}} </strong></h4>
         </li>
         <li>
 
@@ -82,7 +82,7 @@
       <th>CRBT</th>
       <th>Frais</th>
     </tr>
-    @foreach ($salesDelivery as $sale)
+    @foreach ($salesSeller as $sale)
     <tr>
       <td> {{ $sale->id }} </td>
       <td> {{ $sale->cmd }} </td>
@@ -92,7 +92,7 @@
       <td> x{{ count($sale->items->pluck('product')->pluck('name')) }} </td>
       {{-- <td> {{ $sale->delivery }} </td> --}}
       <td> {{ App\Services\RoadRunnerService::getPrice($sale) }} </td>
-      <td> @foreach ($factorisation->delivery->deliveryPlaces as $deliveryPlace)
+      <td> @foreach ($sale->delivery_user->deliveryPlaces as $deliveryPlace)
         @if ($deliveryPlace->city->name === $sale->city)
         {{ $deliveryPlace->fee }}
         @endif
@@ -112,8 +112,8 @@
         $totalFees = 0;
         @endphp
 
-        @foreach ($salesDelivery as $sale)
-        @foreach ($factorisation->delivery->deliveryPlaces as $deliveryPlace)
+        @foreach ($salesSeller as $sale)
+        @foreach ($sale->delivery_user->deliveryPlaces as $deliveryPlace)
         @if ($deliveryPlace->city->name === $sale->city)
         @php
         $totalFees += $deliveryPlace->fee;
@@ -122,11 +122,11 @@
         @endforeach
         @endforeach
 
-        {{ $totalFees }} DH
+        {{ $totalFees }} $
       </td>
       <tr>
         <th>Total Net :</th>
-        <td>{{ $factorisation->price - $totalFees}} DH</td>
+        <td>{{ $factorisation->price - $totalFees}} $</td>
       </tr>
     </tr>
   </table>

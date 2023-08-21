@@ -11,7 +11,7 @@ class WarehouseSeeder extends Seeder
     public function run()
     {
         Warehouse::create([
-            'name' => 'Marrakech'
+            'name' => 'Lebanon'
         ]);
     }
 }

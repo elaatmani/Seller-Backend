@@ -14,6 +14,7 @@ class Order extends Model
         'fullname',
         'agente_id',
         'factorisation_id',
+        'seller_factorisation_id',
         'upsell',
         'phone',
         'city',

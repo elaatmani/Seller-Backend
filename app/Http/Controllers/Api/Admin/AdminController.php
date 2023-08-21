@@ -59,7 +59,7 @@ class AdminController extends Controller
 
 
     public function update(UpdateOrderRequest $request, $id) {
-
+// return response()->json(['message' => 'failed', 'code' => 'ERROR'],500);
         // try {
             DB::beginTransaction();
 

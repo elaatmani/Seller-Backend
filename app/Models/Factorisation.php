@@ -10,7 +10,9 @@ class Factorisation extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'factorisation_id',
+        'type',
         'delivery_id',
         'close',
         'paid',
@@ -23,6 +25,7 @@ class Factorisation extends Model
 
 
     protected $casts = [
+        'user_id' => 'integer',
         'factorisation_id' => 'string',
         'delivery_id' => 'integer',
         'close' => 'boolean',
@@ -40,4 +43,8 @@ class Factorisation extends Model
     public function delivery(){
        return $this->belongsTo(User::class,'delivery_id');
     }
+
+    public function seller(){
+        return $this->belongsTo(User::class,'user_id');
+     }
 }

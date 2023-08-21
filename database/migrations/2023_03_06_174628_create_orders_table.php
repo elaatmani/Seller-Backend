@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('sheets_id')->nullable(); // generated unique id for the row
             $table->string('fullname');
             $table->unsignedBigInteger('factorisation_id')->nullable();
+            $table->unsignedBigInteger('seller_factorisation_id')->nullable();
             $table->string('agente_id')->nullable();
             $table->string('upsell')->nullable();
             $table->string('phone');
