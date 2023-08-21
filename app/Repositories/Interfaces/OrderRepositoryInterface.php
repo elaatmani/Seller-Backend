@@ -14,8 +14,6 @@ interface OrderRepositoryInterface {
 
     public function paginate(int $perPage, string $sortBy, string $sortOrder, array $options = []);
 
-    public function adminStatistics();
-
     public function followUpStatistics($userId);
 
     public function agentStatistics($userId);

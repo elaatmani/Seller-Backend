@@ -46,7 +46,7 @@ class AdminController extends Controller
 
 
         $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder, $options);
-        $statistics = $this->orderRepository->adminStatistics();
+        $statistics = StatisticsService::adminSalesStatistics();
 
         return response()->json([
             'code' => 'SUCCESS',
@@ -190,11 +190,16 @@ class AdminController extends Controller
 
         ];
 
+        $whereHas = [
+            [ 'product_id', '=', data_get($filters, 'product_id', 'all'), 'items' ]
+        ];
+
         $options = [
             'whereDate' => $whereDate,
             'where' => $toFilter,
             'orWhere' => $orWhere,
-            'reported_first' => $reportedFirst
+            'reported_first' => $reportedFirst,
+            'whereHas' => $whereHas
         ];
 
         return $options;

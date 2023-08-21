@@ -18,7 +18,12 @@ class OrderObserver
      */
     public function created(Order $order)
     {
-        //
+        $user = request()->user();
+
+        if($user->hasRole('admin') || $user->hasRole('follow-up')) {
+            RoadRunner::insert($order);
+        };
+
     }
 
     /**
@@ -34,11 +39,12 @@ class OrderObserver
 
     public function updating(Order $order)
     {
+        $user = request()->user();
         $oldAttributes = $order->getOriginal(); // Old values
         $newAttributes = $order->getAttributes(); // New values
 
         OrderHistoryService::observe($order);
-        if(request()->user()->hasRole('admin')) {
+        if($user->hasRole('admin') || $user->hasRole('follow-up')) {
             // throw new Exception('Error admin');
             RoadRunner::sync($order);
         };

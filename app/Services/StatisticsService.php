@@ -4,10 +4,30 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\OrderHistory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class StatisticsService
 {
+
+    public static $confirmations = [
+        null => 'New',
+        'day-one-call-one'=> 'No reply 1 / day1',
+        'day-one-call-two' =>'No reply 2 / day1',
+        'day-one-call-three' =>'No reply 3 / day1',
+        'day-two-call-one' =>'No reply 1 / day2',
+        'day-two-call-two' =>'No reply 2 / day2',
+        'day-two-call-three' =>'No reply 3 / day2',
+        'day-three-call-one' =>'No reply 1 / day3',
+        'day-three-call-two' =>'No reply 2 / day3',
+        'day-three-call-three' =>'No reply 3 / day3',
+        'reporter' =>'Reported',
+        'annuler' =>'Canceled',
+        'wrong-number' =>'Wrong number',
+        'confirmer' =>'Confirmed',
+        'double' =>'Double',
+        'reconfirmer' => 'Reconfirmed'
+    ];
 
     public static function followup($orders) {
         // $orders = ;
@@ -400,9 +420,6 @@ class StatisticsService
         // });
 
 
-
-
-
         $statistics = [
             'confirmations' => $confirmations,
             'delivery' => $delivery,
@@ -413,6 +430,69 @@ class StatisticsService
         ];
 
         return $statistics;
+    }
+
+    public static function adminSalesStatistics()
+    {
+        $orders = DB::table('orders')->groupBy('confirmation')->selectRaw("confirmation, count('confirmation') as total")->get();
+
+        $deliveryOrders = DB::table('orders')->groupBy('delivery')->selectRaw("delivery, count('delivery') as total")->get();
+
+        $total = $orders->where('confirmation', '!=', 'double')->sum('total');
+
+        $noAnswers = [
+            'day-one-call-one',
+            'day-one-call-two',
+            'day-one-call-three',
+            'day-two-call-one',
+            'day-two-call-two',
+            'day-two-call-three',
+            'day-three-call-one',
+            'day-three-call-two',
+            'day-three-call-three',
+        ];
+
+        $noAnswer = $orders->whereIn('confirmation', $noAnswers);
+
+        $statistics = $orders->map(function($c) use($total, $orders) {
+            return [
+                'name' => self::$confirmations[$c->confirmation],
+                'confirmation' => $c->confirmation,
+                'total' => $c->total,
+                'percent' => $c->confirmation != 'double' ? round(($c->total * 100) / $total, 2) : round(($c->total * 100) / $orders->sum('total'), 2),
+            ];
+        })->whereNotIn('confirmation', $noAnswers);
+
+        $statistics[] = [
+                'name' => 'No Answer',
+                'confirmation' => 'day-one-call-one',
+                'total' => $noAnswer->sum('total'),
+                'percent' => round(($noAnswer->sum('total') * 100) / $total, 2),
+        ];
+
+        $deliveredCount = $deliveryOrders->where('delivery', 'livrer')->count();
+        $statistics[] = [
+            'name' => 'Delivered',
+            'confirmation' => 'confirmer',
+            'total' => $deliveredCount,
+            'percent' => round(($deliveredCount * 100) / $orders->where('confirmation', 'confirmer')->first()->total ?? 1, 2),
+        ];
+
+        $shippedCount = $deliveryOrders->where('delivery', 'expidier')->count();
+        $statistics[] = [
+            'name' => 'Shipped',
+            'confirmation' => 'wrong-number',
+            'total' => $shippedCount,
+            'percent' => round(($shippedCount * 100) / $orders->where('confirmation', 'confirmer')->first()->total, 2),
+        ];
+
+        $show = [ '*' ];
+        $response = [
+            'data' => $statistics,
+            'show' => $show
+        ];
+
+        return $response;
     }
 
 

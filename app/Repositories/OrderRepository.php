@@ -52,15 +52,21 @@ class OrderRepository implements OrderRepositoryInterface {
             $query->where($w[0], $w[1], $w[2]);
         }
 
-        if(data_get($options, 'get', true)) {
-            return $query->get();
-        }
 
         if(data_get($options, 'reported_first', false)) {
             $this->reportedFirst($query);
         }
 
+        foreach(data_get($options, 'whereHas', []) as $w) {
 
+            $query->when($w[2] != 'all', fn($q) => $q->whereHas($w[3], fn($oq) => $oq->where($w[0], $w[1], $w[2])));
+        }
+
+
+
+        if(data_get($options, 'get', true)) {
+            return $query->get();
+        }
         return $query;
 
     }
@@ -165,52 +171,6 @@ class OrderRepository implements OrderRepositoryInterface {
         }
         $order = $order->fresh();
         return $order;
-    }
-
-
-    public function adminStatistics()
-    {
-        $orders = DB::table('orders')->groupBy('confirmation')->selectRaw("confirmation, count('confirmation') as total")->get();
-
-        $total = $orders->sum('total');
-
-        $noAnswers = [
-            'day-one-call-one',
-            'day-one-call-two',
-            'day-one-call-three',
-            'day-two-call-one',
-            'day-two-call-two',
-            'day-two-call-three',
-            'day-three-call-one',
-            'day-three-call-two',
-            'day-three-call-three',
-        ];
-
-        $noAnswer = $orders->whereIn('confirmation', $noAnswers);
-
-        $statistics = $orders->map(function($c) use($total) {
-            return [
-                'name' => $this->confirmations[$c->confirmation],
-                'confirmation' => $c->confirmation,
-                'total' => $c->total,
-                'percent' => round(($c->total * 100) / $total, 2),
-            ];
-        })->whereNotIn('confirmation', $noAnswers);
-
-        $statistics[] = [
-                'name' => 'No Answer',
-                'confirmation' => 'day-one-call-one',
-                'total' => $noAnswer->sum('total'),
-                'percent' => round(($noAnswer->sum('total') * 100) / $total, 2),
-        ];
-
-        $show = [ '*' ];
-        $response = [
-            'data' => $statistics,
-            'show' => $show
-        ];
-
-        return $response;
     }
 
 
