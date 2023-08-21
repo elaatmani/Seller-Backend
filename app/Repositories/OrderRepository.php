@@ -44,6 +44,10 @@ class OrderRepository implements OrderRepositoryInterface {
             $query->whereDate($wd[0], $wd[1], Carbon::make($wd[2])->toDate());
         }
 
+        foreach(data_get($options, 'orderBy', []) as $wd) {
+            $query->orderBy($wd[0], $wd[1]);
+        }
+
         foreach(data_get($options, 'where', []) as $w ) {
             $query->where($w[0], $w[1], $w[2]);
         }
@@ -52,8 +56,26 @@ class OrderRepository implements OrderRepositoryInterface {
             return $query->get();
         }
 
+        if(data_get($options, 'reported_first', false)) {
+            $this->reportedFirst($query);
+        }
+
+
         return $query;
 
+    }
+
+    public function reportedFirst($query) {
+        $query->select('*',
+        DB::raw('TIMESTAMPDIFF(day, DATE_FORMAT(now(), "%Y-%m-%d"), DATE_FORMAT(reported_agente_date, "%Y-%m-%d")) as reported_diff')
+        , DB::raw('
+            CASE
+                WHEN confirmation = "reporter" AND TIMESTAMPDIFF(day, DATE_FORMAT(now(), "%Y-%m-%d"), DATE_FORMAT(reported_agente_date, "%Y-%m-%d")) <= 0 THEN 1
+                ELSE 0
+            END AS show_first')
+        );
+
+        $query->orderBy('show_first', 'DESC');
     }
 
 
@@ -67,6 +89,7 @@ class OrderRepository implements OrderRepositoryInterface {
 
         return $query->count();
     }
+
 
     public function paginate(
         int $perPage = 10,
@@ -99,7 +122,7 @@ class OrderRepository implements OrderRepositoryInterface {
     public function update($id, $data) {
         $order = Order::where('id', $id)->first();
 
-        if($data['affectation'] != null) {
+        if($data['affectation'] != null && $data['delivery'] == null) {
             $data['delivery'] = 'dispatch';
         }
 

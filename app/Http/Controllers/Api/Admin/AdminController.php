@@ -159,6 +159,7 @@ class AdminController extends Controller
     public function get_options($request) {
         $filters = $request->input('filters', []);
         $search = $request->input('search', '');
+        $reportedFirst = data_get($filters, 'reported_first', false);
 
         $orWhere = !$search ? [] : [
             ['id', 'LIKE', "%$search%"],
@@ -171,11 +172,11 @@ class AdminController extends Controller
 
 
         $filtersDate = Arr::only($filters, ['created_from', 'created_to', 'dropped_from', 'dropped_to']);
-        $filters = Arr::only($filters, ['confirmation', 'delivery', 'affectation', 'agente_id', 'upsell']);
+        $validatedFilters = Arr::only($filters, ['confirmation', 'delivery', 'affectation', 'agente_id', 'upsell']);
 
         $toFilter = [];
-        if(is_array($filters)){
-            foreach($filters as $f => $v) {
+        if(is_array($validatedFilters)){
+            foreach($validatedFilters as $f => $v) {
                 if($v == 'all') continue;
                 $toFilter[] = [$f, '=', $v];
             }
@@ -193,6 +194,7 @@ class AdminController extends Controller
             'whereDate' => $whereDate,
             'where' => $toFilter,
             'orWhere' => $orWhere,
+            'reported_first' => $reportedFirst
         ];
 
         return $options;
