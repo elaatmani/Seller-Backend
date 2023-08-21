@@ -617,35 +617,35 @@ class StatisticsService
         $delivery[] = $cancelled;
 
 
-        $AllRevenue = [
-            'id' => 1,
-            'title' => 'Revenue',
-            'value' => 0,
-            'icon' => 'mdi-currency-usd',
-            'color' => '#22c55e'
-        ];
+        // $AllRevenue = [
+        //     'id' => 1,
+        //     'title' => 'Revenue',
+        //     'value' => 0,
+        //     'icon' => 'mdi-currency-usd',
+        //     'color' => '#22c55e'
+        // ];
 
-        $orders
-        ->where('confirmation', 'confirmer')
-        ->map(function($o) use(&$AllRevenue) {
-            $AllRevenue['value'] += self::getPrice($o);
-        });
+        // $orders
+        // ->where('confirmation', 'confirmer')
+        // ->map(function($o) use(&$AllRevenue) {
+        //     $AllRevenue['value'] += self::getPrice($o);
+        // });
 
 
-        $deliveredRevenue = [
-            'id' => 2,
-            'title' => 'Delivered',
-            'value' => 0,
-            'icon' => 'mdi-check-all',
-            'color' => '#22c55e'
-        ];
+        // $deliveredRevenue = [
+        //     'id' => 2,
+        //     'title' => 'Delivered',
+        //     'value' => 0,
+        //     'icon' => 'mdi-check-all',
+        //     'color' => '#22c55e'
+        // ];
 
-        $orders
-        ->where('confirmation', 'confirmer')
-        ->where('delivery', 'livrer')
-        ->map(function($o) use(&$deliveredRevenue) {
-            $deliveredRevenue['value'] += self::getPrice($o);
-        });
+        // $orders
+        // ->where('confirmation', 'confirmer')
+        // ->where('delivery', 'livrer')
+        // ->map(function($o) use(&$deliveredRevenue) {
+        //     $deliveredRevenue['value'] += self::getPrice($o);
+        // });
 
 
 
@@ -655,8 +655,8 @@ class StatisticsService
             'confirmations' => $confirmations,
             'delivery' => $delivery,
             'revenue' => [
-                $AllRevenue,
-                $deliveredRevenue
+                // $AllRevenue,
+                // $deliveredRevenue
             ]
         ];
 

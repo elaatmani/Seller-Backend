@@ -4,7 +4,7 @@ namespace App\Repositories\Interfaces;
 
 interface OrderRepositoryInterface {
 
-    public function all();
+    public function all($options = []);
 
     public function update($id, $data);
 
