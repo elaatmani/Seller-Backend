@@ -11,6 +11,7 @@ class BulkActionController extends Controller
 {
     public function index(Request $request) {
         try {
+            DB::beginTransaction();
 
             if(!auth()->user()->hasRole('admin')) {
                 return response()->json([
@@ -58,6 +59,8 @@ class BulkActionController extends Controller
                 }
             }
 
+            DB::commit();
+
             return response()->json([
                 'code' => 'SUCCESS',
                 'data' => [
@@ -66,6 +69,7 @@ class BulkActionController extends Controller
             ], 200);
 
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json([
                 'code' => 'ERROR',
                 'message' => $th->getMessage(),
