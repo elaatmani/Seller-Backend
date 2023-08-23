@@ -43,6 +43,10 @@ class OrderObserver
         $oldAttributes = $order->getOriginal(); // Old values
         $newAttributes = $order->getAttributes(); // New values
 
+        if($newAttributes['affectation'] != null && $newAttributes['delivery'] == null) {
+            $newAttributes['delivery'] = 'dispatch';
+        }
+
         OrderHistoryService::observe($order);
         if($user->hasRole('admin') || $user->hasRole('follow-up')) {
             // throw new Exception('Error admin');

@@ -60,12 +60,9 @@ class AdminController extends Controller
 
     public function update(UpdateOrderRequest $request, $id) {
 
-        // try {
-            DB::beginTransaction();
-
+        try {
             $order = $this->orderRepository->update($id, $request->all());
 
-            DB::commit();
             return [
                 'code' => 'SUCCESS',
                 'data' => [
@@ -73,20 +70,18 @@ class AdminController extends Controller
                 ]
             ];
 
-        // } catch (\Throwable $th) {
+        } catch (\Throwable $th) {
 
-        //     // rollback transaction on error
-        //     DB::rollBack();
 
-        //     return response()->json(
-        //         [
-        //             'status' => false,
-        //             'code' => 'SERVER_ERROR',
-        //             'message' => $th->getMessage(),
-        //         ],
-        //         500
-        //     );
-        // }
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
     }
 
 

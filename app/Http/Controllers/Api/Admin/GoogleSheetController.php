@@ -6,6 +6,7 @@ use App\Helpers\SheetHelper;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
 use App\Models\Sheet;
 use Revolution\Google\Sheets\Facades\Sheets;
@@ -26,11 +27,13 @@ class GoogleSheetController extends Controller
             //     );
             // }
 
+            Auth::loginUsingId(1);
             $sheets = Sheet::where('auto_fetch', 1)->get();
             $sheet_helper = new SheetHelper();
 
             $newOrders = [];
             $done = [];
+            $errors = [];
 
             foreach($sheets as $sheet) {
                 try {
@@ -40,7 +43,16 @@ class GoogleSheetController extends Controller
                     $sheet->active = true;
                     $sheet->save();
                 } catch (\Throwable $th) {
-                    $done[] = ['id' => $sheet->id, 'orders' => count($orders), 'status' => false];
+                    $errors[] = [
+                        'sheet_id' => $sheet->id,
+                        'message' => $th->getMessage(),
+                        'file' => $th->getFile(),
+                        'line' => $th->getLine(),
+                        'trace' => $th->getTrace(),
+                        'trace_string' => $th->getTraceAsString()
+                    ];
+
+                    $done[] = ['id' => $sheet->id, 'orders' => 0, 'status' => false];
                     if($th->getMessage() == 'PERMISSION_DENIED') {
                         $sheet->active = false;
                         $sheet->save();
@@ -48,10 +60,11 @@ class GoogleSheetController extends Controller
                     continue;
                 }
             }
-
+            Auth::logout();
             return response()->json([
                 'status' => true,
                 'code' => 'SUCCESS',
+                'errors' => $errors,
                 'data' => [
                     'orders' => $newOrders,
                     'sheets' => $done
@@ -62,6 +75,13 @@ class GoogleSheetController extends Controller
             return response()->json([
                 'status' => false,
                 'code' => 'SERVER_ERROR',
+                'from' => 'GoogleSheetController',
+                'error' => [
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine(),
+                    'trace' => $th->getTrace(),
+                    'trace_string' => $th->getTraceAsString()
+                ],
                 'message' => $th->getMessage()
             ], 500);
         }

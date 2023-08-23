@@ -124,7 +124,7 @@ class SheetHelper {
                 $newOrders[] = $order->fresh()->load($relationship);
 
             } catch (\Throwable $th) {
-                continue;
+                throw new \Exception($th->getMessage());
             }
 
         }

@@ -126,30 +126,34 @@ class OrderRepository implements OrderRepositoryInterface {
 
 
     public function update($id, $data) {
-        $order = Order::where('id', $id)->first();
+        try {
+            DB::beginTransaction();
+            $order = Order::where('id', $id)->first();
 
-        if($data['affectation'] != null && $data['delivery'] == null) {
-            $data['delivery'] = 'dispatch';
+            $order->update($data);
+
+            $items = $data['items'];
+            $itemsIds = collect($items)->map(fn($i) => $i['id'])->values()->toArray();
+
+            OrderItem::where('order_id', $id)->whereNotIn('id', $itemsIds)->delete();
+
+            foreach($items as $item) {
+                OrderItem::updateOrCreate(
+                    [
+                        'id' => $item['id'],
+                        'order_id' => $id,
+                    ],
+                    $item
+                );
+            }
+            $order = $order->fresh();
+            DB::commit();
+            return $order;
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-
-        $order->update($data);
-
-        $items = $data['items'];
-        $itemsIds = collect($items)->map(fn($i) => $i['id'])->values()->toArray();
-
-        OrderItem::where('order_id', $id)->whereNotIn('id', $itemsIds)->delete();
-
-        foreach($items as $item) {
-            OrderItem::updateOrCreate(
-                [
-                    'id' => $item['id'],
-                    'order_id' => $id,
-                ],
-                $item
-            );
-        }
-        $order = $order->fresh();
-        return $order;
     }
 
 
