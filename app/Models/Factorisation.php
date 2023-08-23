@@ -47,4 +47,8 @@ class Factorisation extends Model
     public function seller(){
         return $this->belongsTo(User::class,'user_id');
      }
+
+     public function fees(){
+        return $this->hasMany(FactorisationFee::class ,'factorisation_id');
+     }
 }

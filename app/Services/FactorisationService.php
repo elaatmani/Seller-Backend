@@ -21,11 +21,11 @@ class FactorisationService
         $oldConfirmation = data_get($oldAttributes, 'confirmation', 'New');
         // $newConfirmation = data_get($newAttributes, 'confirmation', 'New');
 
-        // $oldDelivery = data_get($oldAttributes, 'delivery', 'Select');
+        $oldDelivery = data_get($oldAttributes, 'delivery', 'Select');
         $newDelivery = data_get($newAttributes, 'delivery', 'Select');
 
         
-        if ($oldConfirmation == 'confirmer' && $newDelivery == 'livrer') {
+        if ($oldConfirmation == 'confirmer' &&  $oldDelivery != 'livrer') {
 
                 $order->cmd = 'CMD-' . date('dmY-His', strtotime($order->created_at));
                 $order->delivery_date = now();

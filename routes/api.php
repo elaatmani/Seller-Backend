@@ -86,6 +86,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/factorisations/update/comment/{id}', [FactorisationController::class, 'updateComment']);
     Route::post('/factorisations/update/closing/{id}', [FactorisationController::class, 'updateClosing']);
     Route::post('/factorisations/update/payment/{id}', [FactorisationController::class, 'updatePayment']);
+    Route::post('/factorisations/update/fees/{id}', [FactorisationController::class, 'addOrUpdateFees']);
     Route::delete('/factorisations/delete/{id}', [FactorisationController::class, 'destroy']);
     Route::get('/factorisations/generate-pdf/{id}', [FactorisationController::class,'generatePDF']);
 

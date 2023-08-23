@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Factorisation;
+use App\Models\FactorisationFee;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
@@ -32,8 +33,8 @@ class FactorisationController extends Controller
         }
 
         $factorisation = Factorisation::when(!auth()->user()->hasRole('admin'), function ($query) {
-            return $query->where('user_id', auth()->id())->where('close',1);
-        })->with('delivery','seller')->get();
+            return $query->where('user_id', auth()->id())->where('close', 1);
+        })->with('delivery', 'seller','fees')->get();
 
         return response()->json(
             [
@@ -163,6 +164,137 @@ class FactorisationController extends Controller
         }
     }
 
+
+    /**
+     * update the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function addOrUpdateFees(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->can('update_factorisation')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Factorisation',
+                    ],
+                    405
+                );
+            }
+
+            $factorisation = Factorisation::find($id);
+            if ($factorisation) {
+                $existingFees = $factorisation->fees->pluck('feename')->toArray();
+
+                foreach ($request->fees as $fee) {
+                    FactorisationFee::updateOrCreate([
+                        'factorisation_id' => $factorisation->id,
+                        'feename' => $fee['feename'],
+                    ], [
+                        'feename' => $fee['feename'],
+                        'feeprice' => $fee['feeprice']
+                    ]);
+
+                    // Remove the fee from the existingFees array
+                    $key = array_search($fee['feename'], $existingFees);
+                    if ($key !== false) {
+                        unset($existingFees[$key]);
+                    }
+                }
+                // Delete fees that are not present in $request->fees
+                if (!empty($existingFees)) {
+                    FactorisationFee::whereIn('feename', $existingFees)->delete();
+                }
+
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'FACTORISATION_UPDATED',
+                        'message' => 'Factorisation Updated Successfully!',
+                    ],
+                    200
+                );
+            }
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'NOT_FOUND',
+                    'message' => 'Factorisation Not Exist',
+                ],
+                404
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $th->getMessage(),
+                    'code' => 'SERVER_ERROR',
+                    'trace' => $th->getTrace()
+                ],
+                500
+            );
+        }
+    }
+
+
+    // /**
+    //  * Display the specified resource.
+    //  *
+    //  * @param  \Illuminate\Http\Request  $request
+    //  * @param  int  $id
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function showFees(Request  $request, $id)
+    // {
+    //     try {
+    //         if (!$request->user()->can('view_factorisation')) {
+    //             return response()->json(
+    //                 [
+    //                     'status' => false,
+    //                     'code' => 'NOT_ALLOWED',
+    //                     'message' => 'You Dont Have Access To See Factorisation',
+    //                 ],
+    //                 405
+    //             );
+    //         }
+
+    //         $factorisation = Factorisation::with('delivery')->find($id);
+
+    //         if (isset($factorisation)) {
+    //             return response()->json(
+    //                 [
+    //                     'status' => true,
+    //                     'code' => 'SUCCESS',
+    //                     'data' => [
+    //                         'factorisations' => $factorisation,
+    //                     ],
+    //                 ],
+    //                 200
+    //             );
+    //         } else {
+    //             return response()->json(
+    //                 [
+    //                     'status' => false,
+    //                     'code' => 'NOT_FOUND',
+    //                     'message' => 'factorisation Not Exist',
+    //                 ],
+    //                 404
+    //             );
+    //         }
+    //     } catch (\Throwable $th) {
+    //         return response()->json(
+    //             [
+    //                 'status' => false,
+    //                 'code' => 'SERVER_ERROR',
+    //                 'message' => $th->getMessage()
+    //             ],
+    //             500
+    //         );
+    //     }
+    // }
 
 
     /**
@@ -413,19 +545,19 @@ class FactorisationController extends Controller
     public function generatePDF($id)
     {
 
-       
-        $factorisation = Factorisation::with('seller','delivery', 'delivery.deliveryPlaces', 'delivery.deliveryPlaces.city')
-        ->where('id', $id)
-        ->first(); // Retrieve the user based on the ID
+
+        $factorisation = Factorisation::with('seller', 'delivery', 'delivery.deliveryPlaces', 'delivery.deliveryPlaces.city','fees')
+            ->where('id', $id)
+            ->first(); // Retrieve the user based on the ID
 
         $salesDelivery = Order::with('items', 'items.product')
             ->where('factorisation_id', $factorisation->id)
             ->get();
 
-            
-        $salesSeller = Order::with('delivery_user','delivery_user.deliveryPlaces','delivery_user.deliveryPlaces.city','items', 'items.product')
-        ->where('seller_factorisation_id', $factorisation->id)
-        ->get();
+
+        $salesSeller = Order::with('delivery_user', 'delivery_user.deliveryPlaces', 'delivery_user.deliveryPlaces.city', 'items', 'items.product')
+            ->where('seller_factorisation_id', $factorisation->id)
+            ->get();
 
         // dd($salesSeller);
 
@@ -437,14 +569,14 @@ class FactorisationController extends Controller
             'Content-Type' => 'application/pdf',
         ];
         // return view('factorisationpdf')->with(compact('factorisation','sales'));
-        if($factorisation->type == "delivery"){
-        $pdf = PDF::loadView('factorisationpdf', compact('factorisation', 'salesDelivery'));
-        }else{
-            
-        $pdf = PDF::loadView('factorisationsellerpdf', compact('factorisation', 'salesSeller'));
+        if ($factorisation->type == "delivery") {
+            $pdf = PDF::loadView('factorisationpdf', compact('factorisation', 'salesDelivery'));
+        } else {
+
+            $pdf = PDF::loadView('factorisationsellerpdf', compact('factorisation', 'salesSeller'));
         }
-        
-        
-            return  $pdf->stream($factorisation->factorisation_id . '.pdf');
+
+
+        return  $pdf->stream($factorisation->factorisation_id . '.pdf', 'UTF-8');
     }
 }

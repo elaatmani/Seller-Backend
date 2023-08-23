@@ -1308,16 +1308,16 @@ class OrderController extends Controller
     public function orderHistory(Request $request, $id)
     {
         try {
-            if (!$request->user()->can('view_order')) {
-                return response()->json(
-                    [
-                        'status' => false,
-                        'code' => 'NOT_ALLOWED',
-                        'message' => 'You Dont Have Access To Delivery Orders',
-                    ],
-                    405
-                );
-            }
+            // if (!$request->user()->can('view_order')) {
+            //     return response()->json(
+            //         [
+            //             'status' => false,
+            //             'code' => 'NOT_ALLOWED',
+            //             'message' => 'You Dont Have Access To Delivery Orders',
+            //         ],
+            //         405
+            //     );
+            // }
             $orderHistory = OrderHistory::where('order_id', $id)->with('orders', 'users')->get();
 
             if (count($orderHistory) > 0) {

@@ -244,6 +244,7 @@ class RolesAndPermissionsSeeder extends Seeder
   
               'show_seller_sales',
               'view_sale',
+              'view_order',
               'create_sale',
               'update_sale',
               'delete_sale',
