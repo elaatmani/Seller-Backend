@@ -14,6 +14,11 @@ class Product extends Model
         'user_id',
         'name',
         'ref',
+        'link_video',
+        'link_store',
+        'transport_mode',
+        'expedition_date',
+        'country_of_purchase',
         'selling_price',
         'buying_price',
         'description'
@@ -24,6 +29,11 @@ class Product extends Model
         'user_id' => 'integer',
         'name' => 'string',
         'ref' => 'string',
+        'link_video' => 'string',
+        'link_store' => 'string',
+        'transport_mode' => 'string',
+        'expedition_date' => 'string',
+        'country_of_purchase' => 'string',
         'selling_price' => 'float',
         'buying_price' => 'float',
         'description' => 'string'

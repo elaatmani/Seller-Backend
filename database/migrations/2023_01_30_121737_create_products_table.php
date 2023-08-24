@@ -20,6 +20,11 @@ return new class extends Migration
             $table->string('name');
             $table->float('selling_price');
             $table->float('buying_price');
+            $table->string('link_video')->nullable();
+            $table->string('link_store')->nullable();
+            $table->string('transport_mode')->nullable();
+            $table->dateTime('expedition_date')->nullable();
+            $table->string('country_of_purchase')->nullable();
             $table->text('description')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();

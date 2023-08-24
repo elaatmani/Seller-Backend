@@ -132,6 +132,11 @@ class ProductController extends Controller
                 'user_id' => auth()->id(),
                 'name' => $request->name,
                 'ref' => $request->ref,
+                'link_video' => $request->link_video,
+                'link_store' => $request->link_store,
+                'transport_mode' => $request->transport_mode,
+                'expedition_date' => $request->expedition_date,
+                'country_of_purchase' => $request->country_of_purchase,
                 'buying_price' => $request->buying_price,
                 'selling_price' => $request->selling_price,
                 'description' => $request->description,
@@ -347,9 +352,17 @@ class ProductController extends Controller
 
             $product->name = $request->name;
             $product->ref = $request->ref;
+
+            $product->link_video = $request->link_video;
+            $product->link_store = $request->link_store;
+            $product->transport_mode = $request->transport_mode;
+            $product->expedition_date = $request->expedition_date;
+            $product->country_of_purchase = $request->country_of_purchase;
+
             $product->buying_price = $request->buying_price;
             $product->selling_price = $request->selling_price;
             $product->description = $request->description;
+            
             $product->status = 1;
 
             $product->save();
