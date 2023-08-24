@@ -36,6 +36,8 @@ class FactorisationController extends Controller
             return $query->where('user_id', auth()->id())->where('close', 1);
         })->with('delivery', 'seller','fees')->get();
 
+        
+
         return response()->json(
             [
                 'status' => true,
@@ -567,6 +569,7 @@ class FactorisationController extends Controller
 
         $headers = [
             'Content-Type' => 'application/pdf',
+            'charset' => 'UTF-8'
         ];
         // return view('factorisationpdf')->with(compact('factorisation','sales'));
         if ($factorisation->type == "delivery") {

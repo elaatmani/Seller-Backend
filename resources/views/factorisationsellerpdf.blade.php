@@ -8,6 +8,20 @@ $totalPrice = 0;
 
 $shippingFees = 0;
 $totalCOD = 0;
+use \ArPHP\I18N\Arabic;
+
+
+function translateProductNameToArabic($productName)
+{
+    $arabic = app(Arabic::class);
+    return $arabic->utf8Glyphs($productName);
+}
+
+
+$closeAt = new DateTime($factorisation->close_at);
+$sevenDaysAgo = $closeAt->modify('-7 days');
+$factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
+
 
 @endphp
 
@@ -32,13 +46,22 @@ $totalCOD = 0;
 
 <!DOCTYPE html>
 <html>
+<meta charset="UTF-8">
+
 
 <head>
-  <title>Larave Generate Invoice PDF - Nicesnippest.com</title>
+  <title>Invoice VLDO N° : {{$factorisation->factorisation_id}}</title>
 </head>
 <style type="text/css">
+  @font-face {
+    font-family: Adobe Arabic;
+    src: url('/storage/fonts/Adobe\ Arabic\ Bold.otf');
+  }
+  .arabic-font{
+    font-family: DejaVu Sans, sans-serif;
+  }
   body {
-    font-family: 'Roboto Condensed', sans-serif;
+    font-family: Roboto, sans-serif;
   }
 
   .m-0 {
@@ -159,12 +182,11 @@ $totalCOD = 0;
 
   <div class="add-detail mt-10">
     <h4>Invoice To: </h4>
-    <div class="w-50 float-left mt-0" style="border-left:3px solid #f97316; margin-right:10px;">
+    <div class="w-100 float-left mt-0" style="border-left:3px solid #f97316; margin-right:10px;">
       <div style="margin-left:5px;">
-
         <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">Seller Fullname: <span class="gray-color">{{ucfirst($factorisation->seller->firstname)}} {{ucfirst($factorisation->seller->lastname)}} </span></p>
-        <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">Warehouse: <span class="gray-color">Lebnon</span></p>
-        <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">Date Payment: <span class="gray-color">{{ $factorisation->close_at }}</span></p>
+        <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">Country: <span class="gray-color">Lebnon</span></p>
+        <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">Date Payment: <span class="gray-color">[{{$factorisationLastWeek}} , {{ $factorisation->close_at }}]</span></p>
         <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">NB Orders: <span class="gray-color">{{ $factorisation->commands_number }}</span></p>
       </div>
     </div>
@@ -189,7 +211,7 @@ $totalCOD = 0;
       @foreach ($salesSeller as $sale)
       <tr align="center">
         <td>{{ substr($sale->sheets_id, strrpos($sale->sheets_id, '***') + 4) }}</td>
-        <td>{{ $sale->product_name }}</td>
+        <td class="arabic-font">{{ translateProductNameToArabic($sale->product_name) }}</td>
         <td>{{ implode(", ", $sale->items->pluck("quantity")->toArray()) }}</td>
         <td>{{ salePrice($sale) }}$</td>
         <td>{{ $sale->upsell == "oui" ? 10 : 8 }}$</td>
@@ -202,7 +224,7 @@ $totalCOD = 0;
           <div class="total-part">
             <table class="table w-20 mt-10" style="margin-left:auto">
               <tr>
-                <th class="w-50">Orders Fees</th>
+                <th class="w-50">Total Revenue</th>
                 <td>{{$totalPrice}}$</td>
               </tr>
               <tr>
