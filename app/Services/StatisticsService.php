@@ -715,7 +715,7 @@ class StatisticsService
                 'name' => 'No Answer',
                 'confirmation' => 'day-one-call-one',
                 'total' => $noAnswer->sum('total'),
-                'percent' => round(($noAnswer->sum('total') * 100) / $total, 2),
+                'percent' =>$total == 0 ? 0 : round(($noAnswer->sum('total') * 100) / $total, 2),
         ];
 
         $deliveredCount = $deliveryOrders->where('delivery', 'livrer')->count();
@@ -723,7 +723,7 @@ class StatisticsService
             'name' => 'Delivered',
             'confirmation' => 'confirmer',
             'total' => $deliveredCount,
-            'percent' => $orders->where('confirmation', 'confirmer')->first()->total == NULL ? 0 : round(($deliveredCount * 100) / $orders->where('confirmation', 'confirmer')->first()->total ?? 1, 2),
+            'percent' => $orders->where('confirmation', 'confirmer')->first()?->total == 0 ? 0 : round(($deliveredCount * 100) / $orders->where('confirmation', 'confirmer')->first()->total ?? 1, 2),
         ];
 
         $shippedCount = $deliveryOrders->where('delivery', 'expidier')->count();
@@ -731,7 +731,7 @@ class StatisticsService
             'name' => 'Shipped',
             'confirmation' => 'wrong-number',
             'total' => $shippedCount,
-            'percent' => round(($shippedCount * 100) / $orders->where('confirmation', 'confirmer')->first()->total, 2),
+            'percent' => $orders->where('confirmation', 'confirmer')->first()?->total == 0 ? 0 :round(($shippedCount * 100) / $orders->where('confirmation', 'confirmer')->first()?->total, 2),
         ];
 
         $show = [ '*' ];
