@@ -44,7 +44,12 @@ class OrderObserver
         $newAttributes = $order->getAttributes(); // New values
 
         if($newAttributes['affectation'] != null && $newAttributes['delivery'] == null) {
-            $newAttributes['delivery'] = 'dispatch';
+            $order->delivery = 'dispatch';
+            // throw new Exception('Error admin');
+        }
+
+        if($newAttributes['delivery'] == 'annuler') {
+            $order->followup_id = 19;
         }
 
         OrderHistoryService::observe($order);
