@@ -575,7 +575,48 @@ class ProductController extends Controller
 
 
 
+    public function productStatus($id, Request $request){
+        try {
+            if (!$request->user()->can('update_product')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Update Product',
+                    ],
+                    405
+                );
+            }
+            // return $request->status;
+            $product = Product::with('variations', 'variations.warehouse')->where('id',$id)->first();
+            $product->status = $request->status == 'true' ? true : false;
+            $product->note = $request->note;
+            $product->save();
+        
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'PRODUCT_UPDATED',
+                    'message' => 'Product Sttatus Updated Successfully!',
+                    'data' => [
+                        'product' => $product
+                    ]
+                ],
+                200
+            );
 
+        } catch (\Throwable $th) {
+                    return response()->json(
+                        [
+                            'status' => false,
+                            'code' => 'SERVER_ERROR',
+                            'message' => $th->getMessage(),
+                        ],
+                        500
+                    );
+                }
+
+    }
     // public function test(){
     //     $sheets = Sheets::spreadsheet(config('sheets.post_spreadsheet_id'))
 

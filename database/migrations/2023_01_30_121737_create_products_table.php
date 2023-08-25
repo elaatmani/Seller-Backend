@@ -26,7 +26,8 @@ return new class extends Migration
             $table->dateTime('expedition_date')->nullable();
             $table->string('country_of_purchase')->nullable();
             $table->text('description')->nullable();
-            $table->tinyInteger('status')->default(1);
+            $table->tinyInteger('status')->default(0);
+            $table->string('note')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

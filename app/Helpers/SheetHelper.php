@@ -74,10 +74,10 @@ class SheetHelper {
                 $quantity = array_key_exists('Total quantity', $o) ? $o['Total quantity'] : '';
                 $sku = array_key_exists('SKU', $o) ? $o['SKU'] : '';
                 $product_name = array_key_exists('Product name', $o) ? $o['Product name'] : '';
-
-                $product_exists = DB::table('products')->where('ref', $sku)->exists();
-
+                
                 if(!$sku) continue;
+                $product_exists = DB::table('products')->where('ref', $sku)->where('status',1)->exists();
+
                 if(!$product_exists) {
                     $productNotFoundOrders[] = $o;
                     continue;

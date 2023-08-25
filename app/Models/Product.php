@@ -21,7 +21,9 @@ class Product extends Model
         'country_of_purchase',
         'selling_price',
         'buying_price',
-        'description'
+        'description',
+        'status',
+        'note'
     ];
 
 
@@ -32,11 +34,11 @@ class Product extends Model
         'link_video' => 'string',
         'link_store' => 'string',
         'transport_mode' => 'string',
-        'expedition_date' => 'string',
+        'expedition_date' => 'datetime',
         'country_of_purchase' => 'string',
         'selling_price' => 'float',
         'buying_price' => 'float',
-        'description' => 'string'
+        'description' => 'string',
     ];
 
     protected $appends = [
