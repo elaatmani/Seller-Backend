@@ -140,7 +140,6 @@ class ProductController extends Controller
                 'buying_price' => $request->buying_price,
                 'selling_price' => $request->selling_price,
                 'description' => $request->description,
-                'status' => 1
             ]);
 
 
@@ -363,7 +362,6 @@ class ProductController extends Controller
             $product->selling_price = $request->selling_price;
             $product->description = $request->description;
             
-            $product->status = 1;
 
             $product->save();
 
