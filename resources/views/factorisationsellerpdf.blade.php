@@ -210,13 +210,13 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
       </tr>
       @foreach ($salesSeller as $sale)
       <tr align="center">
-        <td>{{ substr($sale->sheets_id, strrpos($sale->sheets_id, '***') + 4) }}</td>
+        <td>{{ substr($sale->sheets_id, strrpos($sale->sheets_id, '***') + 3) }}</td>
         <td class="arabic-font">{{ translateProductNameToArabic($sale->product_name) }}</td>
         <td>{{ implode(", ", $sale->items->pluck("quantity")->toArray()) }}</td>
         <td>{{ salePrice($sale) }}$</td>
         <td>{{ $sale->upsell == "oui" ? 10 : 8 }}$</td>
-        <td>{{ number_format(salePrice($sale) * 0.04,2) }}$</td>
-        <td>{{ number_format(salePrice($sale) - (($sale->upsell == "oui" ? 10 : 8) + (salePrice($sale) * 0.04)),)}}$</td>
+        <td>{{ salePrice($sale) * 0.04 }}$</td>
+        <td>{{ salePrice($sale) - (($sale->upsell == "oui" ? 10 : 8) + (salePrice($sale) * 0.04))}}$</td>
       </tr>
       @endforeach
       <tr>
@@ -229,7 +229,7 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
               </tr>
               <tr>
                 <th class="w-50">Total Fees</th>
-                <td>{{number_format($shippingFees + $totalCOD)}}$</td>
+                <td>{{$shippingFees + $totalCOD}}$</td>
               </tr>
               @php
                   $otherFees = 0;                
@@ -245,7 +245,7 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
               @endforeach
               <tr>
                 <th class="w-50">Net Payment</th>
-                <td>{{number_format($totalPrice - ($shippingFees + $totalCOD + $otherFees))}}$</td>
+                <td>{{$totalPrice - ($shippingFees + $totalCOD + $otherFees)}}$</td>
               </tr>
             </table>
             <div style="clear: both;"></div>
