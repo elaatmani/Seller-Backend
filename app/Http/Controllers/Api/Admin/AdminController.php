@@ -46,7 +46,7 @@ class AdminController extends Controller
 
 
         $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder, $options);
-        $statistics = $this->orderRepository->adminStatistics();
+        $statistics = StatisticsService::adminSalesStatistics();
 
         return response()->json([
             'code' => 'SUCCESS',
@@ -59,13 +59,10 @@ class AdminController extends Controller
 
 
     public function update(UpdateOrderRequest $request, $id) {
-// return response()->json(['message' => 'failed', 'code' => 'ERROR'],500);
-        // try {
-            DB::beginTransaction();
 
+        try {
             $order = $this->orderRepository->update($id, $request->all());
 
-            DB::commit();
             return [
                 'code' => 'SUCCESS',
                 'data' => [
@@ -73,20 +70,18 @@ class AdminController extends Controller
                 ]
             ];
 
-        // } catch (\Throwable $th) {
+        } catch (\Throwable $th) {
 
-        //     // rollback transaction on error
-        //     DB::rollBack();
 
-        //     return response()->json(
-        //         [
-        //             'status' => false,
-        //             'code' => 'SERVER_ERROR',
-        //             'message' => $th->getMessage(),
-        //         ],
-        //         500
-        //     );
-        // }
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
     }
 
 
@@ -159,6 +154,7 @@ class AdminController extends Controller
     public function get_options($request) {
         $filters = $request->input('filters', []);
         $search = $request->input('search', '');
+        $reportedFirst = data_get($filters, 'reported_first', false);
 
         $orWhere = !$search ? [] : [
             ['id', 'LIKE', "%$search%"],
@@ -171,11 +167,11 @@ class AdminController extends Controller
 
 
         $filtersDate = Arr::only($filters, ['created_from', 'created_to', 'dropped_from', 'dropped_to']);
-        $filters = Arr::only($filters, ['confirmation', 'delivery', 'affectation', 'agente_id', 'upsell']);
+        $validatedFilters = Arr::only($filters, ['confirmation', 'delivery', 'affectation', 'agente_id', 'upsell']);
 
         $toFilter = [];
-        if(is_array($filters)){
-            foreach($filters as $f => $v) {
+        if(is_array($validatedFilters)){
+            foreach($validatedFilters as $f => $v) {
                 if($v == 'all') continue;
                 $toFilter[] = [$f, '=', $v];
             }
@@ -189,10 +185,16 @@ class AdminController extends Controller
 
         ];
 
+        $whereHas = [
+            [ 'product_id', '=', data_get($filters, 'product_id', 'all'), 'items' ]
+        ];
+
         $options = [
             'whereDate' => $whereDate,
             'where' => $toFilter,
             'orWhere' => $orWhere,
+            'reported_first' => $reportedFirst,
+            'whereHas' => $whereHas
         ];
 
         return $options;

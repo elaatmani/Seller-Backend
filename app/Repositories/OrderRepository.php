@@ -44,16 +44,44 @@ class OrderRepository implements OrderRepositoryInterface {
             $query->whereDate($wd[0], $wd[1], Carbon::make($wd[2])->toDate());
         }
 
+        foreach(data_get($options, 'orderBy', []) as $wd) {
+            $query->orderBy($wd[0], $wd[1]);
+        }
+
         foreach(data_get($options, 'where', []) as $w ) {
             $query->where($w[0], $w[1], $w[2]);
         }
 
+
+        if(data_get($options, 'reported_first', false)) {
+            $this->reportedFirst($query);
+        }
+
+        foreach(data_get($options, 'whereHas', []) as $w) {
+
+            $query->when($w[2] != 'all', fn($q) => $q->whereHas($w[3], fn($oq) => $oq->where($w[0], $w[1], $w[2])));
+        }
+
+
+
         if(data_get($options, 'get', true)) {
             return $query->get();
         }
-
         return $query;
 
+    }
+
+    public function reportedFirst($query) {
+        $query->select('*',
+        DB::raw('TIMESTAMPDIFF(day, DATE_FORMAT(now(), "%Y-%m-%d"), DATE_FORMAT(reported_agente_date, "%Y-%m-%d")) as reported_diff')
+        , DB::raw('
+            CASE
+                WHEN confirmation = "reporter" AND TIMESTAMPDIFF(day, DATE_FORMAT(now(), "%Y-%m-%d"), DATE_FORMAT(reported_agente_date, "%Y-%m-%d")) <= 0 THEN 1
+                ELSE 0
+            END AS show_first')
+        );
+
+        $query->orderBy('show_first', 'DESC');
     }
 
 
@@ -67,6 +95,7 @@ class OrderRepository implements OrderRepositoryInterface {
 
         return $query->count();
     }
+
 
     public function paginate(
         int $perPage = 10,
@@ -97,30 +126,34 @@ class OrderRepository implements OrderRepositoryInterface {
 
 
     public function update($id, $data) {
-        $order = Order::where('id', $id)->first();
+        try {
+            DB::beginTransaction();
+            $order = Order::where('id', $id)->first();
 
-        if($data['affectation'] != null && $data['delivery'] == null) {
-            $data['delivery'] = 'dispatch';
+            $order->update($data);
+
+            $items = $data['items'];
+            $itemsIds = collect($items)->map(fn($i) => $i['id'])->values()->toArray();
+
+            OrderItem::where('order_id', $id)->whereNotIn('id', $itemsIds)->delete();
+
+            foreach($items as $item) {
+                OrderItem::updateOrCreate(
+                    [
+                        'id' => $item['id'],
+                        'order_id' => $id,
+                    ],
+                    $item
+                );
+            }
+            $order = $order->fresh();
+            DB::commit();
+            return $order;
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-
-        $order->update($data);
-
-        $items = $data['items'];
-        $itemsIds = collect($items)->map(fn($i) => $i['id'])->values()->toArray();
-
-        OrderItem::where('order_id', $id)->whereNotIn('id', $itemsIds)->delete();
-
-        foreach($items as $item) {
-            OrderItem::updateOrCreate(
-                [
-                    'id' => $item['id'],
-                    'order_id' => $id,
-                ],
-                $item
-            );
-        }
-        $order = $order->fresh();
-        return $order;
     }
 
 
@@ -142,52 +175,6 @@ class OrderRepository implements OrderRepositoryInterface {
         }
         $order = $order->fresh();
         return $order;
-    }
-
-
-    public function adminStatistics()
-    {
-        $orders = DB::table('orders')->groupBy('confirmation')->selectRaw("confirmation, count('confirmation') as total")->get();
-
-        $total = $orders->sum('total');
-
-        $noAnswers = [
-            'day-one-call-one',
-            'day-one-call-two',
-            'day-one-call-three',
-            'day-two-call-one',
-            'day-two-call-two',
-            'day-two-call-three',
-            'day-three-call-one',
-            'day-three-call-two',
-            'day-three-call-three',
-        ];
-
-        $noAnswer = $orders->whereIn('confirmation', $noAnswers);
-
-        $statistics = $orders->map(function($c) use($total) {
-            return [
-                'name' => $this->confirmations[$c->confirmation],
-                'confirmation' => $c->confirmation,
-                'total' => $c->total,
-                'percent' => round(($c->total * 100) / $total, 2),
-            ];
-        })->whereNotIn('confirmation', $noAnswers);
-
-        $statistics[] = [
-                'name' => 'No Answer',
-                'confirmation' => 'day-one-call-one',
-                'total' => $noAnswer->sum('total'),
-                'percent' => round(($noAnswer->sum('total') * 100) / $total, 2),
-        ];
-
-        $show = [ '*' ];
-        $response = [
-            'data' => $statistics,
-            'show' => $show
-        ];
-
-        return $response;
     }
 
 

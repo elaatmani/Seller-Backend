@@ -2,6 +2,7 @@
 
 use App\Events\NewNotification;
 use App\Http\Controllers\Api\Admin\AdminController;
+use App\Http\Controllers\Api\Admin\BulkActionController;
 use App\Services\RoadRunnerService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
@@ -204,16 +205,20 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/dashboard/delivery', [DashboardController::class, 'delivery']);
     Route::get('/dashboard/agente', [DashboardController::class, 'agente']);
 
-    // Follow Up
+    // Admin
     Route::post('/v1/admin/statistics', [AdminController::class, 'statistics']);
     Route::post('/v1/admin/orders', [AdminController::class, 'index']);
     Route::post('/v1/admin/orders/export', [AdminController::class, 'export']);
     Route::post('/v1/admin/orders/create', [AdminController::class, 'create']);
     Route::post('/v1/admin/orders/{id}/update', [AdminController::class, 'update']);
 
+    // Bulk Actions
+    Route::post('/v1/bulk/execute', [BulkActionController::class, 'index']);
+
     // Follow Up
     Route::post('/v1/followup/statistics', [FollowUpController::class, 'statistics']);
     Route::post('/v1/followup/orders', [FollowUpController::class, 'index']);
+    Route::post('/v1/followup/orders/create', [FollowUpController::class, 'create']);
     Route::post('/v1/followup/orders/{id}/update', [FollowUpController::class, 'update']);
 
     // Agent orders
