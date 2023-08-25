@@ -723,7 +723,7 @@ class StatisticsService
             'name' => 'Delivered',
             'confirmation' => 'confirmer',
             'total' => $deliveredCount,
-            'percent' => round(($deliveredCount * 100) / $orders->where('confirmation', 'confirmer')->first()->total ?? 1, 2),
+            'percent' => $orders->where('confirmation', 'confirmer')->first()->total == NULL ? 0 : round(($deliveredCount * 100) / $orders->where('confirmation', 'confirmer')->first()->total ?? 1, 2),
         ];
 
         $shippedCount = $deliveryOrders->where('delivery', 'expidier')->count();
