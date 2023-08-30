@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Public;
 
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\StatisticsService;
@@ -19,9 +20,8 @@ class AgentController extends Controller
     }
 
     public function statistics() {
-        $orders = $this->orderRepository->all()->where('agente_id', auth()->id());
 
-        $statistics = StatisticsService::agent($orders);
+        $statistics = StatisticsService::agent();
 
         return response()->json([
             'code' => 'SUCCESS',
@@ -37,44 +37,19 @@ class AgentController extends Controller
         $sortBy = $request->input('sort_by');
         $sortOrder = $request->input('sort_order');
         $perPage = $request->input('per_page');
-        $filters = $request->input('filters');
-        $search = $request->input('search');
         $confirmation = $request->input('confirmation');
 
-        $orWhere = !$search ? [] : [
-            ['id', 'LIKE', "%$search%"],
-            ['fullname', 'LIKE', "%$search%"],
-            ['phone', 'LIKE', "%$search%"],
-            ['adresse', 'LIKE', "%$search%"],
-            ['city', 'LIKE', "%$search%"],
-            ['note', 'LIKE', "%$search%"],
-        ];
+        $options = $this->get_options($request);
 
-        $toFilter = [];
-
-        if(is_array($filters)){
-            foreach($filters as $f => $v) {
-                if($v == 'all') continue;
-                if($f == 'created_at') {
-
-                    $toFilter[] = [$f, 'like', "%$v%"];
-                } else {
-                    $toFilter[] = [$f, '=', $v];
-                }
-            }
+        if(!$confirmation) {
+            $options['where'][] = ['confirmation', '!=', 'confirmer'];
+        } else {
+            $options['where'][] = ['confirmation', '=', 'confirmer'];
         }
 
-        $where = [
-            // check if only confirmed orders or else
-            ['confirmation', $confirmation == 'confirmer' ? '=' : '!=', 'confirmer'],
-            ['agente_id', '=', auth()->id(), ],
-            ...$toFilter
-        ];
+        $options['where'][] = ['agente_id', '=', auth()->id()];
 
-        $options = [
-            'where' => $where,
-            'orWhere' => $orWhere
-        ];
+
 
 
         $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder, $options);
@@ -109,8 +84,10 @@ class AgentController extends Controller
     public function update(UpdateOrderRequest $request, $id) {
 
         try {
+            DB::beginTransaction();
             $order = $this->orderRepository->update($id, $request->all());
 
+            DB::commit();
             return [
                 'code' => 'SUCCESS',
                 'data' => [
@@ -132,5 +109,55 @@ class AgentController extends Controller
                 500
             );
         }
+    }
+
+
+    public function get_options($request) {
+        $filters = $request->input('filters', []);
+        $search = $request->input('search', '');
+        $reportedFirst = data_get($filters, 'reported_first', false);
+
+        $orWhere = !$search ? [] : [
+            ['id', 'LIKE', "%$search%"],
+            ['fullname', 'LIKE', "%$search%"],
+            ['phone', 'LIKE', "%$search%"],
+            ['adresse', 'LIKE', "%$search%"],
+            ['city', 'LIKE', "%$search%"],
+            ['note', 'LIKE', "%$search%"],
+        ];
+
+
+        $filtersDate = Arr::only($filters, ['created_from', 'created_to', 'dropped_from', 'dropped_to']);
+        $validatedFilters = Arr::only($filters, ['confirmation', 'delivery', 'affectation', 'agente_id', 'upsell']);
+
+        $toFilter = [];
+        if(is_array($validatedFilters)){
+            foreach($validatedFilters as $f => $v) {
+                if($v == 'all') continue;
+                $toFilter[] = [$f, '=', $v];
+            }
+        }
+
+        $whereDate = [
+            ['created_at', '>=', data_get($filtersDate, 'created_from', null)],
+            ['created_at', '<=', data_get($filtersDate, 'created_to', null)],
+            ['dropped_at', '>=', data_get($filtersDate, 'dropped_from', null)],
+            ['dropped_at', '<=', data_get($filtersDate, 'dropped_to', null)],
+
+        ];
+
+        $whereHas = [
+            [ 'product_id', '=', data_get($filters, 'product_id', 'all'), 'items' ]
+        ];
+
+        $options = [
+            'whereDate' => $whereDate,
+            'where' => $toFilter,
+            'orWhere' => $orWhere,
+            'reported_first' => $reportedFirst,
+            'whereHas' => $whereHas
+        ];
+
+        return $options;
     }
 }

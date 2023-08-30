@@ -192,7 +192,7 @@ class OrderRepository implements OrderRepositoryInterface {
                 'name' => $this->confirmations[$c->followup_confirmation],
                 'confirmation' => $c->followup_confirmation,
                 'total' => $c->total,
-                'percent' => round(($c->total * 100) / $total, 2),
+                'percent' => $total == 0 ? 0 : round(($c->total * 100) / $total, 2),
             ];
         });
 
@@ -220,7 +220,7 @@ class OrderRepository implements OrderRepositoryInterface {
                 'name' => $this->confirmations[$c->confirmation],
                 'confirmation' => $c->confirmation,
                 'total' => $c->total,
-                'percent' => round(($c->total * 100) / $total, 2),
+                'percent' => $total == 0 ? 0 : round(($c->total * 100) / $total, 2),
             ];
         });
 

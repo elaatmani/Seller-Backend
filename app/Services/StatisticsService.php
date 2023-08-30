@@ -77,14 +77,23 @@ class StatisticsService
     }
 
 
-    public static function agent($orders) {
+    public static function agent() {
+
+        $orders = Order::query();
+
+        $orders->where('agente_id', auth()->id());
+
+        $orders = $orders->get();
+
         // $orders = ;
         // $orders ;
         $reported = $orders->where('confirmation', 'reporter')->count();
+        $new = $orders->where('confirmation', null)->count();
         $confirmed = $orders->where('confirmation', 'confirmer')->count();
         $cancelled = $orders->where('confirmation', 'annuler')->count();
         $doubles = $orders->where('confirmation', 'double')->count();
         $upsells = $orders->where('confirmation', 'confirmer')->where('upsell', 'oui')->count();
+        $earnings = $orders->where('confirmation', 'confirmer')->where('upsell', 'oui')->where('delivery', 'livrer')->count();
         $noAnswer = $orders->whereIn('confirmation',
         [
             'day-one-call-one',
@@ -108,7 +117,17 @@ class StatisticsService
             'color' => '#6b7280'
         ];
 
-        $new = [
+        $earnings = [
+            'id' => 5,
+            'title' => 'Earnings',
+            'value' => $earnings * 0.7,
+            'icon' => 'mdi-currency-usd',
+            'symbol' => '$',
+            'color' => '#34d399'
+        ];
+
+
+        $reported = [
             'id' => 2,
             'title' => 'Reported',
             'value' => $reported,
@@ -117,7 +136,7 @@ class StatisticsService
             'color' => '#14b8a6'
         ];
 
-        $reconfirmed = [
+        $confirmed = [
             'id' => 3,
             'title' => 'Confirmed',
             'value' => $confirmed,
@@ -133,16 +152,6 @@ class StatisticsService
             'percentage' => $totalCount > 0  ? ($noAnswer * 100) / $totalCount : 0,
             'icon' => 'mdi-phone-alert',
             'color' => '#facc15'
-        ];
-
-        $earnings = [
-            'id' => 5,
-            'title' => 'Earnings',
-            'value' => '0',
-            'percentage' => $totalCount > 0  ? (0 * 100) / $totalCount : 0,
-            'icon' => 'mdi-currency-usd',
-            'symbol' => '$',
-            'color' => '#34d399'
         ];
 
         $cancelled = [
@@ -173,7 +182,22 @@ class StatisticsService
         ];
 
 
-        return [$all, $new, $reconfirmed, $earnings, $noAnswer, $cancelled, $doubles, $upsell];
+        $new = [
+            'id' => 9,
+            'title' => 'Need Confirmation',
+            'value' => $new,
+            'icon' => 'mdi-new-box',
+            'color' => '#a78bfa'
+        ];
+
+
+        $statistics = [$earnings, $all, $confirmed, $upsell, $reported,  $noAnswer, $cancelled, $doubles];
+
+        if($new['value'] > 0) {
+            $statistics[] = $new;
+        }
+
+        return $statistics;
     }
 
 
@@ -431,6 +455,8 @@ class StatisticsService
 
         return $statistics;
     }
+
+
 
     public static function adminSalesStatistics()
     {

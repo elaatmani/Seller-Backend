@@ -8,13 +8,13 @@ use App\Models\City;
 use App\Helpers\SteHelper;
 use Illuminate\Support\Facades\Http;
 
-class RoadRunner
+class RoadRunnerCODSquad
 {
 
     const NOTIFY_ROADRUNNER = true;
     const ROADRUNNER_ID = 4;
     const TEST_URL = "https://systemtunes.com/apivoldo/";
-    const LIVE_URL = "https://roadrunner-lb.com/api/vooldo/";
+    const LIVE_URL = "https://roadrunner-lb.com/api/codsquad/";
     const TEST_MODE = false;
 
     const ERRORS = [
@@ -64,8 +64,8 @@ class RoadRunner
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . env('API_STE', ''),
-            'X-Access-Token' => 'oHD-w3=GD3sKBZcLF]CMb#!rjj)Azs;-?wnZsqf43:0WlQO:8U%&-Y-dpzCgua5HJT?tyxJ={Q{+9hJ[dN?|t?-tZ7F[J1'
+            'Authorization' => 'Bearer ' . env('ROAD_RUNNER_CODSQUAD_API_KEY', ''),
+            'X-Access-Token' => env('ROAD_RUNNER_CODSQUAD_ACCESS_TOKEN', '')
             ])->post(self::endpoint($endpoint), $params);
 
         if ($response->successful()) {
@@ -109,16 +109,16 @@ class RoadRunner
     }
 
     public static function cities() {
-        return self::http('getcities/', [ 'company' => 'Voldo' ]);
+        return self::http('getcities/', [ 'company' => 'codsquad' ]);
     }
 
 
     public static function orders() {
-        return self::http('list/', [ 'company' => 'Voldo', 'daterange' => '2023/07/20 - 2023/08/01' ]);
+        return self::http('list/', [ 'company' => 'codsquad', 'daterange' => '2023/07/20 - 2023/08/01' ]);
     }
 
     public static function rates() {
-        return self::http('getrates/', [ 'company' => 'Voldo' ]);
+        return self::http('getrates/', [ 'company' => 'codsquad' ]);
     }
 
     public static function insert($order)
@@ -128,7 +128,7 @@ class RoadRunner
 
         $data = array(
 
-            "company" => "Voldo",
+            "company" => "codsquad",
             "firstName" => $order->fullname,
             "lastName" => "-",
             "countryPhoneCode" => "961",
