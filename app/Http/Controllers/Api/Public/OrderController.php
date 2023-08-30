@@ -1097,7 +1097,7 @@ class OrderController extends Controller
             }
 
 
-
+            DB::beginTransaction();
             //Bring product_ids handled by current agente
             $product_ids = ProductAgente::where('agente_id', $request->user()->id)->pluck('product_id');
 
@@ -1109,6 +1109,7 @@ class OrderController extends Controller
                 ->whereIn('id', $OrderItems)
                 ->whereNull('agente_id')
                 ->whereNull('confirmation')
+                ->lockForUpdate()
                 ->first();
 
 
@@ -1122,7 +1123,7 @@ class OrderController extends Controller
                     ->get();
 
                 if ($checkOrder->count() > 1) {
-                    DB::beginTransaction();
+
                     // $firstOrder = $checkOrder->first();
 
                     foreach ($checkOrder as $order) {
@@ -1133,17 +1134,18 @@ class OrderController extends Controller
 
                     }
 
-                    DB::commit();
+
                 } else {
                     // Only one order or no duplicates found
                     // Continue with the original code without any modifications
-                    DB::beginTransaction();
+
                     $AddOrder->agente_id = $request->user()->id;
                     $AddOrder->dropped_at = now();
                     $AddOrder->save();
 
-                    DB::commit();
+
                 }
+                DB::commit();
             } else {
                 return response()->json(
                     [
