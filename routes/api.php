@@ -2,6 +2,7 @@
 
 use App\Events\NewNotification;
 use App\Http\Controllers\Api\Admin\AdminController;
+use App\Http\Controllers\Api\Admin\AdsController;
 use App\Http\Controllers\Api\Admin\BulkActionController;
 use App\Services\RoadRunnerService;
 use Illuminate\Support\Facades\Route;
@@ -123,6 +124,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/shops/delete/{id}', [ShopController::class, 'destroy']);
 
 
+    //Shop
+    Route::get('/ads', [AdsController::class, 'index']);
+    Route::get('/ads/{id}', [AdsController::class, 'show']);
+    Route::post('/ads/new', [AdsController::class, 'store']);
+    Route::post('/ads/update/{id}', [AdsController::class, 'update']);
+    Route::delete('/ads/delete/{id}', [AdsController::class, 'destroy']);
+
+
 
     //Product
     Route::get('/products', [ProductController::class, 'index']);
@@ -207,6 +216,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Admin
     Route::post('/v1/admin/statistics', [AdminController::class, 'statistics']);
+    Route::post('/v1/admin/analytics', [AdminController::class, 'analytics']);
     Route::post('/v1/admin/orders', [AdminController::class, 'index']);
     Route::post('/v1/admin/orders/export', [AdminController::class, 'export']);
     Route::post('/v1/admin/orders/create', [AdminController::class, 'create']);

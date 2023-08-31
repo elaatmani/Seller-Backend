@@ -6,6 +6,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\StatisticsService;
+use App\Services\AnalyticsService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Requests\CreateOrderRequest;
@@ -35,6 +36,20 @@ class AdminController extends Controller
             ]
         ]);
     }
+
+    public function analytics(Request $request) {
+
+
+        $analytics = AnalyticsService::admin($request);
+
+        return response()->json([
+            'code' => 'SUCCESS',
+            'data' => [
+                'analytics' => $analytics
+            ]
+        ]);
+    }
+
 
     public function index(Request $request) {
 

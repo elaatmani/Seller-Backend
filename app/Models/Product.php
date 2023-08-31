@@ -80,7 +80,7 @@ class Product extends Model
             'variations' => $this->variations->map->formatForOrder(),
             'image' => $this->image,
             'available_with' => $this->deliveries->map(fn($d) => $d->delivery_id),
-            'offeres' => $this->offers
+            'offers' => $this->offers
         ];
     }
 }

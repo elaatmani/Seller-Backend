@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\OrderRepository;
+use App\Repositories\Interfaces\AdsRepositoryInterface;
+use App\Repositories\AdsRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -26,5 +28,7 @@ class RepositoryServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->app->bind(OrderRepositoryInterface::class, OrderRepository::class);
+        $this->app->bind(AdsRepositoryInterface::class, AdsRepository::class);
+
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Public;
 
 use Carbon\Carbon;
 use App\Models\Order;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\StatisticsService;
@@ -41,43 +42,11 @@ class FollowUpController extends Controller
         $sortBy = $request->input('sort_by');
         $sortOrder = $request->input('sort_order');
         $perPage = $request->input('per_page');
-        $filters = $request->input('filters');
-        $search = $request->input('search');
 
-        $followUpCondition = [['delivery', '=', 'annuler'],['confirmation', '=', 'confirmer']];
+        $options = $this->get_options($request);
+        $options['where'][] = ['delivery', '=', 'annuler'];
+        $options['where'][] = ['confirmation', '=', 'confirmer'];
 
-        $orWhere = !$search ? [] : [
-            ['id', 'LIKE', "%$search%"],
-            ['fullname', 'LIKE', "%$search%"],
-            ['phone', 'LIKE', "%$search%"],
-            ['adresse', 'LIKE', "%$search%"],
-            ['city', 'LIKE', "%$search%"],
-            ['note', 'LIKE', "%$search%"],
-        ];
-
-        $toFilter = [];
-
-        if(is_array($filters)){
-            foreach($filters as $f => $v) {
-                if($v == 'all') continue;
-                if($f == 'created_at') {
-
-                    $toFilter[] = [$f, 'like', "%$v%"];
-                } else {
-                    $toFilter[] = [$f, '=', $v];
-                }
-            }
-        }
-
-        $where = [
-            ...$followUpCondition,
-            ...$toFilter
-        ];
-
-        $options = [
-            'where' => $where,
-            'orWhere' => $orWhere
-        ];
 
 
         $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder, $options);
@@ -86,7 +55,6 @@ class FollowUpController extends Controller
         return response()->json([
             'code' => 'SUCCESS',
             'data' => [
-                'filters' => $toFilter,
                 'statistics' => $statistics,
                 'orders' => $orders,
             ]
@@ -154,5 +122,55 @@ class FollowUpController extends Controller
                 500
             );
         }
+    }
+
+
+    public function get_options($request) {
+        $filters = $request->input('filters', []);
+        $search = $request->input('search', '');
+        $reportedFirst = data_get($filters, 'reported_first', false);
+
+        $orWhere = !$search ? [] : [
+            ['id', 'LIKE', "%$search%"],
+            ['fullname', 'LIKE', "%$search%"],
+            ['phone', 'LIKE', "%$search%"],
+            ['adresse', 'LIKE', "%$search%"],
+            ['city', 'LIKE', "%$search%"],
+            ['note', 'LIKE', "%$search%"],
+        ];
+
+
+        $filtersDate = Arr::only($filters, ['created_from', 'created_to', 'dropped_from', 'dropped_to']);
+        $validatedFilters = Arr::only($filters, ['confirmation', 'delivery', 'affectation', 'agente_id', 'upsell']);
+
+        $toFilter = [];
+        if(is_array($validatedFilters)){
+            foreach($validatedFilters as $f => $v) {
+                if($v == 'all') continue;
+                $toFilter[] = [$f, '=', $v];
+            }
+        }
+
+        $whereDate = [
+            ['created_at', '>=', data_get($filtersDate, 'created_from', null)],
+            ['created_at', '<=', data_get($filtersDate, 'created_to', null)],
+            ['dropped_at', '>=', data_get($filtersDate, 'dropped_from', null)],
+            ['dropped_at', '<=', data_get($filtersDate, 'dropped_to', null)],
+
+        ];
+
+        $whereHas = [
+            [ 'product_id', '=', data_get($filters, 'product_id', 'all'), 'items' ]
+        ];
+
+        $options = [
+            'whereDate' => $whereDate,
+            'where' => $toFilter,
+            'orWhere' => $orWhere,
+            'reported_first' => $reportedFirst,
+            'whereHas' => $whereHas
+        ];
+
+        return $options;
     }
 }

@@ -181,7 +181,7 @@ class OrderRepository implements OrderRepositoryInterface {
     public function followUpStatistics($userId)
     {
         $orders = DB::table('orders')
-        // ->where('followup_id', $userId)
+        ->where('followup_id', $userId)
         ->groupBy('followup_confirmation')
         ->selectRaw("followup_confirmation, count('followup_confirmation') as total")->get();
 

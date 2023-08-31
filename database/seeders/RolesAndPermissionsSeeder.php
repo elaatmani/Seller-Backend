@@ -111,6 +111,14 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'delete_sheet', 'description' => 'Delete a sheet']);
         Permission::create(['name' => 'access_to_sheets', 'description' => 'Access to sheets management']);
 
+        //Ads
+        Permission::create(['name' => 'show_all_ads', 'description' => 'View all adss']);
+        Permission::create(['name' => 'create_ads', 'description' => 'Create a new ads']);
+        Permission::create(['name' => 'update_ads', 'description' => 'Update a ads']);
+        Permission::create(['name' => 'view_ads', 'description' => 'View a specific ads']);
+        Permission::create(['name' => 'delete_ads', 'description' => 'Delete a ads']);
+        Permission::create(['name' => 'access_to_ads', 'description' => 'Access to ads management']);
+
 
         //Seller
         Permission::create(['name' => 'show_all_sellers', 'description' => 'View all sellers']);
@@ -200,7 +208,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'access_to_sheets',
 
             'show_all_expidations',
-            'handle_expidation'
+            'handle_expidation', 
+
+            'show_all_ads',
+            'create_ads',
+            'update_ads',
+            'view_ads',
+            'delete_ads',
+            'access_to_ads'
         ]);
 
 

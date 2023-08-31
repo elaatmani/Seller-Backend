@@ -33,6 +33,7 @@ class Order extends Model
         'sheets_id',
         'cmd',
         'product_name',
+        'source',
         'dropped_at',
         'followup_id',
         'followup_confirmation',
@@ -65,7 +66,8 @@ class Order extends Model
         // 'reported_delivery_date' => 'date',
         'delivery_date'  => 'datetime',
         'cmd'  => 'string',
-        'double' => 'integer'
+        'double' => 'integer',
+        'source' => 'string'
     ];
 
     protected $with = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
@@ -113,6 +115,10 @@ class Order extends Model
 
     public function getIsDoubleAttribute() {
         return !!$this->double;
+    }
+
+    public function advertisements(){
+        return $this->hasMany(Ads::class, 'source', 'source');
     }
 
 

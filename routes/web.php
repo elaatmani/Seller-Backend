@@ -14,6 +14,7 @@ use App\Models\RoadRunnerRequest;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use App\Services\RoadRunnerService;
+use App\Services\AnalyticsService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -34,9 +35,12 @@ use App\Services\RoadRunner;
 | contains the "web" middleware group. Now create something great!
 |
 */
+// Route::get('/analytics', function () {
+//     return AnalyticsService::admin(null);
+// });
 
 Route::get('/', function () {
-    return view('welcome');
+    return Order::with('advertisements')->get();
 });
 
 Route::get('check-sheet/{id}', [GoogleSheetController::class, 'save_orders']);
