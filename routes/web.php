@@ -65,7 +65,7 @@ Route::get('/road', function() {
 // });
 
 Route::get('storage/productImages/{filename}', function ($filename) {
-    $path = "/home/u594122495/domains/vldo.shop/public_html/seller/api/storage/app/public/productImages/{$filename}";
+    $path = "/home/u594122495/domains/codesquad.net/public_html/seller/api/storage/app/public/productImages/{$filename}";
     if (file_exists($path)) {
         return response()->file($path);
     } else {
