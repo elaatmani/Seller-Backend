@@ -39,6 +39,8 @@ class AnalyticsService
         $created_from = $request->created_from;
         $created_to = $request->created_to;
         $product_id = $request->product_id;
+        $user_id = $request->user_id;
+        
         
 
         $orders->with(['advertisements' => function ($query) use ($created_from, $created_to) {
@@ -49,9 +51,11 @@ class AnalyticsService
             if ($created_to) {
                 $query->whereDate('ads_at', '<=', $created_to);
             }
-        },'delivery_user','delivery_user.deliveryPlaces','delivery_user.deliveryPlaces.city'])->when(!!$created_from, fn($q) => $q->whereDate('created_at', '>=', $created_from))
+        },'delivery_user','delivery_user.deliveryPlaces','delivery_user.deliveryPlaces.city'])
+        ->when(!!$created_from, fn($q) => $q->whereDate('created_at', '>=', $created_from))
         ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to))
-        ->when($product_id != 'all', fn($q) => $q->whereHas('items', fn($oq) => $oq->where('product_id', $product_id)));
+        ->when($product_id != 'all', fn($q) => $q->whereHas('items', fn($oq) => $oq->where('product_id', $product_id)))
+        ->when($user_id != 'all' , fn($q) => $q->where('user_id',$user_id));
 
         
         

@@ -70,7 +70,7 @@ class Order extends Model
         'source' => 'string'
     ];
 
-    protected $with = ['items' => ['product_variation.warehouse', 'product'], 'factorisations'];
+    protected $with = ['seller_user','items' => ['product_variation.warehouse', 'product'], 'factorisations'];
 
     protected $appends = [
         'is_done',
@@ -119,6 +119,9 @@ class Order extends Model
 
     public function advertisements(){
         return $this->hasMany(Ads::class, 'source', 'source');
+    }
+    public function seller_user() {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
 

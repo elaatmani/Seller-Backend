@@ -76,6 +76,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Route::get('/cities', [RoadRunnerService::class, 'cities']);
     Route::get('/delevries', [UserController::class, 'delevries']);
     Route::get('/deliveries', [UserController::class, 'deliveries']);
+    Route::get('/sellers', [UserController::class, 'sellers']);
     Route::get('/agents', [UserController::class, 'agents']);
     Route::get('/online', [UserController::class, 'onlineUsers']);
 
