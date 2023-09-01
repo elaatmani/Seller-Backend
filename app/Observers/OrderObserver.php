@@ -6,7 +6,8 @@ use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Services\FactorisationService;
 use App\Services\OrderHistoryService;
-use App\Services\RoadRunner;
+use App\Services\RoadRunnerCODSquad;
+use App\Services\RoadRunnerVoldo;
 use Exception;
 
 class OrderObserver
@@ -22,7 +23,19 @@ class OrderObserver
         $user = request()->user();
 
         if($user->hasRole('admin') || $user->hasRole('follow-up')) {
-            RoadRunner::insert($order);
+            switch ($order->affectation) {
+                case RoadRunnerVoldo::ROADRUNNER_ID:
+                    RoadRunnerVoldo::insert($order);
+                break;
+
+                case RoadRunnerCODSquad::ROADRUNNER_ID:
+                    RoadRunnerCODSquad::insert($order);
+                break;
+
+                default:
+                    # code...
+                    break;
+            }
         };
 
     }
@@ -56,8 +69,8 @@ class OrderObserver
         OrderHistoryService::observe($order);
         if($user->hasRole('admin') || $user->hasRole('follow-up')) {
             // throw new Exception('Error admin');
-
-            RoadRunner::sync($order);
+            RoadRunnerCODSquad::sync($order);
+            RoadRunnerVoldo::sync($order);
         };
         
         FactorisationService::observe($order);
