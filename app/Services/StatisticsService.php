@@ -120,7 +120,7 @@ class StatisticsService
         $earnings = [
             'id' => 5,
             'title' => 'Earnings',
-            'value' => $earnings * 0.7,
+            'value' => round($earnings * 0.7, 2),
             'icon' => 'mdi-currency-usd',
             'symbol' => '$',
             'color' => '#34d399'
