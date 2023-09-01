@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Helpers\ProductHelper;
 use App\Events\NewNotification;
 use App\Helpers\SheetHelper;
+use App\Http\Controllers\Api\Admin\AdsController;
 use App\Models\RoadRunnerRequest;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -35,9 +36,7 @@ use App\Services\RoadRunner;
 | contains the "web" middleware group. Now create something great!
 |
 */
-// Route::get('/analytics', function () {
-//     return AnalyticsService::admin(null);
-// });
+Route::get('/ads',  [AdsController::class, 'index']);
 
 Route::get('/', function () {
     return Order::with('advertisements')->get();

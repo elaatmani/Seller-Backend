@@ -124,12 +124,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/shops/delete/{id}', [ShopController::class, 'destroy']);
 
 
-    //Shop
-    Route::get('/ads', [AdsController::class, 'index']);
-    Route::get('/ads/{id}', [AdsController::class, 'show']);
-    Route::post('/ads/new', [AdsController::class, 'store']);
-    Route::post('/ads/update/{id}', [AdsController::class, 'update']);
-    Route::delete('/ads/delete/{id}', [AdsController::class, 'destroy']);
+    
 
 
 
@@ -242,6 +237,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/v1/seller/orders', [SellerController::class, 'index']);
     Route::get('/v1/seller/orders/counts', [SellerController::class, 'counts']);
     Route::post('/v1/seller/orders/{id}/update', [SellerController::class, 'update']);
+
+    //Ads
+    Route::post('/ads', [AdsController::class, 'index']);
+    Route::post('/ads/new', [AdsController::class, 'store']);
+    Route::post('/ads/update/{id}', [AdsController::class, 'update']);
+    Route::delete('/ads/delete/{id}', [AdsController::class, 'destroy']);
 });
 
 // Auto fetch

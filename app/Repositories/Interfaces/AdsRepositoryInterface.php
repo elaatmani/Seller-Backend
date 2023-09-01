@@ -10,6 +10,6 @@ interface AdsRepositoryInterface {
 
     public function create($data);
 
-    public function paginate(int $perPage, string $sortBy, string $sortOrder, array $options = []);
+    public function paginate(int $perPage, string $sortBy, string $sortAds, array $options = []);
 
 }

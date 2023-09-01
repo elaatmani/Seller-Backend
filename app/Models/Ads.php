@@ -23,6 +23,7 @@ class Ads extends Model
         'ads_at' => 'date'
     ];
 
+    protected $with = ['products'];
 
     public function orders(){
         return $this->belongsTo(Order::class,'source', 'source');
