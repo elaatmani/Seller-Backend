@@ -215,7 +215,7 @@ class AnalyticsService
         });
         $totalCharges = $totalPriceOfBuyingOrders + $totalPriceOfDeliveryOrders + $totalSpendPrice;
     
-        $profitPerUnit = !$deliveredCount ? 0 : ($totalPriceOfDeliveredOrders - $totalCharges) /  $totalQuantityDelivered;
+        $profitPerUnit = !$totalQuantityDelivered ? 0 : ($totalPriceOfDeliveredOrders - $totalCharges) /  $totalQuantityDelivered;
 
     
         

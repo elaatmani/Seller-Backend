@@ -38,9 +38,9 @@ use App\Services\RoadRunner;
 */
 Route::get('/ads',  [AdsController::class, 'index']);
 
-Route::get('/', function () {
-    return Order::with('advertisements')->get();
-});
+// Route::get('/', function () {
+//     return Order::with('advertisements')->get();
+// });
 
 Route::get('check-sheet/{id}', [GoogleSheetController::class, 'save_orders']);
 
