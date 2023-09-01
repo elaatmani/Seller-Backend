@@ -1101,4 +1101,31 @@ class UserController extends Controller
             200
         );
     }
+
+     /**
+     * Show Online Users.
+     * @return \Illuminate\Http\Response
+     */
+    public function sellers()
+    {
+        $role = Role::where('name', 'seller')->first();
+        $sellers = $role->users->map(fn($u) =>
+            [
+                'id' => $u->id,
+                'name' => $u->firstname . ' ' . $u->lastname,
+            
+            ]
+        );
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'data' => [
+                    'sellers' => $sellers
+                ]
+            ],
+            200
+        );
+    }
 }

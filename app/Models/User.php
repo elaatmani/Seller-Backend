@@ -42,7 +42,7 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected $with = [ 'productsDelivery' ];
+    protected $with = [ 'productsDelivery'  ];
 
     /**
      * The attributes that should be cast.
@@ -94,5 +94,7 @@ class User extends Authenticatable
     public function getFullnameAttribute() {
         return $this->firstname . ' ' . $this->lastname;
     }
+
+
 
 }

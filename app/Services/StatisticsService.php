@@ -461,6 +461,7 @@ class StatisticsService
         $delivery = $request->delivery;
         $product_id = $request->product_id;
         $agente_id = $request->agente_id;
+        $user_id = $request->user_id;
         $upsell = $request->upsell;
 
         $orders
@@ -472,6 +473,7 @@ class StatisticsService
         ->when($confirmation != 'all', fn($q) => $q->where('confirmation', '=', $confirmation))
         ->when($delivery != 'all', fn($q) => $q->where('delivery', '=', $delivery))
         ->when($agente_id != 'all', fn($q) => $q->where('agente_id', '=', $agente_id))
+        ->when($user_id != 'all', fn($q) => $q->where('user_id', '=', $user_id))
         ->when($upsell != 'all', fn($q) => $q->where('upsell', '=', $upsell))
         ->when($product_id != 'all', fn($q) => $q->whereHas('items', fn($oq) => $oq->where('product_id', $product_id)));
 
