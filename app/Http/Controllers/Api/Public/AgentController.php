@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\StatisticsService;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 
@@ -86,6 +87,37 @@ class AgentController extends Controller
         try {
             DB::beginTransaction();
             $order = $this->orderRepository->update($id, $request->all());
+
+            DB::commit();
+            return [
+                'code' => 'SUCCESS',
+                'data' => [
+                    'order' => $order
+                ]
+            ];
+
+        } catch (\Throwable $th) {
+
+            // rollback transaction on error
+            DB::rollBack();
+
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+    public function create(CreateOrderRequest $request) {
+
+        try {
+            DB::beginTransaction();
+
+            $order = $this->orderRepository->create($request->all());
 
             DB::commit();
             return [

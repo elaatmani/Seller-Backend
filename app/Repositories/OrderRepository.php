@@ -161,6 +161,8 @@ class OrderRepository implements OrderRepositoryInterface {
 
         $order = Order::create([
             ...$data,
+            'sheets_id' => 'created_by:' . auth()->id(),
+            'agente_id' => auth()->id(),
             'delivery' => data_get($data, 'affectation') != null ? 'dispatch' : null
         ]);
 

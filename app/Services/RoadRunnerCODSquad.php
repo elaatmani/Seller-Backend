@@ -12,7 +12,7 @@ class RoadRunnerCODSquad
 {
 
     const NOTIFY_ROADRUNNER = true;
-    const ROADRUNNER_ID = 4;
+    const ROADRUNNER_ID = 20;
     const TEST_URL = "https://systemtunes.com/apivoldo/";
     const LIVE_URL = "https://roadrunner-lb.com/api/codsquad/";
     const TEST_MODE = false;

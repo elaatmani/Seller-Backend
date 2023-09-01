@@ -22,7 +22,7 @@ class OrderObserver
     {
         $user = request()->user();
 
-        if($user->hasRole('admin') || $user->hasRole('follow-up')) {
+        if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
             switch ($order->affectation) {
                 case RoadRunnerVoldo::ROADRUNNER_ID:
                     RoadRunnerVoldo::insert($order);
@@ -67,7 +67,7 @@ class OrderObserver
         }
 
         OrderHistoryService::observe($order);
-        if($user->hasRole('admin') || $user->hasRole('follow-up')) {
+        if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
             // throw new Exception('Error admin');
             RoadRunnerCODSquad::sync($order);
             RoadRunnerVoldo::sync($order);

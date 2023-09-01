@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Public;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
@@ -1128,7 +1129,7 @@ class OrderController extends Controller
 
                     foreach ($checkOrder as $order) {
                         $order->agente_id = $request->user()->id;
-                        $order->dropped_at = now();
+                        $order->dropped_at = Carbon::now()->format('Y-m-d H:i:s');
                         // $order->double = $firstOrder->id;
                         $order->save();
 
@@ -1140,7 +1141,7 @@ class OrderController extends Controller
                     // Continue with the original code without any modifications
 
                     $AddOrder->agente_id = $request->user()->id;
-                    $AddOrder->dropped_at = now();
+                    $AddOrder->dropped_at = Carbon::now()->format('Y-m-d H:i:s');
                     $AddOrder->save();
 
 
