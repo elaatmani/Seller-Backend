@@ -74,7 +74,8 @@ class SheetHelper {
                 $quantity = array_key_exists('Total quantity', $o) ? $o['Total quantity'] : '';
                 $sku = array_key_exists('SKU', $o) ? $o['SKU'] : '';
                 $product_name = array_key_exists('Product name', $o) ? $o['Product name'] : '';
-                
+                $source = array_key_exists('Source', $o) ? $o['Source'] : '';
+
                 if(!$sku) continue;
                 $product_exists = DB::table('products')->where('ref', $sku)->where('status',1)->exists();
 
@@ -100,7 +101,8 @@ class SheetHelper {
                 'price' => 0,
                 'sheets_id' => self::order_sheet_id($sheet, $o['Order ID']),
                 'counts_from_warehouse' => true,
-                'product_name' => $product_name
+                'product_name' => $product_name,
+                'source' => $source
             ]);
 
                 if(isset($product)) {
