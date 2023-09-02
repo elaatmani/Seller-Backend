@@ -164,12 +164,15 @@ class RoadRunnerCODSquad
 
 
     public static function formatProductString($order) {
-        $order = json_decode($order, true);
+        // $items = $order->load('items');
+        // $order = json_decode($order, true);
+        unset($order->items);
+
 
         $result = '';
 
-        if (!empty($order['items'])) {
-            foreach ($order['items'] as $item) {
+        // if (!empty($order['items'])) {
+            foreach ($order->items as $item) {
                 $productName = isset($item['product']['name']) ? $item['product']['name'] : 'Unknown Product';
                 $quantity = isset($item['quantity']) ? $item['quantity'] : 0;
                 $variationSize = isset($item['product_variation']['size']) ? $item['product_variation']['size'] : '';
@@ -179,7 +182,7 @@ class RoadRunnerCODSquad
             }
 
             $result = rtrim($result, ', '); // Remove the trailing comma and space
-        }
+        // }
 
         return $result;
     }

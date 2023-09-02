@@ -130,8 +130,7 @@ class OrderRepository implements OrderRepositoryInterface {
             DB::beginTransaction();
             $order = Order::where('id', $id)->first();
 
-            $order->update($data);
-
+            
             $items = $data['items'];
             $itemsIds = collect($items)->map(fn($i) => $i['id'])->values()->toArray();
 
@@ -146,6 +145,7 @@ class OrderRepository implements OrderRepositoryInterface {
                     $item
                 );
             }
+            $order->update($data);
             $order = $order->fresh();
             DB::commit();
             return $order;
