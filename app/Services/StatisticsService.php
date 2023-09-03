@@ -230,7 +230,7 @@ class StatisticsService
 
         $confirmations = [];
         $delivery = [];
-        $totalCount = $orders->where('confirmation', '!=', 'double')->count();
+        $totalCount = $orders->where('confirmation', '!=', null)->where('confirmation', '!=', 'double')->count();
 
         $allCount = $orders->count();
         $all = [
@@ -481,7 +481,7 @@ class StatisticsService
 
         $confirmations = [];
         $delivery = [];
-        $totalCount = $orders->where('confirmation', '!=', 'double')->count();
+        $totalCount = $orders->where('confirmation', '!=', null)->where('confirmation', '!=', 'double')->count();
 
         $allCount = $orders->count();
         $all = [
@@ -499,7 +499,7 @@ class StatisticsService
             'id' => 2,
             'title' => 'Confirmed',
             'value' => $confirmedCount,
-            'percentage' => $totalCount > 0  ? ($confirmedCount * 100) / $totalCount : 0,
+            'percentage' => $totalCount > 0  ? (($confirmedCount * 100) / $totalCount) : 0,
             // 'icon' => 'mdi-check-all',
             'icon' => 'mdi-phone-check',
             'color' => '#10b981'

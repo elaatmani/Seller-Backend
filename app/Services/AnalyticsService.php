@@ -72,7 +72,7 @@ class AnalyticsService
 
         $confirmations = [];
 
-        $totalCount = $orders->where('confirmation', '!=', 'double')->count();
+        $totalCount = $orders->where('confirmation', '!=', null)->where('confirmation', '!=', 'double')->count();
 
         $allCount = $orders->count();
         $all = [

@@ -25,7 +25,7 @@ class FactorisationService
         $newDelivery = data_get($newAttributes, 'delivery', 'Select');
 
         
-        if ($oldConfirmation == 'confirmer' &&  $oldDelivery != 'livrer') {
+        if ($oldConfirmation == 'confirmer' &&  $newDelivery == 'livrer') {
 
                 $order->cmd = 'CMD-' . date('dmY-His', strtotime($order->created_at));
                 $order->delivery_date = now();
