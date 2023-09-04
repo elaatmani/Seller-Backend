@@ -44,11 +44,14 @@ class ClientController extends Controller
             DB::beginTransaction();
 
 
-            $id = substr($request->reference_id, 3);
-            // $id = $idBefore - 2000;
-            $prefix = strtolower(substr($request->reference_id, 0, 3));
-
-            if($prefix == 'vld' && is_numeric($id)) {
+            $idold = substr($request->reference_id, 3);
+            $prefixold = strtolower(substr($request->reference_id, 0, 3));
+            
+            $id = substr($request->reference_id, 4);
+            $prefix = strtolower(substr($request->reference_id, 0, 4));
+            if($prefixold == 'vld' && is_numeric($idold)) {
+                $order = Order::where('id', (int) $idold)->first();
+            } elseif($prefix == 'CODS' && is_numeric($id)){
                 $order = Order::where('id', (int) $id)->first();
             } else {
                 $order = null;
@@ -185,17 +188,27 @@ class ClientController extends Controller
             foreach ($references as $res) {
 
                 try {
-                    $id = substr($res['reference_id'], 3);
+                    $idold = substr($res['reference_id'], 3);
 
                     // $id = $idBefore - 2000;
-                    $prefix = strtolower(substr($res['reference_id'], 0, 3));
+                    $prefixold = strtolower(substr($res['reference_id'], 0, 3));
+                    
+                    
+                     $id = substr($res['reference_id'], 4);
 
-                    if($prefix == 'vld' && is_numeric($id)) {
-                        $order = Order::where('id', (int) $id)->first();
-                    } else {
+                    // $id = $idBefore - 2000;
+                    $prefix = strtolower(substr($res['reference_id'], 0, 4));
+
+                    if($prefixold == 'vld' && is_numeric($idold)) {
+                        $order = Order::where('id', (int) $idold)->first();
+                    }elseif($prefix == 'CODS' && is_numeric($id)){
+                                    $order = Order::where('id', (int) $id)->first();
+                                } else {
                         $order = null;
                     }
-
+                    
+                  
+                                
                     $roadrunner = RoadRunnerRequest::create([
                         'reference_id' => $res['reference_id'],
                         'status' => $res['status']

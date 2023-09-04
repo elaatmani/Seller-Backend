@@ -15,7 +15,7 @@ class RoadRunnerService
     }
 
     public static function orders() {
-        return SteHelper::apiSte([ 'company' => 'Voldo', 'daterange' => '2023-07-20 2023-08-01' ], 'list/');
+        return SteHelper::apiSte([ 'company' => 'Voldo', 'daterange' => '2023-07-20 2023-09-04' ], 'list/');
     }
 
     public static function rates() {
