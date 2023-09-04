@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderHistory;
 use App\Services\FactorisationService;
 use App\Services\OrderHistoryService;
+use App\Services\OrderItemHistoryService;
 use App\Services\RoadRunnerCODSquad;
 use App\Services\RoadRunnerVoldo;
 use Exception;
@@ -66,16 +67,18 @@ class OrderObserver
             $order->followup_id = 19;
         }
 
-        OrderHistoryService::observe($order);
         if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
             // throw new Exception('Error admin');
             RoadRunnerCODSquad::sync($order);
             // RoadRunnerVoldo::sync($order);
         };
+
+        // throw new Exception('Error admin');
         
+        // OrderHistoryService::observe($order);
         FactorisationService::observe($order);
         // throw new Exception('Error admin');
-
+        
 
 
     }

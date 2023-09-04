@@ -97,7 +97,7 @@ class RoadRunnerCODSquad
         // $id = $idBefore - 2000;
         $prefix = strtolower(substr($reference_id, 0, 3));
 
-        if($prefix == 'vld' && is_numeric($id)) {
+        if($prefix == 'cod' && is_numeric($id)) {
             return $id;
         }
 
@@ -105,7 +105,7 @@ class RoadRunnerCODSquad
     }
 
     public static function encodeId($id) {
-        return "vld".$id;
+        return "cod".$id;
     }
 
     public static function cities() {

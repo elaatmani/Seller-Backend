@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\Public\OrderController;
 use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
 use App\Models\Sheet;
+use App\Services\OrderItemHistoryService;
 use App\Services\RoadRunner;
 
 /*
@@ -251,3 +252,9 @@ Route::get('add-user', function() {
 
     $user->assignRole('follow-up');
 });
+
+Route::get('/history',function(){
+    $order = Order::find(1);
+    return OrderItemHistoryService::observe($order);
+});
+
