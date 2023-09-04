@@ -112,6 +112,7 @@ class UserController extends Controller
                                 'lastname' => $user->lastname,
                                 'phone' => $user->phone,
                                 'email' => $user->email,
+                                'username'  => $user->username,
                                 'is_online' => $user->is_online,
                                 'status' => $user->status,
                                 'created_at' => $user->created_at,
@@ -177,6 +178,7 @@ class UserController extends Controller
                     'phone' => 'required',
                     'email' => 'required|email|unique:users,email',
                     'password' => 'required',
+                    'username' => 'required',
                     'status' => 'required',
                     'role' => 'required',
                 ]
@@ -199,6 +201,7 @@ class UserController extends Controller
                 'firstname' => $request->firstname,
                 'lastname' => $request->lastname,
                 'phone' => $request->phone,
+                'username' => $request->username,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'status' => $request->status,
@@ -296,6 +299,7 @@ class UserController extends Controller
                     [
                         'firstname' => 'required',
                         'lastname' => 'required',
+                        'username' => 'required',
                         'phone' => 'required',
                         'email' =>  [
                             'required',
@@ -325,6 +329,7 @@ class UserController extends Controller
                 $user->lastname = $request->lastname;
                 $user->phone = $request->phone;
                 $user->email = $request->email;
+                $user->username = $request->username;
                 if ($request->updatePassword == 'true') {
                     $user->password = Hash::make($request->password);
                 }

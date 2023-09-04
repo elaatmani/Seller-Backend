@@ -24,9 +24,9 @@ class OrderObserver
 
         if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
             switch ($order->affectation) {
-                case RoadRunnerVoldo::ROADRUNNER_ID:
-                    RoadRunnerVoldo::insert($order);
-                break;
+                // case RoadRunnerVoldo::ROADRUNNER_ID:
+                //     RoadRunnerVoldo::insert($order);
+                // break;
 
                 case RoadRunnerCODSquad::ROADRUNNER_ID:
                     RoadRunnerCODSquad::insert($order);
@@ -70,7 +70,7 @@ class OrderObserver
         if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
             // throw new Exception('Error admin');
             RoadRunnerCODSquad::sync($order);
-            RoadRunnerVoldo::sync($order);
+            // RoadRunnerVoldo::sync($order);
         };
         
         FactorisationService::observe($order);
