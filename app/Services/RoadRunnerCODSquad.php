@@ -136,7 +136,7 @@ class RoadRunnerCODSquad
             "phoneNumber" => $order->phone,
             "reference_id" => self::encodeId($order->id),
             "totalLbpPrice" => 0,
-            "totalUsdPrice" => self::getPrice($order),
+            "totalUsdPrice" => $order->price,
             "orderSize" => 5,
             "zone_id" => $city->roadrunner_zone_id,
             "address" => $order->adresse,
