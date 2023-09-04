@@ -93,11 +93,11 @@ class RoadRunnerCODSquad
     }
 
     public static function decodeId($reference_id) {
-        $id = substr($reference_id, 3);
+        $id = substr($reference_id, 4);
         // $id = $idBefore - 2000;
-        $prefix = strtolower(substr($reference_id, 0, 3));
+        $prefix = strtolower(substr($reference_id, 0, 4));
 
-        if($prefix == 'vld' && is_numeric($id)) {
+        if($prefix == 'codsquad' && is_numeric($id)) {
             return $id;
         }
 
@@ -105,7 +105,7 @@ class RoadRunnerCODSquad
     }
 
     public static function encodeId($id) {
-        return "vld".$id;
+        return "CODS".$id;
     }
 
     public static function cities() {
@@ -114,7 +114,7 @@ class RoadRunnerCODSquad
 
 
     public static function orders() {
-        return self::http('list/', [ 'company' => 'codsquad', 'daterange' => '2023/07/20 - 2023/08/01' ]);
+        return self::http('list/', [ 'company' => 'codsquad', 'daterange' => '2023/09/02 - 2023/09/05' ]);
     }
 
     public static function rates() {
@@ -123,6 +123,7 @@ class RoadRunnerCODSquad
 
     public static function insert($order)
     {
+         
         $city = City::where('name', $order->city)->first();
         if(!$city) return false;
 

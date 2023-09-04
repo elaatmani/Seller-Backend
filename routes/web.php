@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
 use App\Models\Sheet;
 use App\Services\RoadRunner;
+use App\Services\RoadRunnerCODSquad;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,7 +46,7 @@ Route::get('/ads',  [AdsController::class, 'index']);
 Route::get('check-sheet/{id}', [GoogleSheetController::class, 'save_orders']);
 
 Route::get('/road-orders', function() {
-    return RoadRunner::orders();
+    return RoadRunnerCODSquad::orders();
 });
 
 Route::get('/road', function() {
