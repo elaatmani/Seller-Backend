@@ -2,7 +2,6 @@
 
 namespace App\Observers;
 
-use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderItemHistory;
 
@@ -37,17 +36,8 @@ class OrderItemObserver
     public function updating(OrderItem $orderItem)
     {
 
-            $order = Order::find($orderItem->order_id);
-         
-            $totalPrice = $order->items->sum(function ($item) {
-                return $item->price;
-            });
 
-            // Update the total price in the order
-            $order->price = $totalPrice;
-            $order->save();
-
-  
+       
         
         OrderItemHistoryService::observe($orderItem);
        
