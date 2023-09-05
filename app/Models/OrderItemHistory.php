@@ -15,9 +15,13 @@ class OrderItemHistory extends Model
         'order_id',
         'item_id',
         'user_id',
-        'product',
-        'price',
-        'quantity',
+        
+        'old_product',
+        'new_product',
+        'old_price',
+        'new_price',
+        'old_quantity',
+        'new_quantity',
     ];
 
     public function orders(){
@@ -30,5 +34,13 @@ class OrderItemHistory extends Model
 
     public function items(){
         return $this->belongsTo(OrderItem::class,'item_id');
+    }
+
+    public function oldProduct(){
+        return $this->belongsTo(Product::class,'old_product');
+    }
+
+    public function newProduct(){
+        return $this->belongsTo(Product::class,'new_product');
     }
 }

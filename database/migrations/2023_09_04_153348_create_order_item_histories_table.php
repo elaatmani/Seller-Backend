@@ -16,19 +16,28 @@ return new class extends Migration
         Schema::create('order_item_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('order_id');
-            $table->integer('item_id');
+            $table->unsignedBigInteger('item_id');
             $table->unsignedBigInteger('user_id');
-            $table->string('product');
-            $table->string('price');
-            $table->string('quantity');
+            $table->unsignedBigInteger('old_product');
+            $table->unsignedBigInteger('new_product');
+            $table->float('old_price');
+            $table->float('new_price');
+            $table->integer('old_quantity');
+            $table->integer('new_quantity');
+
 
 
            
             $table->timestamps();
 
 
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('order_id')->references('id')->on('orders');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('item_id')->references('id')->on('order_items');
+
+            $table->foreign('old_product')->references('id')->on('products');
+            $table->foreign('new_product')->references('id')->on('products');
+        
         });
     }
 

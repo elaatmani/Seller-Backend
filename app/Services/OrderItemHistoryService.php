@@ -32,9 +32,12 @@ class OrderItemHistoryService
                     'order_id' => $orderItem->order_id,
                     'item_id' => $orderItem->id,
                     'user_id' => request()->user()->id,
-                    'product' => "$oldProduct->$newProduct",
-                    'price' => "$oldPrice->$newPrice",
-                    'quantity' => "$oldQuantity->$newQuantity",
+                    'old_product' => $oldProduct,
+                    'new_product' => $newProduct,
+                    'old_price' => $oldPrice,
+                    'new_price' => $newPrice,
+                    'old_quantity' => $oldQuantity,
+                    'new_quantity' => $newQuantity,
                 ]);
             }
   

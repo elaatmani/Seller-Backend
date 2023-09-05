@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\OrderItem;
 use Illuminate\Support\Str;
 use App\Models\OrderHistory;
+use App\Models\OrderItemHistory;
 use Illuminate\Http\Request;
 use App\Models\Factorisation;
 use App\Models\ProductAgente;
@@ -1322,6 +1323,65 @@ class OrderController extends Controller
             //     );
             // }
             $orderHistory = OrderHistory::where('order_id', $id)->with('orders', 'users')->get();
+
+            if (count($orderHistory) > 0) {
+                return response()->json(
+                    [
+                        'status' => true,
+                        'code' => 'SUCCESS',
+                        'data' => [
+                            'orders' => $orderHistory,
+                        ]
+                    ],
+                    200
+                );
+            }
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'NO_ORDER',
+                    'message' => 'ORDER_NOT_FOUND',
+                    'data' => [
+                        'orders' => [],
+                    ]
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+
+
+       /**
+     * Display delivered orders.
+     *
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function orderItemHistory(Request $request, $id)
+    {
+        try {
+            // if (!$request->user()->can('view_order')) {
+            //     return response()->json(
+            //         [
+            //             'status' => false,
+            //             'code' => 'NOT_ALLOWED',
+            //             'message' => 'You Dont Have Access To Delivery Orders',
+            //         ],
+            //         405
+            //     );
+            // }
+            $orderHistory =  OrderItemHistory::where('order_id', $id)->with('orders','oldProduct','newProduct','users')->get();
 
             if (count($orderHistory) > 0) {
                 return response()->json(
