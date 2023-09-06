@@ -7,6 +7,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderHistory;
 use Illuminate\Support\Facades\DB;
+use App\Services\RoadRunnerVoldo;
+use App\Services\RoadRunnerCODSquad;
 use App\Services\RoadRunnerService;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 
@@ -176,6 +178,24 @@ class OrderRepository implements OrderRepositoryInterface {
             ]);
         }
         $order = $order->fresh();
+        
+        $user = request()->user();
+
+        if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
+            switch ($order->affectation) {
+                case RoadRunnerVoldo::ROADRUNNER_ID:
+                    RoadRunnerVoldo::insert($order);
+                break;
+
+                case RoadRunnerCODSquad::ROADRUNNER_ID:
+                    RoadRunnerCODSquad::insert($order);
+                break;
+
+                default:
+                    # code...
+                    break;
+            }
+        };
         return $order;
     }
 

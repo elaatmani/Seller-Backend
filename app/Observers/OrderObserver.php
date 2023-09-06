@@ -21,23 +21,23 @@ class OrderObserver
      */
     public function created(Order $order)
     {
-        $user = request()->user();
+        // $user = request()->user();
 
-        if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
-            switch ($order->affectation) {
-                // case RoadRunnerVoldo::ROADRUNNER_ID:
-                //     RoadRunnerVoldo::insert($order);
-                // break;
+        // if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
+        //     switch ($order->affectation) {
+        //         // case RoadRunnerVoldo::ROADRUNNER_ID:
+        //         //     RoadRunnerVoldo::insert($order);
+        //         // break;
 
-                case RoadRunnerCODSquad::ROADRUNNER_ID:
-                    RoadRunnerCODSquad::insert($order);
-                break;
+        //         case RoadRunnerCODSquad::ROADRUNNER_ID:
+        //             RoadRunnerCODSquad::insert($order);
+        //         break;
 
-                default:
-                    # code...
-                    break;
-            }
-        };
+        //         default:
+        //             # code...
+        //             break;
+        //     }
+        // };
 
     }
 
