@@ -202,6 +202,7 @@ class AdminController extends Controller
 
         $whereHas = [
             [ 'product_id', '=', data_get($filters, 'product_id', 'all'), 'items' ]
+        
         ];
 
         $options = [

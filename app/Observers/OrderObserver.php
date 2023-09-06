@@ -64,7 +64,7 @@ class OrderObserver
         }
 
         if($newAttributes['delivery'] == 'annuler') {
-            $order->followup_id = 19;
+            $order->followup_id = 14;
         }
 
         if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
