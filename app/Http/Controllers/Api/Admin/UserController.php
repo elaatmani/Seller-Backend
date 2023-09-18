@@ -112,7 +112,7 @@ class UserController extends Controller
                                 'lastname' => $user->lastname,
                                 'phone' => $user->phone,
                                 'email' => $user->email,
-                                'username'  => $user->username,
+                                // 'username'  => $user->username,
                                 'is_online' => $user->is_online,
                                 'status' => $user->status,
                                 'created_at' => $user->created_at,
@@ -178,7 +178,7 @@ class UserController extends Controller
                     'phone' => 'required',
                     'email' => 'required|email|unique:users,email',
                     'password' => 'required',
-                    'username' => 'required',
+                    // 'username' => 'required',
                     'status' => 'required',
                     'role' => 'required',
                 ]
@@ -299,7 +299,7 @@ class UserController extends Controller
                     [
                         'firstname' => 'required',
                         'lastname' => 'required',
-                        'username' => 'required',
+                        // 'username' => 'required',
                         'phone' => 'required',
                         'email' =>  [
                             'required',

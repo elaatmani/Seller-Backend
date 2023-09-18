@@ -97,7 +97,7 @@ class RoadRunnerCODSquad
         // $id = $idBefore - 2000;
         $prefix = strtolower(substr($reference_id, 0, 4));
 
-        if($prefix == 'CODS' && is_numeric($id)) {
+        if($prefix == 'cods' && is_numeric($id)) {
             return $id;
         }
 
@@ -114,7 +114,7 @@ class RoadRunnerCODSquad
 
 
     public static function orders() {
-        return self::http('list/', [ 'company' => 'codsquad', 'daterange' => '2023/09/02 - 2023/09/05' ]);
+        return self::http('list/', [ 'company' => 'codsquad', 'daterange' => '2023/08/13 - 2023/09/15' ]);
     }
 
     public static function rates() {

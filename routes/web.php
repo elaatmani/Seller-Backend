@@ -114,7 +114,117 @@ Route::get('/inserto', function () {
 });
 
 
+Route::get('/synoldorders' , function(){
+     $statuses = [
+        'New',
+        'Picked Up',
+        'Transfer',
+        'Delay',
+        'Delivered',
+        'Canceled',
+        'Returned',
+        'Delivered & Return',
 
+    ];
+
+     $references = [
+        'New' => 'dispatch',
+        'Picked Up' => 'expidier',
+        'Transfer' => 'transfer',
+        'Delay' => 'pas-de-reponse',
+        'Delivered' => 'livrer',
+        'Canceled' => 'annuler',
+        'Returned' => 'retourner',
+        'Delivered & Return' => 'livrer-et-retourner',
+    ];
+
+    $orders = RoadRunnerCODSquad::orders()['response'];
+   
+    $success = [];
+    $failed = [];
+
+    foreach($orders as $res){
+       
+        try {
+
+            $id = substr($res['reference_id'], 4);
+
+           
+            $prefix = strtolower(substr($res['reference_id'], 0, 4));
+            
+           
+               
+             if($prefix == 'cods' && is_numeric($id)) {
+                $order = Order::where('id', (int) $id)->first();
+            } else {
+                $order = null;
+            }
+
+            $roadrunner = RoadRunnerRequest::create([
+                'reference_id' => $res['reference_id'],
+                'status' => $res['status']
+            ]);
+
+            if (!$order) {
+                $roadrunner->success = false;
+                $roadrunner->message = "Order not found";
+                $roadrunner->save();
+
+                $failed[] = [
+                    'reference_id' => $res['reference_id'],
+                    'error' => 'Order not found'
+                ];
+                continue;
+            }
+
+
+            $roadrunner->success = true;
+            $roadrunner->message = "Order delivery status has changed to '" . $res['status'] . "'.";
+
+            if (!in_array($res['status'], $statuses)) {
+                $newStatus = $order->delivery;
+                $roadrunner->message = "The state '" . $res['status'] . "' was not found. order delivery stays in '" . $order->delivery . "'.";
+
+                $failed[] = [
+                    'reference_id' => $res['reference_id'],
+                    'error' => "'Status not found: '" . $res['status'] . "'"
+                ];
+                continue;
+
+            } else {
+                $newStatus = $references[$res['status']];
+
+            }
+
+            $roadrunner->save();
+
+            $order->delivery = $newStatus;
+ 
+            $order->save();
+
+            $success[] = $res['reference_id'];
+
+        } catch (\Throwable $th) {
+            $failed[] = [
+                'reference_id' => $res['reference_id'],
+                'error' => $th->getMessage()
+            ];
+            continue;
+        }
+    }
+
+
+
+    DB::commit();
+
+    return response()->json([
+        'code' => 'SUCCESS',
+        'success' => $success,
+        'failed' => $failed,
+    ]);
+
+            
+});
 Route::get('/citi' , function(){
     $data = array(
         'company' => 'Voldo',
@@ -234,26 +344,13 @@ Route::get('/citi' , function(){
 // });
 
 
-Route::get('add-user', function() {
-    $role = Role::create([
-        'name' => 'follow-up'
-    ]);
+Route::get('get-token', function() {
+    $abilities = ["delivery:update"];
+    $user = User::where('id', 4)->first();
+    $token = $user->createToken('API', $abilities)->plainTextToken;
 
-    $permission = Permission::create(['name' => 'follow_up_orders']);
-    $role->givePermissionTo($permission);
-
-    $user = User::create([
-        'firstname' => 'followup',
-        'lastname' => 'followup',
-        'email' => 'followup@gmail.com',
-        'phone' => '12345678',
-        'password' => Hash::make('followup'),
-        'status' => 1
-    ]);
-
-    $user->assignRole('follow-up');
+    return response()->json(['user' => $user, 'token' => $token]);
 });
-
 Route::get('/history',function(){
     $order = Order::find(1);
     return OrderItemHistoryService::observe($order);

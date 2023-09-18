@@ -75,7 +75,7 @@ class OrderObserver
 
         // throw new Exception('Error admin');
         
-        // OrderHistoryService::observe($order);
+        OrderHistoryService::observe($order);
         FactorisationService::observe($order);
         // throw new Exception('Error admin');
         

@@ -49,9 +49,7 @@ class ClientController extends Controller
             
             $id = substr($request->reference_id, 4);
             $prefix = strtolower(substr($request->reference_id, 0, 4));
-            if($prefixold == 'vld' && is_numeric($idold)) {
-                $order = Order::where('id', (int) $idold)->first();
-            } elseif($prefix == 'CODS' && is_numeric($id)){
+            if($prefix == 'cods' && is_numeric($id)){
                 $order = Order::where('id', (int) $id)->first();
             } else {
                 $order = null;
@@ -199,9 +197,7 @@ class ClientController extends Controller
                     // $id = $idBefore - 2000;
                     $prefix = strtolower(substr($res['reference_id'], 0, 4));
 
-                    if($prefixold == 'vld' && is_numeric($idold)) {
-                        $order = Order::where('id', (int) $idold)->first();
-                    }elseif($prefix == 'CODS' && is_numeric($id)){
+                   if($prefix == 'cods' && is_numeric($id)){
                                     $order = Order::where('id', (int) $id)->first();
                                 } else {
                         $order = null;

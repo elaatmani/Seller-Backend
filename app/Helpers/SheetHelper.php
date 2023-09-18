@@ -27,9 +27,21 @@ class SheetHelper {
         try {
             $sheet_id = $sheet->sheet_id;
             $sheet_name = $sheet->sheet_name;
+            
 
             $data = Sheets::spreadsheet($sheet_id)->sheet($sheet_name)->get();
             $headers = $data->pull(0);
+            // if($sheet->id == 3) {
+            //     $k = 0;
+            //     try {
+            //         foreach($data as $i) {
+            //             $k += 1;
+            //             array_combine($headers, $i);
+            //         }
+            //     } catch (\Error $e) {
+            //         throw new Exception($k);
+            //     }
+            // }
             $values = Sheets::collection($headers, $data);
             $rows = array_values($values->toArray());
             $sheets_ids = array_map(fn($r) => self::order_sheet_id($sheet, $r['Order ID']), $rows);
@@ -47,7 +59,7 @@ class SheetHelper {
             return array_values($newRows);
         } catch (\Throwable $th) {
             $message = json_decode($th->getMessage(), true);
-
+            
             if(isset($message['error']) && $message['error']['status'] == 'PERMISSION_DENIED') {
                 throw new Exception('PERMISSION_DENIED');
             } else {

@@ -37,9 +37,12 @@ class OrderRepository implements OrderRepositoryInterface {
     public function all($options = []) {
         $query = Order::query();
 
-        foreach(data_get($options, 'orWhere', []) as $w) {
-            $query->orWhere($w[0], $w[1], $w[2]);
-        }
+        $query->where(function($q) use($options){
+            
+            foreach(data_get($options, 'orWhere', []) as $w) {
+                    $q->orWhere($w[0], $w[1], $w[2]);
+            }    
+        });
 
         foreach(data_get($options, 'whereDate', []) as $wd) {
             if(!$wd[2]) continue;

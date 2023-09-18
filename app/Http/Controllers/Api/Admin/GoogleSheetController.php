@@ -201,6 +201,9 @@ class GoogleSheetController extends Controller
                 [
                     'status' => false,
                     'message' => $th->getMessage(),
+                    'line' => $th->getLine(),
+                    'file' => $th->getFile(),
+                    'trace' => $th->getTrace(), 
                     'code' => 'SERVER_ERROR'
                 ],
                 500
