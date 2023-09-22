@@ -45,7 +45,7 @@ class Product extends Model
         'image'
     ];
 
-    protected $with = [ 'deliveries', 'offers' ];
+    protected $with = [ 'seller_user','deliveries', 'offers' ];
 
     public function variations(){
         return $this->hasMany('App\Models\ProductVariation');
@@ -77,10 +77,16 @@ class Product extends Model
             'id' => $this->id,
             'name' => $this->name,
             'ref' => $this->ref,
+            'video' => $this->link_video,
+            'store' => $this->link_store,
             'variations' => $this->variations->map->formatForOrder(),
             'image' => $this->image,
             'available_with' => $this->deliveries->map(fn($d) => $d->delivery_id),
             'offers' => $this->offers
         ];
+    }
+
+    public function seller_user() {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }
