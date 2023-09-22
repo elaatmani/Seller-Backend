@@ -84,27 +84,35 @@ class FactorisationService
 
             }
             
-            if ($order->factorisation_id && $order->seller_factorisation_id) {
+            if ($order->factorisation_id) {
                 if ($newDelivery != 'livrer') {
                     $order->delivery_date = null;
                     $oldFactorisation = Factorisation::find($order->factorisation_id);
-                    $oldSellerFactorisation = Factorisation::find($order->seller_factorisation_id);
-                    if ($oldSellerFactorisation && $oldFactorisation) {
+                    if ($oldFactorisation) {
                         $oldFactorisation->price -= RoadRunnerService::getPrice($order);
                         $oldFactorisation->commands_number -= 1;
                         $oldFactorisation->save();
-
-                        $oldSellerFactorisation->price -= RoadRunnerService::getPrice($order);
-                        $oldSellerFactorisation->commands_number -= 1;
-                        $oldSellerFactorisation->save();
                         if ($oldFactorisation->commands_number == 0 ) {
                             $oldFactorisation->delete();
                         }
+                    }
+                    $order->factorisation_id = null;
+                };
+            };
+            
+            if ($order->seller_factorisation_id) {
+                if ($newDelivery != 'livrer') {
+                    $order->delivery_date = null;
+                    $oldSellerFactorisation = Factorisation::find($order->seller_factorisation_id);
+                    if ($oldSellerFactorisation){
+                        $oldSellerFactorisation->price -= RoadRunnerService::getPrice($order);
+                        $oldSellerFactorisation->commands_number -= 1;
+                        $oldSellerFactorisation->save();
+                        
                         if ($oldSellerFactorisation->commands_number == 0 ) {
                             $oldSellerFactorisation->delete();
                         }
                     }
-                    $order->factorisation_id = null;
                     $order->seller_factorisation_id = null;
                 };
             };

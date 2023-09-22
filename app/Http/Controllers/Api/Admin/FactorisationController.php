@@ -554,11 +554,15 @@ class FactorisationController extends Controller
 
         $salesDelivery = Order::with('items', 'items.product')
             ->where('factorisation_id', $factorisation->id)
+            ->where('confirmation' , 'confirmer')
+            ->where('delivery' , 'livrer')
             ->get();
 
 
         $salesSeller = Order::with('delivery_user', 'delivery_user.deliveryPlaces', 'delivery_user.deliveryPlaces.city', 'items', 'items.product')
             ->where('seller_factorisation_id', $factorisation->id)
+            ->where('confirmation' , 'confirmer')
+            ->where('delivery' , 'livrer')
             ->get();
 
         // dd($salesSeller);
@@ -575,7 +579,6 @@ class FactorisationController extends Controller
         if ($factorisation->type == "delivery") {
             $pdf = PDF::loadView('factorisationpdf', compact('factorisation', 'salesDelivery'));
         } else {
-
             $pdf = PDF::loadView('factorisationsellerpdf', compact('factorisation', 'salesSeller'));
         }
 

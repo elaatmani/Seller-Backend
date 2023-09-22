@@ -4,7 +4,7 @@ function salePrice($sale)
 return App\Services\RoadRunnerService::getPrice($sale);
 }
 $totalPrice = 0;
-
+$i = 1;
 
 $shippingFees = 0;
 $totalCOD = 0;
@@ -187,7 +187,7 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
         <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">Seller Fullname: <span class="gray-color">{{ucfirst($factorisation->seller->firstname)}} {{ucfirst($factorisation->seller->lastname)}} </span></p>
         <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">Country: <span class="gray-color">Lebnon</span></p>
         <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">Date Payment: <span class="gray-color">[{{$factorisationLastWeek}} , {{ $factorisation->close_at }}]</span></p>
-        <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">NB Orders: <span class="gray-color">{{ $factorisation->commands_number }}</span></p>
+        <p class="m-0 pt-5 text-bold w-100" style="font-size:small;">NB Orders: <span class="gray-color">{{ count($salesSeller) }}</span></p>
       </div>
     </div>
 
@@ -197,12 +197,13 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
   <div class="table-section bill-tbl w-100 mt-10">
     <table class="table w-100 mt-10">
       <tr>
-        <th class="w-100" style="font-size:medium;" colspan="7">Orders</th>
+        <th class="w-100" style="font-size:medium;" colspan="8">Orders</th>
       </tr>
       <tr>
+        <th class="w-20" style="color:#4b5563;">#</th>
         <th class="w-50" style="color:#4b5563;">Order ID</th>
         <th class="w-50" style="color:#4b5563;">Product Name</th>
-        <th class="w-50" style="color:#4b5563;">Quantity</th>
+        <th class="w-25" style="color:#4b5563;">Quantity</th>
         <th class="w-50" style="color:#4b5563;">CRBT</th>
         <th class="w-50" style="color:#4b5563;">Shipping Fees</th>
         <th class="w-50" style="color:#4b5563;">COD Fees</th>
@@ -210,7 +211,8 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
       </tr>
       @foreach ($salesSeller as $sale)
       <tr align="center">
-        <td>{{ substr($sale->sheets_id, strrpos($sale->sheets_id, '***') + 3) }}</td>
+         <td>{{ $i++ }}</td>
+        <td>{{ auth()->user()->hasRole('seller') ? substr($sale->sheets_id, strrpos($sale->sheets_id, '***') + 3) : $sale->id }}</td>
         <td class="arabic-font">{{ translateProductNameToArabic($sale->product_name) }}</td>
         <td>{{ implode(", ", $sale->items->pluck("quantity")->toArray()) }}</td>
         <td>{{ salePrice($sale) }}$</td>
@@ -220,7 +222,7 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
       </tr>
       @endforeach
       <tr>
-        <td colspan="7">
+        <td colspan="8">
           <div class="total-part">
             <table class="table w-20 mt-10" style="margin-left:auto">
               <tr>
