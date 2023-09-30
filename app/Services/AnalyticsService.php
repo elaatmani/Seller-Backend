@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Ads;
 use App\Models\OrderHistory;
 use Illuminate\Support\Facades\DB;
@@ -29,52 +30,57 @@ class AnalyticsService
         'double' =>'Double',
         'reconfirmer' => 'Reconfirmed'
     ];
-
-
-
-    public static function admin($request) {
+    
+    public static function orders($request) {
         $orders = Order::query();
-        $ads = Ads::query();
-
+        
         $created_from = $request->created_from;
         $created_to = $request->created_to;
         $product_id = $request->product_id;
         $user_id = $request->user_id;
         
-        
-
-        $orders->with(['advertisements' => function ($query) use ($created_from, $created_to) {
-            if ($created_from) {
-                $query->whereDate('ads_at', '>=', $created_from);
-            }
-            
-            if ($created_to) {
-                $query->whereDate('ads_at', '<=', $created_to);
-            }
-        },'delivery_user','delivery_user.deliveryPlaces','delivery_user.deliveryPlaces.city'])
-        ->when(!!$created_from, fn($q) => $q->whereDate('created_at', '>=', $created_from))
+        $orders = $orders->when(!!$created_from, fn($q) => $q->whereDate('created_at', '>=', $created_from))
         ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to))
         ->when($product_id != 'all', fn($q) => $q->whereHas('items', fn($oq) => $oq->where('product_id', $product_id)))
         ->when($user_id != 'all' , fn($q) => $q->where('user_id',$user_id));
-
+        return $orders;
+    }
+    
+    public static function ads($request) {
+        $ads = Ads::query();
         
+        $created_from = $request->created_from;
+        $created_to = $request->created_to;
+        $product_id = $request->product_id;
+        $user_id = $request->user_id;
         
-        $ads =  $ads->with('orders','orders.items')->when(!!$created_from, fn($q) => $q->whereDate('ads_at', '>=', $created_from))
+        $ads = $ads
+        ->when(!!$created_from, fn($q) => $q->whereDate('ads_at', '>=', $created_from))
         ->when(!!$created_to, fn($q) => $q->whereDate('ads_at', '<=', $created_to))
         ->when($product_id != 'all', fn($q) => $q->where('product_id', $product_id));
-       
+        return $ads;
+    }
 
 
 
-       
-        $orders = $orders->get();
-        $ads = $ads->get();
+    public static function admin($request) {
+        // $orders = Order::query();
+        $ads = Ads::query();
 
+        // $created_from = $request->created_from;
+        // $created_to = $request->created_to;
+        // $product_id = $request->product_id;
+        // $user_id = $request->user_id;
+        
+        // $orders = $orders->when(!!$created_from, fn($q) => $q->whereDate('created_at', '>=', $created_from))
+        // ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to))
+        // ->when($product_id != 'all', fn($q) => $q->whereHas('items', fn($oq) => $oq->where('product_id', $product_id)))
+        // ->when($user_id != 'all' , fn($q) => $q->where('user_id',$user_id));
+        
         $confirmations = [];
-
-        $totalCount = $orders->where('confirmation', '!=', null)->where('confirmation', '!=', 'double')->count();
-
-        $allCount = $orders->count();
+        
+        
+        $allCount = self::orders($request)->count();
         $all = [
             'id' => 1,
             'title' => 'Total',
@@ -83,9 +89,10 @@ class AnalyticsService
             'color' => '#6b7280'
         ];
         $confirmations[] = $all;
-
-
-        $confirmedCount = $orders->where('confirmation', 'confirmer')->count();
+        
+        
+        $confirmedCount = self::orders($request)->where('confirmation', 'confirmer')->count();
+        $totalCount = self::orders($request)->where('confirmation', '!=', 'double')->where('confirmation', '!=', null)->count();
         $confirmed = [
             'id' => 2,
             'title' => 'Confirmed',
@@ -95,24 +102,22 @@ class AnalyticsService
             'color' => '#10b981'
         ];
         $confirmations[] = $confirmed;
-
-
-        $deliveryOrders = $orders->where('confirmation', 'confirmer');
-        $deliveredCount = $deliveryOrders->where('delivery', 'livrer')->count();
+        
+        
+        $deliveryOrders = self::orders($request)->where('confirmation', 'confirmer')->count();
+        $deliveredCount = self::orders($request)->where('confirmation', 'confirmer')->where('delivery', 'livrer')->count();
         $delivered = [
             'id' => 3,
             'title' => 'Delivered',
             'value' => $deliveredCount,
-            'percentage' => $deliveryOrders->count() > 0  ? ($deliveredCount * 100) / $deliveryOrders->count() : 0,
+            'percentage' => $deliveryOrders > 0  ? ($deliveredCount * 100) / $deliveryOrders : 0,
             'icon' => 'mdi-truck-check',
             'color' => '#10b981'
         ];
         $confirmations[] = $delivered;
-
         
         
-
-        $totalSpendPrice = $ads->sum('amount');
+        $totalSpendPrice = self::ads($request)->sum('amount');
         
         $totalSpend = [
             'id' => 4,
@@ -122,125 +127,99 @@ class AnalyticsService
             'color' => '#ef4444'
         ];
         $confirmations[] = $totalSpend;
-
-
-
-        $costPerLead = !$totalCount ? 0 : $ads->sum('amount') /  $totalCount;
+        
+        
+        $costPerLead = !$totalCount ? 0 : $totalSpendPrice /  $totalCount;
         
         $totalSpend = [
-            'id' => 4,
+            'id' => 5,
             'title' => 'Cost per lead',
             'value' => number_format($costPerLead,2),
             'icon' => 'mdi-account',
             'color' => '#f97316'
         ];
         $confirmations[] = $totalSpend;
-
-
-
-        $costPerDelivred = !$confirmedCount ? 0 : $ads->sum('amount') / $confirmedCount;
+        
+        
+        $costPerDelivred = !$deliveredCount ? 0 : $totalSpendPrice / $deliveredCount;
         
         $totalSpend = [
-            'id' => 4,
+            'id' => 6,
             'title' => 'Cost per delivered',
             'value' => number_format($costPerDelivred,2),
             'icon' => 'mdi-truck-delivery-outline',
             'color' => '#f97316'
         ];
         $confirmations[] = $totalSpend;
-
-
-
-
-        $deliveredOrders = $deliveryOrders->where('delivery', 'livrer');
-        $totalPriceOfDeliveredOrders = $deliveredOrders->sum(function ($order) {
-            return self::getPrice($order);
-        });
         
-        $totalSpend = [
-            'id' => 4,
+        
+        
+        $orderIds = self::orders($request)->whereNotIn('confirmation', ['double', 'annuler'])->where([['confirmation', 'confirmer'], ['delivery', 'livrer']])->get()->pluck('id')->values()->toArray();
+        $ordersTotalRevenue = self::orders($request)->where([['confirmation', 'confirmer'], ['delivery', 'livrer']])->sum('price');
+        $orderItemsTotalRevenue = OrderItem::whereIn('order_id', $orderIds)->sum('price');
+        $revenueValue = round($ordersTotalRevenue + $orderItemsTotalRevenue, 2);
+        
+        $revenue = [
+            'id' => 10,
             'title' => 'turnover',
-            'value' => number_format($totalPriceOfDeliveredOrders,2),
+            'value' => $revenueValue,
             'icon' => 'mdi-cash-marker',
             'color' => '#15803d'
         ];
-        $confirmations[] = $totalSpend;
-
-
-
+        $confirmations[] = $revenue;
         
-        $deliveredOrders = $deliveryOrders->where('delivery', 'livrer');
-        $averageOrderValue = !$deliveredCount ? 0 : $totalPriceOfDeliveredOrders / $deliveredCount ;
         
+        $averageOrderValue = !$deliveredCount ? 0 : $revenueValue / $deliveredCount ;
         $totalSpend = [
-            'id' => 4,
+            'id' => 7,
             'title' => 'Aov',
             'value' => number_format($averageOrderValue ,2),
             'icon' => 'mdi-currency-usd-off',
             'color' => '#f87171'
         ];
         $confirmations[] = $totalSpend;
+        
+        $totalPriceOfBuyingOrders = self::orders($request)->where([['confirmation', 'confirmer'], ['delivery', 'livrer']])
+        ->select(DB::raw('(SELECT SUM(buying_price) FROM order_items JOIN products ON order_items.product_id = products.id WHERE order_items.order_id = orders.id) as buying'))
+        ->get()->sum('buying');
+        
 
-
-
-
-
-        $deliveredOrders = $deliveryOrders->where('delivery', 'livrer');
-
-
-        $totalPriceOfBuyingOrders = $deliveredOrders->sum(function ($order) {
-            return self::getBuyingPrice($order);
-        });
-
-
-        $totalPriceOfDeliveryOrders = $deliveredOrders->sum(function ($order) {
-            return self::findDeliveryFeeForOrder($order);
-        });
+        $totalPriceOfDeliveryOrders = self::orders($request)->where([['confirmation', 'confirmer'], ['delivery', 'livrer']])
+        ->select(DB::raw('(SELECT fee FROM cities JOIN delivery_places ON cities.id = delivery_places.city_id WHERE cities.name = orders.city AND delivery_places.delivery_id = orders.affectation) as delivery_fee'))
+        ->get()->sum('delivery_fee');
 
         $totalCharges = $totalPriceOfBuyingOrders + $totalPriceOfDeliveryOrders + $totalSpendPrice;
     
-        $profitPerOrder = !$deliveredCount ? 0 : ($totalPriceOfDeliveredOrders - $totalCharges) /  $deliveredCount;
+        $profitPerOrder = !$deliveredCount ? 0 : ($revenueValue - $totalCharges) /  $deliveredCount;
         
         $totalSpend = [
-            'id' => 4,
+            'id' => 8,
             'title' => 'Profit per order',
             'value' => number_format($profitPerOrder,2),
             'icon' => 'mdi-package-variant-closed',
             'color' => '#16a34a'
         ];
         $confirmations[] = $totalSpend;
-
-        
-
         
         
-        $totalQuantityDelivered = $deliveredOrders->sum(function ($order) {
-            return self::getQuantity($order);
-        });
-        $totalCharges = $totalPriceOfBuyingOrders + $totalPriceOfDeliveryOrders + $totalSpendPrice;
+        
+        $totalQuantityDelivered = self::orders($request)->where([['confirmation', 'confirmer'], ['delivery', 'livrer']])
+        ->select(DB::raw('(SELECT SUM(quantity) FROM order_items  WHERE order_items.order_id = orders.id) as total_quantity'))
+        ->get()->sum('total_quantity');
     
-        $profitPerUnit = !$totalQuantityDelivered ? 0 : ($totalPriceOfDeliveredOrders - $totalCharges) /  $totalQuantityDelivered;
-
-    
-        
+        $profitPerUnit = !$totalQuantityDelivered ? 0 : ($revenueValue - $totalCharges) /  $totalQuantityDelivered;
 
         $totalSpend = [
-            'id' => 4,
+            'id' => 9,
             'title' => 'Profit per unit',
             'value' => number_format( $profitPerUnit , 2),
             'icon' => 'mdi-currency-usd',
             'color' => '#16a34a'
         ];
         $confirmations[] = $totalSpend;
-
-
-      
-
-        $analytics = [
-            'analytics' => $confirmations,
-        ];
-
-        return $analytics;
+        
+        
+        return [ 'analytics' => $confirmations ];
     }
 
 
