@@ -13,6 +13,7 @@ class Ads extends Model
         'product_id',
         'source',
         'amount',
+        'marketer_id',
         'ads_at'
     ];
 
@@ -20,10 +21,11 @@ class Ads extends Model
         'product_id' => 'integer',
         'source' => 'string',
         'amount' => 'float',
+        'marketer_id' => 'integer',
         'ads_at' => 'date'
     ];
 
-    protected $with = ['products'];
+    protected $with = ['products','marketers'];
 
     public function orders(){
         return $this->belongsTo(Order::class,'source', 'source');
@@ -32,5 +34,8 @@ class Ads extends Model
     public function products(){
         return $this->belongsTo(Product::class,'product_id');
     }
-  
+    
+    public function marketers(){
+        return $this->belongsTo(User::class,'marketer_id');
+    }
 }

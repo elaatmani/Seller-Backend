@@ -238,8 +238,8 @@ class AdsController extends Controller
         ];
 
 
-        $filtersDate = Arr::only($filters, ['created_from', 'created_to']);
-        $validatedFilters = Arr::only($filters, []);
+        $filtersDate = Arr::only($filters, ['created_from', 'created_to','ads_from','ads_to']);
+        $validatedFilters = Arr::only($filters, ['source','marketer_id','product_id']);
 
         $toFilter = [];
         if(is_array($validatedFilters)){
@@ -252,20 +252,15 @@ class AdsController extends Controller
         $whereDate = [
             ['created_at', '>=', data_get($filtersDate, 'created_from', null)],
             ['created_at', '<=', data_get($filtersDate, 'created_to', null)],
-            ['ads_at', '>=', data_get($filtersDate, 'dropped_from', null)],
-            ['ads_at', '<=', data_get($filtersDate, 'dropped_to', null)],
-
+            ['ads_at', '>=', data_get($filtersDate, 'ads_from', null)],
+            ['ads_at', '<=', data_get($filtersDate, 'ads_to', null)],
         ];
 
-        $whereHas = [
-            [ 'product_id', '=', data_get($filters, 'product_id', 'all'), 'items' ]
-        ];
 
         $options = [
             'whereDate' => $whereDate,
             'where' => $toFilter,
             'orWhere' => $orWhere,
-            'whereHas' => $whereHas
         ];
 
         return $options;

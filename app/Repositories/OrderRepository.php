@@ -63,7 +63,6 @@ class OrderRepository implements OrderRepositoryInterface {
         }
 
         foreach(data_get($options, 'whereHas', []) as $w) {
-
             $query->when($w[2] != 'all', fn($q) => $q->whereHas($w[3], fn($oq) => $oq->where($w[0], $w[1], $w[2])));
         }
 

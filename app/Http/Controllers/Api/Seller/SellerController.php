@@ -11,6 +11,7 @@ use App\Http\Requests\UpdateOrderRequest;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use Exception;
 
 class SellerController extends Controller
 {
@@ -39,56 +40,13 @@ class SellerController extends Controller
         $sortBy = $request->input('sort_by');
         $sortOrder = $request->input('sort_order');
         $perPage = $request->input('per_page');
-        $filters = $request->input('filters');
-        $search = $request->input('search');
-        // $confirmation = $request->input('confirmation');
-
-        $orWhere = !$search ? [] : [
-            ['id', 'LIKE', "%$search%"],
-            ['fullname', 'LIKE', "%$search%"],
-            ['phone', 'LIKE', "%$search%"],
-            ['adresse', 'LIKE', "%$search%"],
-            ['city', 'LIKE', "%$search%"],
-            ['note', 'LIKE', "%$search%"],
-        ];
-
-
-        $filtersDate = Arr::only($filters, ['created_from', 'created_to', 'dropped_from', 'dropped_to']);
-        $filters = Arr::only($filters, ['confirmation', 'delivery', 'affectation', 'agente_id', 'upsell']);
-
-        $toFilter = [];
-        if(is_array($filters)){
-            foreach($filters as $f => $v) {
-                if($v == 'all') continue;
-                $toFilter[] = [$f, '=', $v];
-            }
-        }
-
-        $toFilter[] = ['user_id', '=' , auth()->id()];
-
-        $whereDate = [
-            ['created_at', '>=', $filtersDate['created_from']],
-            ['created_at', '<=', $filtersDate['created_to']],
-            ['dropped_at', '>=', $filtersDate['dropped_from']],
-            ['dropped_at', '<=', $filtersDate['dropped_to']],
-
-        ];
-
-      
-        // if(!!$filtersDate['created_from']) $whereDate[] = ['created_at', '>=', Carbon::make($filtersDate['created_from'])->toDate()];
-        // if(!!$filtersDate['created_to']) $whereDate[] = ['created_at', '<=', Carbon::make($filtersDate['created_to'])->toDate()];
-        // if(!!$filtersDate['dropped_from']) $whereDate[] = ['dropped_at', '>=', Carbon::make($filtersDate['dropped_from'])->toDate()];
-        // if(!!$filtersDate['dropped_to']) $whereDate[] = ['dropped_at', '<=', Carbon::make($filtersDate['dropped_to'])->toDate()];
-
-        $options = [
-            'whereDate' => $whereDate,
-            'where' => $toFilter,
-            'orWhere' => $orWhere,
-        ];
-
+        
+        $options = $this->get_options($request);
+        
         $orders = $this->orderRepository->paginate($perPage, $sortBy, $sortOrder, $options);
         $statistics = $this->orderRepository->sellerStatistics(auth()->id());
 
+        
         return response()->json([
             'code' => 'SUCCESS',
             'data' => [
@@ -128,5 +86,55 @@ class SellerController extends Controller
                 500
             );
         }
+    }
+
+    public function get_options($request) {
+        $filters = $request->input('filters', []);
+        $search = $request->input('search', '');
+        
+        $orWhere = !$search ? [] : [
+            ['id', 'LIKE', "%$search%"],
+            ['fullname', 'LIKE', "%$search%"],
+            ['phone', 'LIKE', "%$search%"],
+            ['adresse', 'LIKE', "%$search%"],
+            ['city', 'LIKE', "%$search%"],
+            ['note', 'LIKE', "%$search%"],
+        ];
+
+
+        $filtersDate = Arr::only($filters, ['created_from', 'created_to', 'dropped_from', 'dropped_to']);
+        $validatedFilters = Arr::only($filters, ['confirmation', 'delivery', 'upsell']);
+
+        $toFilter = [];
+        if(is_array($validatedFilters)){
+            foreach($validatedFilters as $f => $v) {
+                if($v == 'all') continue;
+                $toFilter[] = [$f, '=', $v];
+            }
+        }
+
+        $toFilter[] = ['user_id', '=' , auth()->id()];
+
+        $whereDate = [
+            ['created_at', '>=', $filtersDate['created_from']],
+            ['created_at', '<=', $filtersDate['created_to']],
+            ['dropped_at', '>=', $filtersDate['dropped_from']],
+            ['dropped_at', '<=', $filtersDate['dropped_to']],
+
+        ];
+
+        $whereHas = [
+            [ 'product_id', '=', data_get($filters, 'product_id', 'all'), 'items' ]
+        ];
+
+        $options = [
+            'whereDate' => $whereDate,
+            'where' => $toFilter,
+            'orWhere' => $orWhere,
+            'whereHas' => $whereHas
+        ];
+
+        
+        return $options;
     }
 }
