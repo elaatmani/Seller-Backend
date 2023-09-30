@@ -17,7 +17,7 @@ class FactorisationFee extends Model
     protected $casts =  [
         'factorisation_id' => 'integer',
         'feename' => 'string',
-        'feeprice' => 'integer'
+        'feeprice' => 'float'
     ];
 
 }

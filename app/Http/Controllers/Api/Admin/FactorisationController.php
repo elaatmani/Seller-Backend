@@ -435,12 +435,18 @@ class FactorisationController extends Controller
 
             $factorisation = Factorisation::find($id);
 
-            if ($factorisation) {
+             if ($factorisation) {
                 $factorisation->paid = $request->paid;
                 if ($request->paid == true) {
                     $factorisation->paid_at = now();
+                    if ($factorisation->type == "seller") {
+                        Order::where('seller_factorisation_id', $id)->update(['delivery' => 'paid']);
+                    }
                 } else {
                     $factorisation->paid_at = null;
+                    if ($factorisation->type == "seller") {
+                        Order::where('seller_factorisation_id', $id)->update(['delivery' => 'livrer']);
+                    }
                 }
                 $factorisation->save();
             }
