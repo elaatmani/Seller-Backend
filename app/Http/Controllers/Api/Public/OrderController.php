@@ -1121,6 +1121,7 @@ class OrderController extends Controller
                     ->where('phone', $AddOrder->phone)
                     ->where('city', $AddOrder->city)
                     ->where('product_name', $AddOrder->product_name)
+                    ->where('user_id' , $AddOrder->user_id)
                     ->whereNull('agente_id')
                     ->get();
 
