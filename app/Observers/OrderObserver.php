@@ -73,8 +73,15 @@ class OrderObserver
             // RoadRunnerVoldo::sync($order);
         };
 
-        // throw new Exception('Error admin');
-        
+        // $oldTotalQuantity = $order->items->sum('quantity');
+        // $upsell = $order->upsell;
+        // unset($order->items);
+        // $newTotalQuantity = $order->items->sum('quantity');
+     
+        // if ($newTotalQuantity <= $oldTotalQuantity && $upsell != "oui") {
+        //     $order->upsell = null; // Set 'upsell' to null if quantity decreased
+        // }
+
         OrderHistoryService::observe($order);
         FactorisationService::observe($order);
         // throw new Exception('Error admin');
