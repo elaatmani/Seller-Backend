@@ -11,6 +11,7 @@ use App\Services\RoadRunnerVoldo;
 use App\Services\RoadRunnerCODSquad;
 use App\Services\RoadRunnerService;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
+use Exception;
 
 class OrderRepository implements OrderRepositoryInterface {
 
@@ -31,7 +32,9 @@ class OrderRepository implements OrderRepositoryInterface {
         'wrong-number' =>'Wrong number',
         'confirmer' =>'Confirmed',
         'double' =>'Double',
-        'reconfirmer' => 'Reconfirmed'
+        'reconfirmer' => 'Reconfirmed',
+        'change' => 'Change',
+        'refund' => 'Refund'
     ];
 
     public function all($options = []) {
@@ -163,11 +166,12 @@ class OrderRepository implements OrderRepositoryInterface {
 
     public function create($data) {
 
+       
         $order = Order::create([
             ...$data,
             'sheets_id' => 'created_by:' . auth()->id(),
             'price' => 0,
-            'user_id' => auth()->id(),
+            'user_id' => $data['items'][0]['product']['user_id'],
             'agente_id' => auth()->id(),
             'delivery' => data_get($data, 'affectation') != null ? 'dispatch' : null
         ]);

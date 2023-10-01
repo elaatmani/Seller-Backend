@@ -76,6 +76,7 @@ class Product extends Model
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'user_id' => $this->user_id,
             'ref' => $this->ref,
             'video' => $this->link_video,
             'store' => $this->link_store,
