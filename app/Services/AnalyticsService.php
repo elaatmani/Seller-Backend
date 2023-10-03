@@ -105,7 +105,7 @@ class AnalyticsService
         
         
         $deliveryOrders = self::orders($request)->where('confirmation', 'confirmer')->count();
-        $deliveredCount = self::orders($request)->where('confirmation', 'confirmer')->where('delivery', 'livrer')->count();
+        $deliveredCount = self::orders($request)->where('confirmation', 'confirmer')->whereIn('delivery', ['livrer', 'paid'])->count();
         $delivered = [
             'id' => 3,
             'title' => 'Delivered',
@@ -154,8 +154,8 @@ class AnalyticsService
         
         
         
-        $orderIds = self::orders($request)->whereNotIn('confirmation', ['double', 'annuler'])->where([['confirmation', 'confirmer'], ['delivery', 'livrer']])->get()->pluck('id')->values()->toArray();
-        $ordersTotalRevenue = self::orders($request)->where([['confirmation', 'confirmer'], ['delivery', 'livrer']])->sum('price');
+        $orderIds = self::orders($request)->whereNotIn('confirmation', ['double', 'annuler'])->where('confirmation', 'confirmer')->whereIn('delivery', ['livrer', 'paid'])->get()->pluck('id')->values()->toArray();
+        $ordersTotalRevenue = self::orders($request)->where('confirmation', 'confirmer')->whereIn('delivery', ['livrer', 'paid'])->sum('price');
         $orderItemsTotalRevenue = OrderItem::whereIn('order_id', $orderIds)->sum('price');
         $revenueValue = round($ordersTotalRevenue + $orderItemsTotalRevenue, 2);
         
@@ -179,12 +179,12 @@ class AnalyticsService
         ];
         $confirmations[] = $totalSpend;
         
-        $totalPriceOfBuyingOrders = self::orders($request)->where([['confirmation', 'confirmer'], ['delivery', 'livrer']])
+        $totalPriceOfBuyingOrders = self::orders($request)->where('confirmation', 'confirmer')->whereIn('delivery', ['livrer', 'paid'])
         ->select(DB::raw('(SELECT SUM(buying_price) FROM order_items JOIN products ON order_items.product_id = products.id WHERE order_items.order_id = orders.id) as buying'))
         ->get()->sum('buying');
         
 
-        $totalPriceOfDeliveryOrders = self::orders($request)->where([['confirmation', 'confirmer'], ['delivery', 'livrer']])
+        $totalPriceOfDeliveryOrders = self::orders($request)->where('confirmation', 'confirmer')->whereIn('delivery', ['livrer', 'paid'])
         ->select(DB::raw('(SELECT fee FROM cities JOIN delivery_places ON cities.id = delivery_places.city_id WHERE cities.name = orders.city AND delivery_places.delivery_id = orders.affectation) as delivery_fee'))
         ->get()->sum('delivery_fee');
 
@@ -203,7 +203,7 @@ class AnalyticsService
         
         
         
-        $totalQuantityDelivered = self::orders($request)->where([['confirmation', 'confirmer'], ['delivery', 'livrer']])
+        $totalQuantityDelivered = self::orders($request)->where('confirmation', 'confirmer')->whereIn('delivery', ['livrer', 'paid'])
         ->select(DB::raw('(SELECT SUM(quantity) FROM order_items  WHERE order_items.order_id = orders.id) as total_quantity'))
         ->get()->sum('total_quantity');
     

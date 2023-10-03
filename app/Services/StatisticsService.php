@@ -26,7 +26,9 @@ class StatisticsService
         'wrong-number' =>'Wrong number',
         'confirmer' =>'Confirmed',
         'double' =>'Double',
-        'reconfirmer' => 'Reconfirmed'
+        'reconfirmer' => 'Reconfirmed',
+        'change' => 'Change',
+        'refund' => 'Refund'
     ];
 
     public static function followup($orders) {
@@ -341,18 +343,26 @@ class StatisticsService
         $delivery[] = $all;
 
 
-        $deliveredCount = $deliveryOrders->where('delivery', 'livrer')->count();
+        $deliveredCount = $deliveryOrders->whereIn('delivery', ['livrer', 'paid'])->count();
         $delivered = [
             'id' => 2,
             'title' => 'Delivered',
-            'value' => $deliveredCount,
+            'value' => $deliveryOrders->where('delivery', 'livrer')->count(),
             'percentage' => $deliveryOrders->count() > 0  ? ($deliveredCount * 100) / $deliveryOrders->count() : 0,
             'icon' => 'mdi-truck-check',
             'color' => '#10b981'
         ];
         $delivery[] = $delivered;
 
-
+         $paidCount = $deliveryOrders->where('delivery', 'paid')->count();
+                $paid = [
+                    'id' => 6,
+                    'title' => 'Paid',
+                    'value' => $paidCount,
+                    'icon' => 'mdi-currency-usd',
+                    'color' => '#10b981'
+                ];
+                $delivery[] = $paid;
         $shippedCount = $deliveryOrders->where('delivery', 'expidier')->count();
         $shipped = [
             'id' => 3,
@@ -592,16 +602,26 @@ class StatisticsService
         $delivery[] = $all;
 
 
-        $deliveredCount = $deliveryOrders->where('delivery', 'livrer')->count();
+        $deliveredCount = $deliveryOrders->whereIn('delivery', ['livrer', 'paid'])->count();
         $delivered = [
             'id' => 2,
             'title' => 'Delivered',
-            'value' => $deliveredCount,
+            'value' => $deliveryOrders->where('delivery', 'livrer')->count(),
             'percentage' => $deliveryOrders->count() > 0  ? ($deliveredCount * 100) / $deliveryOrders->count() : 0,
             'icon' => 'mdi-truck-check',
             'color' => '#10b981'
         ];
         $delivery[] = $delivered;
+        
+        $paidCount = $deliveryOrders->where('delivery', 'paid')->count();
+        $paid = [
+            'id' => 6,
+            'title' => 'Paid',
+            'value' => $paidCount,
+            'icon' => 'mdi-currency-usd',
+            'color' => '#10b981'
+        ];
+        $delivery[] = $paid;
 
 
         $shippedCount = $deliveryOrders->where('delivery', 'expidier')->count();
@@ -663,44 +683,12 @@ class StatisticsService
         $delivery[] = $cancelled;
 
 
-        // $AllRevenue = [
-        //     'id' => 1,
-        //     'title' => 'Revenue',
-        //     'value' => 0,
-        //     'icon' => 'mdi-currency-usd',
-        //     'color' => '#22c55e'
-        // ];
-
-        // $orders
-        // ->where('confirmation', 'confirmer')
-        // ->map(function($o) use(&$AllRevenue) {
-        //     $AllRevenue['value'] += self::getPrice($o);
-        // });
-
-
-        // $deliveredRevenue = [
-        //     'id' => 2,
-        //     'title' => 'Delivered',
-        //     'value' => 0,
-        //     'icon' => 'mdi-check-all',
-        //     'color' => '#22c55e'
-        // ];
-
-        // $orders
-        // ->where('confirmation', 'confirmer')
-        // ->where('delivery', 'livrer')
-        // ->map(function($o) use(&$deliveredRevenue) {
-        //     $deliveredRevenue['value'] += self::getPrice($o);
-        // });
+        
 
 
         $statistics = [
             'confirmations' => $confirmations,
             'delivery' => $delivery,
-            'revenue' => [
-                // $AllRevenue,
-                // $deliveredRevenue
-            ]
         ];
 
         return $statistics;
@@ -754,6 +742,14 @@ class StatisticsService
             'confirmation' => 'confirmer',
             'total' => $deliveredCount,
             'percent' => $confirmedTotal == 0 ? 0 : round(($deliveredCount * 100) / $confirmedTotal, 2),
+        ];
+        
+        $paidCount = $deliveryOrders->where('delivery', 'paid')->first()?->total;
+        $statistics[] = [
+            'name' => 'Paid',
+            'confirmation' => 'confirmer',
+            'total' => $paidCount,
+            'percent' => $confirmedTotal == 0 ? 0 : round(($paidCount * 100) / $confirmedTotal, 2),
         ];
 
         // $statistics[] = [
