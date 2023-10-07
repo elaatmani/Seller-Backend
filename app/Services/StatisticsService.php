@@ -3,10 +3,11 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\OrderHistory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-
+use Exception;
 class StatisticsService
 {
 
@@ -30,6 +31,21 @@ class StatisticsService
         'change' => 'Change',
         'refund' => 'Refund'
     ];
+
+    public static function orders($request) {
+        $orders = Order::query();
+        
+        $created_from = $request->created_from;
+        $created_to = $request->created_to;
+        $product_id = $request->product_id;
+        $user_id = auth()->id();
+        
+        $orders = $orders->when(!!$created_from, fn($q) => $q->whereDate('created_at', '>=', $created_from))
+        ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to))
+        ->when($product_id != 'all', fn($q) => $q->whereHas('items', fn($oq) => $oq->where('product_id', $product_id)))
+        ->when($user_id != 'all' , fn($q) => $q->where('user_id',$user_id));
+        return $orders;
+    }
 
     public static function followup($orders) {
         // $orders = ;
@@ -79,16 +95,22 @@ class StatisticsService
     }
 
 
-    public static function agent() {
+    public static function agent($request) {
 
         $orders = Order::query();
 
         $orders->where('agente_id', auth()->id());
 
+        $created_from = $request->created_from;
+        $created_to = $request->created_to;
+
+        $orders
+        ->when(!!$created_from, fn($q) => $q->whereDate('created_at', '>=', $created_from))
+        ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to));
+
         $orders = $orders->get();
 
-        // $orders = ;
-        // $orders ;
+      
         $reported = $orders->where('confirmation', 'reporter')->count();
         $new = $orders->where('confirmation', null)->count();
         $confirmed = $orders->where('confirmation', 'confirmer')->count();
@@ -422,37 +444,72 @@ class StatisticsService
         $delivery[] = $cancelled;
 
 
-        $deliveredRevenue = [
-            'id' => 2,
+        
+        
+        $orderIds = self::orders($request)->where('confirmation', 'confirmer')->whereIn('delivery', ['livrer', 'paid'])->get()->pluck('id')->values()->toArray();
+        $totalRevenue = self::orders($request)->where('confirmation', 'confirmer')->whereIn('delivery', ['livrer', 'paid'])->sum('price');
+        $orderItemsTotalRevenue = OrderItem::whereIn('order_id', $orderIds)->sum('price');
+        $totalRevenueValue = round($totalRevenue + $orderItemsTotalRevenue, 2);
+        
+        $totalRevenue = [
+            'id' => 1,
             'title' => 'Revenue',
-            'value' => 0,
+            'value' => $totalRevenueValue,
             'icon' => 'mdi-currency-usd',
             'color' => '#22c55e'
         ];
 
-        $orders
-        ->where('confirmation', 'confirmer')
-        ->where('delivery', 'livrer')
-        ->map(function($o) use(&$deliveredRevenue) {
-            $deliveredRevenue['value'] += self::getPrice($o);
-        });
+
+        $orderIds = self::orders($request)->where('confirmation', 'confirmer')->where('delivery', 'paid')->get()->pluck('id')->values()->toArray();
+        $ordersTotalPaid = self::orders($request)->where('confirmation', 'confirmer')->where('delivery', 'paid')->sum('price');
+        $orderItemsTotalPaid = OrderItem::whereIn('order_id', $orderIds)->sum('price');
+        $paidRevenueValue = round($ordersTotalPaid + $orderItemsTotalPaid, 2);
+        
+        $totalPaid = [
+            'id' => 2,
+            'title' => 'Paid',
+            'value' => $paidRevenueValue,
+            'icon' => 'mdi-check',
+            'color' => '#22c55e'
+        ];
 
 
-        // $deliveredRevenue = 0;
-        // $deliveredOrders = $orders
-        // ->where('confirmation', 'confirmer')
-        // ->where('delivery', 'livrer')
-        // ->map(function($o) use(&$total) {
-        //     $total += self::getPrice($o);
-        // });
+        $orderIds = self::orders($request)->where('confirmation', 'confirmer')->where('delivery', 'livrer')->get()->pluck('id')->values()->toArray();
+        $ordersTotalDelivered = self::orders($request)->where('confirmation', 'confirmer')->where('delivery', 'livrer')->sum('price');
+        $orderItemsTotalDelivered = OrderItem::whereIn('order_id', $orderIds)->sum('price');
+        $deliveredRevenueValue = round($ordersTotalDelivered + $orderItemsTotalDelivered, 2);
+        
+        $totalDelivered = [
+            'id' => 3,
+            'title' => 'Delivered',
+            'value' => $deliveredRevenueValue,
+            'icon' => 'mdi-truck-check',
+            'color' => '#22c55e'
+        ];
+
+
+        $orderIds = self::orders($request)->where('confirmation', 'confirmer')->whereIn('delivery', ['expidier', 'transfer'])->get()->pluck('id')->values()->toArray();
+        $ordersTotalShipped = self::orders($request)->where('confirmation', 'confirmer')->whereIn('delivery', ['expidier', 'transfer'])->sum('price');
+        $orderItemsTotalShipped = OrderItem::whereIn('order_id', $orderIds)->sum('price');
+        $shippedRevenueValue = round($ordersTotalShipped + $orderItemsTotalShipped, 2);
+        
+        $totalShipped = [
+            'id' => 3,
+            'title' => 'Shipped & Tranferred',
+            'value' => $shippedRevenueValue,
+            'icon' => 'mdi-dolly',
+            'color' => '#22c55e'
+        ];
 
 
         $statistics = [
             'confirmations' => $confirmations,
             'delivery' => $delivery,
             'revenue' => [
-               
-                // $deliveredRevenue
+                $totalRevenue,
+                $totalPaid,
+                $totalDelivered,
+                $totalShipped
             ]
         ];
 

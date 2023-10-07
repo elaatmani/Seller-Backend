@@ -173,7 +173,7 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
         <h1 class="m-0 p-0 gray-color">INVOICE <br /> <span style="font-size:medium; color:gray;">#</span><span style="font-size:medium; color:#f97316;"> {{$factorisation->factorisation_id}} </span></h1>
       </td>
       <td style="text-align: right; border:1px solid white;">
-        <h1>VLDO</h1>
+        <h1>COD SQUAD</h1>
       </td>
     </tr>
   </table>
@@ -212,7 +212,7 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
       @foreach ($salesSeller as $sale)
       <tr align="center">
          <td>{{ $i++ }}</td>
-        <td>{{ auth()->user()->hasRole('seller') ? substr($sale->sheets_id, strrpos($sale->sheets_id, '***') + 3) : $sale->id }}</td>
+        <td>{{ $sale->id }}</td>
         <td class="arabic-font">{{ translateProductNameToArabic($sale->product_name) }}</td>
         <td>{{ implode(", ", $sale->items->pluck("quantity")->toArray()) }}</td>
         <td>{{ salePrice($sale) }}$</td>

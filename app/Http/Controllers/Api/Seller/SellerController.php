@@ -88,18 +88,62 @@ class SellerController extends Controller
         }
     }
 
+    public function export(Request $request) {
+
+        try {
+            DB::beginTransaction();
+
+            $options = $this->get_options($request);
+
+            $orders = $this->orderRepository->all($options);
+
+            DB::commit();
+            return [
+                'code' => 'SUCCESS',
+                'data' => [
+                    'orders' => $orders
+                ]
+            ];
+
+        } catch (\Throwable $th) {
+
+            // rollback transaction on error
+            DB::rollBack();
+
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
     public function get_options($request) {
         $filters = $request->input('filters', []);
         $search = $request->input('search', '');
+        $searchByField = $request->input('searchByField', 'all');
         
-        $orWhere = !$search ? [] : [
-            ['id', 'LIKE', "%$search%"],
-            ['fullname', 'LIKE', "%$search%"],
-            ['phone', 'LIKE', "%$search%"],
-            ['adresse', 'LIKE', "%$search%"],
-            ['city', 'LIKE', "%$search%"],
-            ['note', 'LIKE', "%$search%"],
-        ];
+        switch ($searchByField) {
+            case 'id':
+                $orWhere = [
+                    ['id', '=', $search]
+                ];
+            break;
+            
+            default:
+                $orWhere = !$search ? [] : [
+                    ['id', 'LIKE', "%$search%"],
+                    ['fullname', 'LIKE', "%$search%"],
+                    ['phone', 'LIKE', "%$search%"],
+                    ['adresse', 'LIKE', "%$search%"],
+                    ['city', 'LIKE', "%$search%"],
+                    ['note', 'LIKE', "%$search%"],
+                ];
+            break;
+        }
 
 
         $filtersDate = Arr::only($filters, ['created_from', 'created_to', 'dropped_from', 'dropped_to']);

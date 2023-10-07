@@ -238,6 +238,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Seller
     Route::post('/v1/seller/statistics', [SellerController::class, 'statistics']);
     Route::post('/v1/seller/orders', [SellerController::class, 'index']);
+    Route::post('/v1/seller/orders/export', [SellerController::class, 'export']);
     Route::get('/v1/seller/orders/counts', [SellerController::class, 'counts']);
     Route::post('/v1/seller/orders/{id}/update', [SellerController::class, 'update']);
 

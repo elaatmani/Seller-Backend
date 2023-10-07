@@ -33,7 +33,7 @@ class OrderAffectation implements Rule
             return true;
         }
 
-        return $value != null ? $this->confirmation == 'confirmer' : true;
+        return $value != null ? in_array($this->confirmation, ['confirmer', 'refund','change']): true;
     }
 
     /**

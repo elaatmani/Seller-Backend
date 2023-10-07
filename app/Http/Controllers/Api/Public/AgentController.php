@@ -20,14 +20,15 @@ class AgentController extends Controller
         $this->orderRepository = $orderRepository;
     }
 
-    public function statistics() {
+    public function statistics(Request $request) {
 
-        $statistics = StatisticsService::agent();
+        $statistics = StatisticsService::agent($request);
 
         return response()->json([
             'code' => 'SUCCESS',
             'data' => [
-                'statistics' => $statistics
+                'statistics' => $statistics,
+                'filters' => $request->filters
             ]
         ]);
     }

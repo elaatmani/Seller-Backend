@@ -169,16 +169,27 @@ class AdminController extends Controller
     public function get_options($request) {
         $filters = $request->input('filters', []);
         $search = $request->input('search', '');
+        $searchByField = $request->input('searchByField', 'all');
         $reportedFirst = data_get($filters, 'reported_first', false);
 
-        $orWhere = !$search ? [] : [
-            ['id', 'LIKE', "%$search%"],
-            ['fullname', 'LIKE', "%$search%"],
-            ['phone', 'LIKE', "%$search%"],
-            ['adresse', 'LIKE', "%$search%"],
-            ['city', 'LIKE', "%$search%"],
-            ['note', 'LIKE', "%$search%"],
-        ];
+        switch ($searchByField) {
+            case 'id':
+                $orWhere = [
+                    ['id', '=', $search]
+                ];
+            break;
+            
+            default:
+                $orWhere = !$search ? [] : [
+                    ['id', 'LIKE', "%$search%"],
+                    ['fullname', 'LIKE', "%$search%"],
+                    ['phone', 'LIKE', "%$search%"],
+                    ['adresse', 'LIKE', "%$search%"],
+                    ['city', 'LIKE', "%$search%"],
+                    ['note', 'LIKE', "%$search%"],
+                ];
+            break;
+        }
 
 
         $filtersDate = Arr::only($filters, ['created_from', 'created_to', 'dropped_from', 'dropped_to']);
