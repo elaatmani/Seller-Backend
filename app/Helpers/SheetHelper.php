@@ -88,7 +88,7 @@ class SheetHelper {
                 $product_name = array_key_exists('Product name', $o) ? $o['Product name'] : '';
                 $source = array_key_exists('Source', $o) ? $o['Source'] : '';
 
-                if(!$sku) continue;
+                if(!$sku || !$phone) continue;
                 $product_exists = DB::table('products')->where('ref', $sku)->where('status',1)->exists();
 
                 if(!$product_exists) {

@@ -1123,6 +1123,7 @@ class OrderController extends Controller
                     ->where('product_name', $AddOrder->product_name)
                     ->where('user_id' , $AddOrder->user_id)
                     ->whereNull('agente_id')
+                    ->lockForUpdate()
                     ->get();
 
                 if ($checkOrder->count() > 1) {
@@ -1138,7 +1139,7 @@ class OrderController extends Controller
                     }
 
 
-                } else {
+                }
                     // Only one order or no duplicates found
                     // Continue with the original code without any modifications
 
@@ -1147,7 +1148,7 @@ class OrderController extends Controller
                     $AddOrder->save();
 
 
-                }
+               
                 DB::commit();
             } else {
                 return response()->json(

@@ -44,6 +44,7 @@ class StatisticsService
         ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to))
         ->when($product_id != 'all', fn($q) => $q->whereHas('items', fn($oq) => $oq->where('product_id', $product_id)))
         ->when($user_id != 'all' , fn($q) => $q->where('user_id',$user_id));
+        
         return $orders;
     }
 
