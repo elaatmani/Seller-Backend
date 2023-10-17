@@ -18,7 +18,7 @@ class DeliveryPlace extends Model
     protected $casts = [
         'delivery_id' => 'integer',
         'city_id' => 'integer',
-        'fee' => 'integer',
+        'fee' => 'float',
     ];
 
     public function user()

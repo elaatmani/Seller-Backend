@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\Public\FollowUpController;
 use App\Http\Controllers\Api\Public\DashboardController;
 use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
+use App\Http\Controllers\Api\Admin\NewFactorisationController;
 use App\Http\Controllers\Api\Seller\SellerController;
 
 
@@ -235,18 +236,25 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/v1/agent/orders/counts', [AgentController::class, 'counts']);
     Route::post('/v1/agent/orders/{id}/update', [AgentController::class, 'update']);
 
-    //Seller
+    // Seller
     Route::post('/v1/seller/statistics', [SellerController::class, 'statistics']);
     Route::post('/v1/seller/orders', [SellerController::class, 'index']);
     Route::post('/v1/seller/orders/export', [SellerController::class, 'export']);
     Route::get('/v1/seller/orders/counts', [SellerController::class, 'counts']);
     Route::post('/v1/seller/orders/{id}/update', [SellerController::class, 'update']);
 
-    //Ads
+    // Ads
     Route::post('/ads', [AdsController::class, 'index']);
     Route::post('/ads/new', [AdsController::class, 'store']);
     Route::post('/ads/update/{id}', [AdsController::class, 'update']);
     Route::delete('/ads/delete/{id}', [AdsController::class, 'destroy']);
+
+    // Factorisation
+    Route::post('/v1/factorisation', [NewFactorisationController::class, 'index']);
+    Route::post('/v1/factorisation/new', [NewFactorisationController::class, 'store']);
+    Route::post('/v1/factorisation/update/{id}', [NewFactorisationController::class, 'update']);
+    Route::delete('/v1/factorisation/delete/{id}', [NewFactorisationController::class, 'destroy']);
+
 });
 
 // Auto fetch
