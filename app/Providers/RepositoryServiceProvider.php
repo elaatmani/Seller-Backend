@@ -8,6 +8,8 @@ use App\Repositories\Interfaces\AdsRepositoryInterface;
 use App\Repositories\AdsRepository;
 use App\Repositories\FactorisationRepository;
 use App\Repositories\Interfaces\FactorisationRepositoryInterface;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Repositories\ProductRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -32,5 +34,6 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(OrderRepositoryInterface::class, OrderRepository::class);
         $this->app->bind(AdsRepositoryInterface::class, AdsRepository::class);
         $this->app->bind(FactorisationRepositoryInterface::class, FactorisationRepository::class);
+        $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
     }
 }

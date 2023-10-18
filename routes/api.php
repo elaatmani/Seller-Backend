@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\Public\DashboardController;
 use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
 use App\Http\Controllers\Api\Admin\NewFactorisationController;
+use App\Http\Controllers\Api\Admin\NewProductController;
 use App\Http\Controllers\Api\Seller\SellerController;
 
 
@@ -92,7 +93,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/factorisations/update/payment/{id}', [FactorisationController::class, 'updatePayment']);
     Route::post('/factorisations/update/fees/{id}', [FactorisationController::class, 'addOrUpdateFees']);
     Route::delete('/factorisations/delete/{id}', [FactorisationController::class, 'destroy']);
-    Route::get('/factorisations/generate-pdf/{id}', [FactorisationController::class,'generatePDF']);
+    Route::get('/factorisations/generate-pdf/{id}', [FactorisationController::class, 'generatePDF']);
 
 
     // Google Sheet
@@ -126,7 +127,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/shops/delete/{id}', [ShopController::class, 'destroy']);
 
 
-    
+
 
 
 
@@ -153,7 +154,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/sales/fresh', [SaleController::class, 'newSales']);
     Route::post('/sales/new', [SaleController::class, 'create']);
     Route::post('/sales/reset', [SaleController::class, 'saleReset']);
-    Route::post('/sales/scan' , [OrderController::class , 'orderScanner']);
+    Route::post('/sales/scan', [OrderController::class, 'orderScanner']);
 
 
 
@@ -169,7 +170,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/orders/history/show/{id}', [OrderController::class, 'orderHistory']);
     Route::get('/orders/item/history/show/{id}', [OrderController::class, 'orderItemHistory']);
 
-    Route::get('/orders/count',[OrderController::class , 'orderCount']);
+    Route::get('/orders/count', [OrderController::class, 'orderCount']);
 
 
     //Orders For Delivery
@@ -190,22 +191,22 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
     //Inventory
-        //Inventory State
-        Route::get('/inventorystates', [InventoryController::class, 'inventoryState']);
+    //Inventory State
+    Route::get('/inventorystates', [InventoryController::class, 'inventoryState']);
 
 
-        //Inventory Movement
-        Route::get('/inventorymovements', [InventoryController::class, 'inventoryMovement']);
-        Route::post('/inventorymovements/new', [InventoryController::class, 'createInventoryMovement']);
-        Route::post('/inventorymovements/update/{id}', [InventoryController::class, 'updateInventoryMovement']);
-        Route::delete('/inventorymovements/delete/{id}', [InventoryController::class, 'deleteInventoryMovement']);
-        Route::get('/inventorymovements/{id}', [InventoryController::class, 'showInventoryMovement']);
+    //Inventory Movement
+    Route::get('/inventorymovements', [InventoryController::class, 'inventoryMovement']);
+    Route::post('/inventorymovements/new', [InventoryController::class, 'createInventoryMovement']);
+    Route::post('/inventorymovements/update/{id}', [InventoryController::class, 'updateInventoryMovement']);
+    Route::delete('/inventorymovements/delete/{id}', [InventoryController::class, 'deleteInventoryMovement']);
+    Route::get('/inventorymovements/{id}', [InventoryController::class, 'showInventoryMovement']);
 
 
-        //Is_Received
-        Route::post('/delivery/inventorymovements/update/isreceived/{id}', [InventoryController::class, 'updateReceivedInventoryMovement']);
-        Route::post('/delivery/inventorymovements/update/note/{id}', [InventoryController::class, 'updateNoteInventoryMovement']);
-        Route::post('/delivery/inventorymovements/update/{id}', [InventoryController::class, 'updateReceivedNoteInventoryMovement']);
+    //Is_Received
+    Route::post('/delivery/inventorymovements/update/isreceived/{id}', [InventoryController::class, 'updateReceivedInventoryMovement']);
+    Route::post('/delivery/inventorymovements/update/note/{id}', [InventoryController::class, 'updateNoteInventoryMovement']);
+    Route::post('/delivery/inventorymovements/update/{id}', [InventoryController::class, 'updateReceivedNoteInventoryMovement']);
 
 
     // Dashboard
@@ -220,6 +221,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/v1/admin/orders/create', [AdminController::class, 'create']);
     Route::post('/v1/admin/orders/{id}/update', [AdminController::class, 'update']);
 
+    // Products
+    Route::post('/v1/products', [NewProductController::class, 'index']);
+    
     // Bulk Actions
     Route::post('/v1/bulk/execute', [BulkActionController::class, 'index']);
 
@@ -254,14 +258,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/v1/factorisation/new', [NewFactorisationController::class, 'store']);
     Route::post('/v1/factorisation/update/{id}', [NewFactorisationController::class, 'update']);
     Route::delete('/v1/factorisation/delete/{id}', [NewFactorisationController::class, 'destroy']);
-
 });
 
 // Auto fetch
 Route::post('/sync', [GoogleSheetController::class, 'sync']);
 //User Logout
 Route::get('/auth/logout', [AuthController::class, 'logoutUser']);
-Route::get('/auth/clear', function() {
+Route::get('/auth/clear', function () {
     foreach ($_COOKIE as $key => $value) {
         Cookie::queue(Cookie::forget($key));
     }

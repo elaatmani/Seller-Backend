@@ -83,9 +83,28 @@ class Product extends Model
             'variations' => $this->variations->map->formatForOrder(),
             'image' => $this->image,
             'available_with' => $this->deliveries->map(fn($d) => $d->delivery_id),
-            'offers' => $this->offers
+            'offers' => $this->offers,
+            'created_at' => $this->created_at,
         ];
     }
+
+    public function formatForShow() {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'ref' => $this->ref,
+            'seller_user' => $this->seller_user,
+            'description' => $this->description,
+            'buying_price' => $this->buying_price,
+            'selling_price' => $this->selling_price,
+            'variations' => $this->variations->map->formatForShow(),
+            'image' => $this->image,
+            'status' => $this->status,
+            'offers' => $this->offers,
+            'created_at' => $this->created_at,
+        ];
+    }
+
 
     public function seller_user() {
         return $this->belongsTo(User::class, 'user_id', 'id');
