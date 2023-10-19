@@ -33,6 +33,7 @@ class NewFactorisationController extends Controller
        $options['with'] = 'fees';
        if(!auth()->user()->hasRole('admin')) {
            $options['where'][] = ['user_id', '=', auth()->id()];
+           $options['where'][] = ['close','=',true];
        }
 
         $factorisation = $this->factorisationRepository->paginate($perPage, $sortBy, $sortAds, $options);
