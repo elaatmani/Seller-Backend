@@ -32,7 +32,7 @@ class RoadRunnerCODSquad
         if(
             $oldAttributes['affectation'] != self::ROADRUNNER_ID
             && $newAttributes['affectation'] == self::ROADRUNNER_ID
-            && $newAttributes['confirmation'] == "confirmer"
+            && in_array($newAttributes['confirmation'] , ['confirmer', 'refund','change'])
         ) {
             $response = self::insert($order);
 
