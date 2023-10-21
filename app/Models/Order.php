@@ -76,7 +76,8 @@ class Order extends Model
         'is_done',
         'has_doubles',
         'is_double',
-        'delivery_fullname'
+        'delivery_fullname',
+        'created_by'
     ];
 
 
@@ -123,6 +124,16 @@ class Order extends Model
     public function seller_user() {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+    public function getCreatedByAttribute() {
+        if (strpos($this->sheets_id, 'created_by:') === 0) {
+            $userId = (int)substr($this->sheets_id, strlen('created_by:'));
+            return User::find($userId);
+        } else {
+            return null;
+        }
+    }
+    
+
 
 
 }
