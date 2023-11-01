@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\Admin\FactorisationController;
 use App\Http\Controllers\Api\Admin\NewFactorisationController;
 use App\Http\Controllers\Api\Admin\NewProductController;
 use App\Http\Controllers\Api\Seller\SellerController;
+use App\Http\Controllers\Api\Export\FactorisationExportController;
 
 
 /*
@@ -43,6 +44,9 @@ use App\Http\Controllers\Api\Seller\SellerController;
 
 //User Login
 Route::post('/auth/login', [AuthController::class, 'loginUser']);
+
+// Export
+Route::get('/export/factorisations/{id}', [FactorisationExportController::class, 'index']);
 
 //Sanctum Use
 Route::group(['middleware' => ['auth:sanctum']], function () {
