@@ -1115,7 +1115,6 @@ class OrderController extends Controller
                 ->first();
 
 
-
             if ($AddOrder) {
                 $checkOrder = Order::where('fullname', $AddOrder->fullname)
                     ->where('phone', $AddOrder->phone)
