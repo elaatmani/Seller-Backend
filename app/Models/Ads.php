@@ -13,6 +13,7 @@ class Ads extends Model
         'product_id',
         'source',
         'amount',
+        'leads',
         'marketer_id',
         'ads_at'
     ];
@@ -22,6 +23,7 @@ class Ads extends Model
         'source' => 'string',
         'amount' => 'float',
         'marketer_id' => 'integer',
+        'leads' => 'integer',
         'ads_at' => 'date'
     ];
 
