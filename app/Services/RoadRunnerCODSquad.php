@@ -114,7 +114,7 @@ class RoadRunnerCODSquad
 
 
     public static function orders() {
-        return self::http('list/', [ 'company' => 'codsquad', 'daterange' => '2023/09/18 - 2023/09/20' ]);
+        return self::http('list/', [ 'company' => 'codsquad', 'daterange' => '2023/10/29 - 2023/11/15' ]);
     }
 
     public static function rates() {

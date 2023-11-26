@@ -172,10 +172,10 @@ class AgentController extends Controller
         }
 
         $whereDate = [
-            ['created_at', '>=', data_get($filtersDate, 'created_from', null)],
-            ['created_at', '<=', data_get($filtersDate, 'created_to', null)],
-            ['dropped_at', '>=', data_get($filtersDate, 'dropped_from', null)],
-            ['dropped_at', '<=', data_get($filtersDate, 'dropped_to', null)],
+            // ['created_at', '>=', data_get($filtersDate, 'created_from', null)],
+            // ['created_at', '<=', data_get($filtersDate, 'created_to', null)],
+            ['dropped_at', '>=', data_get($filtersDate, 'created_from', null)],
+            ['dropped_at', '<=', data_get($filtersDate, 'created_to', null)],
 
         ];
 
