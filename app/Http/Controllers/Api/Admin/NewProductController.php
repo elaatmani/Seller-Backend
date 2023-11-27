@@ -67,7 +67,7 @@ class NewProductController extends Controller
 
 
         $filtersDate = Arr::only($filters, ['created_from', 'created_to', 'dropped_from', 'dropped_to']);
-        $validatedFilters = Arr::only($filters, ['confirmation', 'delivery', 'affectation', 'agente_id', 'upsell']);
+        $validatedFilters = Arr::only($filters, ['user_id']);
 
         $toFilter = [];
         if(is_array($validatedFilters)){
@@ -86,7 +86,7 @@ class NewProductController extends Controller
         ];
 
         $whereHas = [
-            [ 'product_id', '=', data_get($filters, 'product_id', 'all'), 'items' ]
+            // [ 'product_id', '=', data_get($filters, 'product_id', 'all'), 'items' ]
         ];
 
         $options = [
@@ -94,7 +94,7 @@ class NewProductController extends Controller
             'where' => $toFilter,
             'orWhere' => $orWhere,
             'reported_first' => $reportedFirst,
-            'whereHas' => $whereHas
+            // 'whereHas' => $whereHas
         ];
 
         return $options;
