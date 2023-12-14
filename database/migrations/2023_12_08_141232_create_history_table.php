@@ -16,13 +16,16 @@ return new class extends Migration
         Schema::create('history', function (Blueprint $table) {
             $table->id();
             // Which table are we tracking
-            $table->string('reference_table');
+            $table->string('trackable_type');
             // Which record from the table are we referencing
-            $table->integer('reference_id')->unsigned();
+            $table->integer('trackable_id')->unsigned();
             // Who made the action
             $table->integer('actor_id')->unsigned();
             // What did they do
-            $table->string('body');
+            $table->string('body')->nullable();
+            // field
+            $table->json('fields')->nullable();
+
             $table->timestamps();
         });
     }

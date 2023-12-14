@@ -3,11 +3,11 @@
 namespace App\Observers;
 
 use App\Models\SupplyRequest;
-use App\Traits\TracksHistoryTrait;
+use App\Traits\TrackHistoryTrait;
 
 class SupplyRequestObserver
 {
-    use TracksHistoryTrait;
+    use TrackHistoryTrait;
 
     /**
      * Handle the SupplyRequest "created" event.

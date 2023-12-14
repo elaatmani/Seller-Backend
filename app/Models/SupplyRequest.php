@@ -13,12 +13,26 @@ class SupplyRequest extends Model
         'product_id',
         'product_variation_id',
         'quantity',
+        'seller_id',
         'status',
-        'note'
+        'note',
+        'admin_note'
     ];
 
     public function history()
     {
-        return $this->morphMany(History::class, 'trackable', 'reference_table', 'reference_id');
+        return $this->morphMany(History::class, 'trackable');
+    }
+
+    public function seller() {
+        return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    public function product_variation() {
+        return $this->belongsTo(ProductVariation::class);
+    }
+
+    public function product() {
+        return $this->belongsTo(Product::class);
     }
 }

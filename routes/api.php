@@ -26,7 +26,7 @@ use App\Http\Controllers\Api\Admin\NewFactorisationController;
 use App\Http\Controllers\Api\Admin\NewProductController;
 use App\Http\Controllers\Api\Seller\SellerController;
 use App\Http\Controllers\Api\Export\FactorisationExportController;
-
+use App\Http\Controllers\Api\SupplyRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -227,7 +227,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Products
     Route::post('/v1/products', [NewProductController::class, 'index']);
-    
+
     // Bulk Actions
     Route::post('/v1/bulk/execute', [BulkActionController::class, 'index']);
 
@@ -262,6 +262,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/v1/factorisation/new', [NewFactorisationController::class, 'store']);
     Route::post('/v1/factorisation/update/{id}', [NewFactorisationController::class, 'update']);
     Route::delete('/v1/factorisation/delete/{id}', [NewFactorisationController::class, 'destroy']);
+
+    // Supply Requests
+    Route::post('/supply-requests', [SupplyRequestController::class, 'index']);
+    Route::post('/supply-requests/new', [SupplyRequestController::class, 'store']);
+    Route::delete('/supply-requests/{id}', [SupplyRequestController::class, 'destroy']);
 });
 
 // Auto fetch

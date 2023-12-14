@@ -10,10 +10,38 @@ class History extends Model
     use HasFactory;
 
     protected $table = 'history';
+
     protected $fillable = [
-        'reference_table',
-        'reference_id',
+        'trackable_type',
+        'trackable_id',
         'actor_id',
-        'body'
+        'body',
+        'fields'
     ];
+
+
+    protected $casts = [
+        'fields' => 'array'
+    ];
+
+    public function trackable()
+    {
+        return $this->morphTo('trackable', 'trackable_type', 'trackable_id');
+    }
+
+    public function toArray()
+    {
+        $array = parent::toArray();
+        unset($array['updated_at']);
+        unset($array['trackable_type']);
+        unset($array['trackable_id']);
+        return [
+            ...$array,
+            'action_by' => $this->user->lastname . ' ' . $this->user->firstname
+        ];
+    }
+
+    public function user() {
+        return $this->belongsTo(User::class, 'actor_id');
+    }
 }

@@ -5,36 +5,46 @@ namespace App\Traits;
 use App\Models\History;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
-trait TracksHistoryTrait
+trait TrackHistoryTrait
 {
     protected function track(Model $model, callable $func = null, $table = null, $id = null)
     {
         // Allow for overriding of table if it's not the model table
-        $table = $table ?: $model->getTable();
+        $table = $table ?: get_class($model);
         // Allow for overriding of id if it's not the model id
         $id = $id ?: $model->id;
         // Allow for customization of the history record if needed
         $func = $func ?: [$this, 'getHistoryBody'];
 
         // Get the dirty fields and run them through the custom function, then insert them into the history table
-        $this->getUpdated($model)
-            ->map(function ($value, $field) use ($func) {
-                return call_user_func_array($func, [$value, $field]);
-            })
-            ->each(function ($fields) use ($table, $id) {
-                History::create([
-                    'reference_table' => $table,
-                    'reference_id'    => $id,
-                    'actor_id'        => Auth::user()->id,
-                ] + $fields);
-            });
+        $updated = $this->getUpdated($model)
+        ->map(function ($value, $key) use ($func) {
+            $field = $value['field'];
+            $newValue = $value['new_value'];
+            $oldValue = $value['old_value'];
+
+            return [
+                ...call_user_func_array($func, [$newValue, $oldValue, $field]),
+                'field' => $field,
+                'new_value' => $newValue,
+                'old_value' => $oldValue,
+            ];
+        });
+
+        History::create([
+            'trackable_type' => $table,
+            'trackable_id'   => $id,
+            'actor_id'       => Auth::user()->id,
+            'fields' => $updated->toArray()
+        ]);
     }
 
-    protected function getHistoryBody($value, $field)
+    protected function getHistoryBody($newValue, $oldValue, $field)
     {
         return [
-            'body' => "Updated " + $field + " To " + $value,
+            'body' => "Updated '" . $field . "' from '" . $oldValue . "' to '" . $newValue . "'",
         ];
     }
 
@@ -43,10 +53,15 @@ trait TracksHistoryTrait
         return collect($model->getDirty())->filter(function ($value, $key) {
             // We don't care if timestamps are dirty, we're not tracking those
             return !in_array($key, ['created_at', 'updated_at']);
-        })->mapWithKeys(function ($value, $key) {
+        })->map(function ($value, $key) use ($model) {
             // Take the field names and convert them into human readable strings for the description of the action
             // e.g. first_name -> first name
-            return [str_replace('_', ' ', $key) => $value];
-        });
+            $oldValue = $model->getOriginal($key);
+            return [
+                'field' => $key,
+                'new_value' => $value,
+                'old_value' => $oldValue,
+            ];
+        })->values();
     }
 }

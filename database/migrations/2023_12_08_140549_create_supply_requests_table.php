@@ -17,9 +17,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id');
             $table->foreignId('product_variation_id');
+            $table->foreignId('seller_id');
             $table->string('status')->default(config('status.supply_requests.default')['value']);
             $table->integer('quantity');
             $table->text('note')->nullable()->default(null);
+            $table->text('admin_note')->nullable()->default(null);
             $table->timestamps();
         });
     }
