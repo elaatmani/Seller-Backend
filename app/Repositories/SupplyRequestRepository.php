@@ -103,5 +103,22 @@ class SupplyRequestRepository  implements SupplyRequestRepositoryInterface {
         return $supply->delete();
     }
 
+    public function update($id, $data) {
+        $supply = SupplyRequest::where('id', $id)->first();
+
+        if(!$supply) return false;
+
+        $supply->update([
+            'product_id'=> $data['product_id'],
+            'product_variation_id' => $data['product_variation_id'],
+            'quantity' => $data['quantity'],
+            'note' => $data['note'],
+            'status' => $data['status'],
+            'admin_note' => $data['admin_note']
+        ]);
+
+        return $supply->fresh();
+    }
+
 
 }

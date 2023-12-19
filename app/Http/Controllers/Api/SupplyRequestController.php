@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupplyRequest\CreateRequest;
+use App\Http\Requests\SupplyRequest\UpdateRequest;
 use App\Repositories\Interfaces\SupplyRequestRepositoryInterface;
 use Illuminate\Http\Request;
 
@@ -113,9 +114,30 @@ class SupplyRequestController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateRequest $request, $id)
     {
-        //
+        try {
+            $supply = $this->supplyRequestRepository->update($id, $request->all());
+
+            $supply->load(['product', 'product_variation']);
+
+            if(auth()->user()->hasRole('admin')) {
+                $supply->load('seller');
+            }
+
+            return response()->json([
+                'code' => 'SUCCESS',
+                'supply_request' => $supply
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'code' => 'SERVER_ERROR',
+                'message' => $th->getMessage(),
+                'trace' => $th->getLine(),
+                'file'=> $th->getFile()
+            ], 500);
+            //throw $th;
+        }
     }
 
     /**

@@ -266,6 +266,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Supply Requests
     Route::post('/supply-requests', [SupplyRequestController::class, 'index']);
     Route::post('/supply-requests/new', [SupplyRequestController::class, 'store']);
+    Route::post('/supply-requests/{id}', [SupplyRequestController::class, 'update']);
     Route::delete('/supply-requests/{id}', [SupplyRequestController::class, 'destroy']);
 });
 

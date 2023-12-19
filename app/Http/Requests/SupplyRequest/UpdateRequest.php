@@ -13,7 +13,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return auth()->user()->hasRole('admin');
     }
 
     /**
@@ -24,7 +24,17 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'quantity' => [ 'required', 'integer', 'gt:0' ],
+            'product_id' => [ 'required', 'exists:products,id' ],
+            'product_variation_id' => [ 'required', 'exists:product_variations,id' ],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'product_id.exists' => 'Select a valid product.',
+            'product_variation_id.exists' => 'Select a valid product variation.'
         ];
     }
 }

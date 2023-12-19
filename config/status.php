@@ -7,6 +7,7 @@
 return [
     'supply_requests' => [
         'default' => [ 'name' => 'Pending', 'value' => 'pending' ],
+        'accepted' => [ 'name' => 'Accepted', 'value' => 'accepted' ],
         'values' => [
             [ 'name' => 'Pending', 'value' => 'pending' ],
             [ 'name' => 'Processing', 'value' => 'processing' ],

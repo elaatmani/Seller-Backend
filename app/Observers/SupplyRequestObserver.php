@@ -2,8 +2,10 @@
 
 namespace App\Observers;
 
+use App\Models\ProductVariation;
 use App\Models\SupplyRequest;
 use App\Traits\TrackHistoryTrait;
+use Illuminate\Support\Facades\DB;
 
 class SupplyRequestObserver
 {
@@ -28,7 +30,32 @@ class SupplyRequestObserver
      */
     public function updated(SupplyRequest $supplyRequest)
     {
+        DB::beginTransaction();
         $this->track($supplyRequest);
+
+        $oldAttributes = $supplyRequest->getOriginal(); // Old values
+        $newAttributes = $supplyRequest->getAttributes(); // New values
+
+        if(
+            $oldAttributes['status'] != config('status.supply_requests.accepted.value') &&
+            $newAttributes['status'] == config('status.supply_requests.accepted.value')
+            ) {
+                $variation = ProductVariation::where('id', $supplyRequest->product_variation_id)->first();
+                $variation->quantity += $newAttributes['quantity'];
+                $variation->save();
+        }
+
+        if(
+            $oldAttributes['status'] == config('status.supply_requests.accepted.value') &&
+            $newAttributes['status'] != config('status.supply_requests.accepted.value')
+            ) {
+                $variation = ProductVariation::where('id', $supplyRequest->product_variation_id)->first();
+                $variation->quantity -= $newAttributes['quantity'];
+                $variation->save();
+        }
+
+
+        DB::commit();
     }
 
     /**
