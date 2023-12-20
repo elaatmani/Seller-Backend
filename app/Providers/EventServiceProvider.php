@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\SupplyRequest;
 use App\Observers\OrderObserver;
 use App\Observers\OrderItemObserver;
+use App\Observers\SupplyRequestObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -33,6 +35,7 @@ class EventServiceProvider extends ServiceProvider
     {
         Order::observe(OrderObserver::class);
         OrderItem::observe(OrderItemObserver::class);
+        SupplyRequest::observe(SupplyRequestObserver::class);
     }
 
     /**
