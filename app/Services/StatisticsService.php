@@ -232,6 +232,8 @@ class StatisticsService
         $created_to = $request->created_to;
         $dropped_from = $request->dropped_from;
         $dropped_to = $request->dropped_to;
+        $delivered_from = $request->delivered_from;
+        $delivered_to = $request->delivered_to;
         $affectation = $request->affectation;
         $confirmation = $request->confirmation;
         $delivery = $request->delivery;
@@ -244,6 +246,8 @@ class StatisticsService
         ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to))
         ->when(!!$dropped_from, fn($q) => $q->whereDate('dropped_at', '>=', $dropped_from))
         ->when(!!$dropped_to, fn($q) => $q->whereDate('dropped_at', '<=', $dropped_to))
+        ->when(!!$delivered_from, fn($q) => $q->whereDate('delivery_date', '>=', $delivered_from))
+        ->when(!!$delivered_to, fn($q) => $q->whereDate('delivery_date', '<=', $delivered_to))
         ->when($affectation != 'all', fn($q) => $q->where('affectation', '=', $affectation))
         ->when($confirmation != 'all', fn($q) => $q->where('confirmation', '=', $confirmation))
         ->when($delivery != 'all', fn($q) => $q->where('delivery', '=', $delivery))
@@ -524,6 +528,8 @@ class StatisticsService
         $created_to = $request->created_to;
         $dropped_from = $request->dropped_from;
         $dropped_to = $request->dropped_to;
+        $delivered_from = $request->delivered_from;
+        $delivered_to = $request->delivered_to;
         $affectation = $request->affectation;
         $confirmation = $request->confirmation;
         $delivery = $request->delivery;
@@ -537,6 +543,8 @@ class StatisticsService
         ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to))
         ->when(!!$dropped_from, fn($q) => $q->whereDate('dropped_at', '>=', $dropped_from))
         ->when(!!$dropped_to, fn($q) => $q->whereDate('dropped_at', '<=', $dropped_to))
+        ->when(!!$delivered_from, fn($q) => $q->whereDate('delivery_date', '>=', $delivered_from))
+        ->when(!!$delivered_to, fn($q) => $q->whereDate('delivery_date', '<=', $delivered_to))
         ->when($affectation != 'all', fn($q) => $q->where('affectation', '=', $affectation))
         ->when($confirmation != 'all', fn($q) => $q->where('confirmation', '=', $confirmation))
         ->when($delivery != 'all', fn($q) => $q->where('delivery', '=', $delivery))
