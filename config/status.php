@@ -15,4 +15,26 @@ return [
             [ 'name' => 'Refused', 'value' => 'refused' ],
         ]
     ],
+
+    'sourcings' => [
+        'quotation_status' => [
+            'default' => [ 'name' => 'Pending', 'value' => 'pending' ],
+            'values' => [
+                [ 'name' => 'Pending', 'value' => 'pending' ],
+                [ 'name' => 'Quoting', 'value' => 'quoting' ],
+                [ 'name' => 'Processing', 'value' => 'processing' ],
+                [ 'name' => 'Accepted', 'value' => 'accepted' ],
+                [ 'name' => 'Refused', 'value' => 'refused' ],
+            ]
+        ],
+        'sourcing_status' => [
+            'default' => [ 'name' => 'Pending', 'value' => 'pending' ],
+            'values' => [
+                [ 'name' => 'Pending', 'value' => 'pending' ],
+                [ 'name' => 'Processing', 'value' => 'processing' ],
+                [ 'name' => 'Accepted', 'value' => 'accepted' ],
+                [ 'name' => 'Refused', 'value' => 'refused' ],
+            ]
+        ]
+    ]
 ];

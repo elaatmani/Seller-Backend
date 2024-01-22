@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\Admin\NewFactorisationController;
 use App\Http\Controllers\Api\Admin\NewProductController;
 use App\Http\Controllers\Api\Seller\SellerController;
 use App\Http\Controllers\Api\Export\FactorisationExportController;
+use App\Http\Controllers\Api\SourcingController;
 use App\Http\Controllers\Api\SupplyRequestController;
 
 /*
@@ -268,6 +269,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/supply-requests/new', [SupplyRequestController::class, 'store']);
     Route::post('/supply-requests/{id}', [SupplyRequestController::class, 'update']);
     Route::delete('/supply-requests/{id}', [SupplyRequestController::class, 'destroy']);
+
+
+    // Supply Requests
+    Route::post('/sourcings', [SourcingController::class, 'index']);
+    Route::post('/sourcings/new', [SourcingController::class, 'store']);
+    Route::post('/sourcings/{id}', [SourcingController::class, 'update']);
+    Route::delete('/sourcings/{id}', [SourcingController::class, 'destroy']);
 });
 
 // Auto fetch
