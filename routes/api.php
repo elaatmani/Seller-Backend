@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\Admin\NewFactorisationController;
 use App\Http\Controllers\Api\Admin\NewProductController;
 use App\Http\Controllers\Api\Seller\SellerController;
 use App\Http\Controllers\Api\Export\FactorisationExportController;
+use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SourcingController;
 use App\Http\Controllers\Api\SupplyRequestController;
 
@@ -276,6 +277,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/sourcings/new', [SourcingController::class, 'store']);
     Route::post('/sourcings/{id}', [SourcingController::class, 'update']);
     Route::delete('/sourcings/{id}', [SourcingController::class, 'destroy']);
+
+
+    // Settings
+    Route::get('/settings', [SettingsController::class, 'index']);
+
+
 });
 
 // Auto fetch
