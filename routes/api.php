@@ -281,6 +281,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Settings
     Route::get('/settings', [SettingsController::class, 'index']);
+    Route::post('/settings/create', [SettingsController::class, 'create']);
 
 
 });
