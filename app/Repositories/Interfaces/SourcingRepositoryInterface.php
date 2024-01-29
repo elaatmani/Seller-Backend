@@ -6,7 +6,7 @@ interface SourcingRepositoryInterface {
 
     public function all($options = []);
 
-    // public function update($id, $data);
+    public function get($id);
 
     public function create($data);
 

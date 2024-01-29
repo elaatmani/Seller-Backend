@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Sourcing\StoreSourcingRequest;
 use App\Repositories\Interfaces\SourcingRepositoryInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SourcingController extends Controller
 {
@@ -25,7 +26,7 @@ class SourcingController extends Controller
     {
         return response()->json([
             'code' => 'SUCCESS',
-            'sourcings' => $this->repository->all()
+            'sourcings' => $this->repository->paginate()
         ]);
     }
 
@@ -66,7 +67,37 @@ class SourcingController extends Controller
      */
     public function show($id)
     {
-        //
+        $sourcing = $this->repository->get($id);
+
+        if(!$sourcing) {
+            return response()->json([
+                'code' => 'NOT_FOUND',
+                'sourcing' => $sourcing
+            ], 200);
+        }
+        $sourcing->load('seller');
+
+        return response()->json([
+            'code' => !$sourcing ? 'NOT_FOUND' : 'SUCCESS',
+            'sourcing' => $sourcing
+        ], 200);
+    }
+
+
+    public function history($id)
+    {
+        $sourcing = $this->repository->get($id);
+
+        if(!$sourcing) {
+            return response()->json([
+                'code' => 'NOT_FOUND',
+            ], 200);
+        }
+
+        return response()->json([
+            'code' => 'SUCCESS',
+            'history' => $sourcing?->history
+        ], 200);
     }
 
     /**
@@ -87,9 +118,24 @@ class SourcingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreSourcingRequest $request, $id)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $sourcing = $this->repository->update($id, $request->all());
+            DB::commit();
+
+            return response()->json([
+                'code' => 'SUCCESS',
+                'sourcing' => $sourcing
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'code' => 'SERVER_ERROR',
+                'message' => $th->getMessage()
+            ]);
+        }
     }
 
     /**
