@@ -6,6 +6,7 @@ use App\Models\Sourcing;
 use Carbon\Carbon;
 use App\Repositories\Interfaces\SourcingRepositoryInterface;
 use Exception;
+use Illuminate\Support\Arr;
 
 class SourcingRepository  implements SourcingRepositoryInterface {
 
@@ -103,12 +104,24 @@ class SourcingRepository  implements SourcingRepositoryInterface {
         return $sourcing;
     }
 
+    public function get($id) {
+        return Sourcing::where('id', $id)->first();
+    }
+
     public function delete($id) {
 
     }
 
     public function update($id, $data) {
+        $sourcing = $this->get($id);
+        $keys = app(Sourcing::class)->getFillable();
+        $can_update_by_admin = array_values(array_diff($keys, ['user_id']));
+        $can_update_by_seller = array_values(array_diff($keys, ['user_id', 'note_by_admin', 'sourcing_status', 'cost_per_unit', 'total_cost', 'additional_fees']));
 
+        $sourcing->update(Arr::only($data, auth()->user()->hasRole('admin') ? $can_update_by_admin : $can_update_by_seller));
+
+        $sourcing->fresh();
+        return $data;
     }
 
 
