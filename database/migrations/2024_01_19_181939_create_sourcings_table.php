@@ -28,6 +28,7 @@ return new class extends Migration
             $table->float('cost_per_unit')->default(0);
             $table->float('total_cost')->default(0);
             $table->float('additional_fees')->default(0);
+            $table->integer('processing_days')->nullable()->default(0);
             $table->timestamps();
         });
     }

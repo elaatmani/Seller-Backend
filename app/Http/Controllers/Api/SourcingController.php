@@ -22,11 +22,17 @@ class SourcingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $options = [];
+
+        if(!auth()->user()->hasRole('admin')){
+            $options['where'][] = ['user_id', '=', auth()->id()];
+        }
+
         return response()->json([
             'code' => 'SUCCESS',
-            'sourcings' => $this->repository->paginate()
+            'sourcings' => $this->repository->paginate(10, 'created_at', 'desc', $options)
         ]);
     }
 
