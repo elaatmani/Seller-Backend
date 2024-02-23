@@ -273,7 +273,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
     // Supply Requests
-    Route::post('/sourcings', [SourcingController::class, 'index']);
+    Route::get('/sourcings', [SourcingController::class, 'index']);
     Route::post('/sourcings/new', [SourcingController::class, 'store']);
     Route::get('/sourcings/{id}', [SourcingController::class, 'show']);
     Route::get('/sourcings/{id}/history', [SourcingController::class, 'history']);

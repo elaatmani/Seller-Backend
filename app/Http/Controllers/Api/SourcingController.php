@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Arr;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sourcing\StoreSourcingRequest;
 use App\Repositories\Interfaces\SourcingRepositoryInterface;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class SourcingController extends Controller
 {
@@ -24,15 +25,18 @@ class SourcingController extends Controller
      */
     public function index(Request $request)
     {
-        $options = [];
+
+
+        $options = $this->parseOptions($request);
 
         if(!auth()->user()->hasRole('admin')){
             $options['where'][] = ['user_id', '=', auth()->id()];
         }
 
+        $sourcings = $this->repository->paginate($options['per_page'], $options['sort_by'], $options['sort_order'], $options);
         return response()->json([
             'code' => 'SUCCESS',
-            'sourcings' => $this->repository->paginate(10, 'created_at', 'desc', $options)
+            'sourcings' => $sourcings
         ]);
     }
 
@@ -153,5 +157,60 @@ class SourcingController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function parseOptions(Request $request) {
+        $filters = $request->input('filters', []);
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortOrder = $request->input('sort_order', 'desc');
+        $perPage = $request->input('per_page', 10);
+        $search = $request->input('search', '');
+        $searchByField = $request->input('searchByField', 'all');
+
+        switch ($searchByField) {
+            case 'id':
+                $orWhere = [
+                    ['id', '=', $search]
+                ];
+            break;
+
+            default:
+                $orWhere = !$search ? [] : [
+                    ['id', 'LIKE', "%$search%"],
+                    ['fullname', 'LIKE', "%$search%"],
+                    ['phone', 'LIKE', "%$search%"],
+                    ['adresse', 'LIKE', "%$search%"],
+                    ['city', 'LIKE', "%$search%"],
+                    ['note', 'LIKE', "%$search%"],
+                ];
+            break;
+        }
+
+        $filtersDate = Arr::only($filters, ['created_from', 'created_to']);
+        $validatedFilters = Arr::only($filters, ['user_id', 'quotation_status', 'sourcing_status']);
+
+        $toFilter = [];
+        if(is_array($validatedFilters)){
+            foreach($validatedFilters as $f => $v) {
+                if($v == 'all') continue;
+                $toFilter[] = [$f, '=', $v];
+            }
+        }
+
+        $whereDate = [
+            ['created_at', '>=', data_get($filtersDate, 'created_from', null)],
+            ['created_at', '<=', data_get($filtersDate, 'created_to', null)],
+        ];
+
+        $options = [
+            'whereDate' => $whereDate,
+            'where' => $toFilter,
+            'orWhere' => $orWhere,
+            'sort_by' => $sortBy,
+            'sort_order' => $sortOrder,
+            'per_page' => $perPage
+        ];
+
+        return $options;
     }
 }

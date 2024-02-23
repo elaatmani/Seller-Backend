@@ -178,7 +178,7 @@ class AdminController extends Controller
                     ['id', '=', $search]
                 ];
             break;
-            
+
             default:
                 $orWhere = !$search ? [] : [
                     ['id', 'LIKE', "%$search%"],
@@ -208,12 +208,11 @@ class AdminController extends Controller
             ['created_at', '<=', data_get($filtersDate, 'created_to', null)],
             ['dropped_at', '>=', data_get($filtersDate, 'dropped_from', null)],
             ['dropped_at', '<=', data_get($filtersDate, 'dropped_to', null)],
-
         ];
 
         $whereHas = [
             [ 'product_id', '=', data_get($filters, 'product_id', 'all'), 'items' ]
-        
+
         ];
 
         $options = [
