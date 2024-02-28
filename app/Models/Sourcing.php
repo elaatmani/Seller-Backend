@@ -25,6 +25,8 @@ class Sourcing extends Model
         'additional_fees'
     ];
 
+    protected $appends = ['seller_name'];
+
 
     public function history()
     {
@@ -33,5 +35,9 @@ class Sourcing extends Model
 
     public function seller() {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function getSellerNameAttribute() {
+        return $this->seller->firstname . ' ' . $this->seller->lastname;
     }
 }
