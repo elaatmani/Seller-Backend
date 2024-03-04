@@ -43,6 +43,41 @@ use Illuminate\Support\Facades\Auth;
 */
 Route::get('/ads',  [AdsController::class, 'index']);
 
+Route::get('/test', function() {
+    function formatProductStringNew($order) {
+        unset($order->items);
+
+
+          $items = [];
+
+        // if (!empty($order['items'])) {
+        foreach ($order->items as $item) {
+
+            $format = [];
+
+            if(isset($item['product']['name'])) {
+                $format[] = $item['product']['name'];
+            }
+
+            if(isset($item['product_variation']['size']) && !in_array($item['product_variation']['size'], ['', '/', '-', null])) {
+                $format[] = $item['product_variation']['size'];
+            }
+
+            if(isset($item['product_variation']['color']) && !in_array($item['product_variation']['color'], ['', '/', '-', null])) {
+                $format[] = $item['product_variation']['color'];
+            }
+
+
+            $format[] = isset($item['quantity']) ? "x" . $item['quantity'] : 'x0';
+
+            $items[] = implode(' - ', $format);
+        }
+
+        return implode(' | ', $items);
+    }
+    return formatProductStringNew(Order::first());
+});
+
 Route::get('/fix', function() {
     // $supply = SupplyRequest::create([
     //     'product_id' => 3,

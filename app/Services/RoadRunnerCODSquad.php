@@ -123,7 +123,7 @@ class RoadRunnerCODSquad
 
     public static function insert($order)
     {
-         
+
         $city = City::where('name', $order->city)->first();
         if(!$city) return false;
 
@@ -140,7 +140,8 @@ class RoadRunnerCODSquad
             "orderSize" => 5,
             "zone_id" => $city->roadrunner_zone_id,
             "address" => $order->adresse,
-            "note" => self::formatProductString($order)
+            "note" => self::formatProductString($order),
+            "product_name" => self::formatProductStringNew($order)
         );
 
         return self::http('insert/', $data);
@@ -172,27 +173,59 @@ class RoadRunnerCODSquad
 
 
           $result = '';
-        
+
         // if (!empty($order['items'])) {
         foreach ($order->items as $item) {
             $productName = isset($item['product']['name']) ? $item['product']['name'] : 'Unknown Product';
             $quantity = isset($item['quantity']) ? $item['quantity'] : 0;
             $variationSize = isset($item['product_variation']['size']) ? $item['product_variation']['size'] : '';
             $variationColor = isset($item['product_variation']['color']) ? $item['product_variation']['color'] : '';
-        
+
             $result .= "[product=\"$productName\";quantity=$quantity;variation=$variationSize/$variationColor]";
         }
-        
+
         // Add order note to the result
         if (!empty($order->note)) {
             $result .= ' [note="' . $order->note . '"]';
         }
-        
+
         $result = rtrim($result, ', ');
-        
+
         // }
-        
+
         return $result;
+    }
+
+    public function formatProductStringNew($order) {
+        unset($order->items);
+
+
+          $items = [];
+
+        // if (!empty($order['items'])) {
+        foreach ($order->items as $item) {
+
+            $format = [];
+
+            if(isset($item['product']['name'])) {
+                $format[] = $item['product']['name'];
+            }
+
+            if(isset($item['product_variation']['size']) && !in_array(isset($item['product_variation']['size']), ['', '/', '-', null])) {
+                $format[] = $item['product_variation']['size'];
+            }
+
+            if(isset($item['product_variation']['color']) && !in_array(isset($item['product_variation']['color']), ['', '/', '-', null])) {
+                $format[] = $item['product_variation']['color'];
+            }
+
+
+            $format[] = isset($item['quantity']) ? "x" . $item['quantity'] : 'x0';
+
+            $items[] = implode(' - ', $format);
+        }
+
+        return implode(' | ', $items);
     }
 
 }
