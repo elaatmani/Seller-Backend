@@ -196,7 +196,7 @@ class RoadRunnerCODSquad
         return $result;
     }
 
-    public function formatProductStringNew($order) {
+    public static function formatProductStringNew($order) {
         unset($order->items);
 
 

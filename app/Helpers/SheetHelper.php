@@ -19,7 +19,6 @@ class SheetHelper {
 
     public function __construct()
     {
-        $this->orders = Order::all();
     }
 
     public function sync_orders($sheet, $save = true) {
@@ -27,28 +26,20 @@ class SheetHelper {
         try {
             $sheet_id = $sheet->sheet_id;
             $sheet_name = $sheet->sheet_name;
-            
+
 
             $data = Sheets::spreadsheet($sheet_id)->sheet($sheet_name)->get();
             $headers = $data->pull(0);
-            // if($sheet->id == 3) {
-            //     $k = 0;
-            //     try {
-            //         foreach($data as $i) {
-            //             $k += 1;
-            //             array_combine($headers, $i);
-            //         }
-            //     } catch (\Error $e) {
-            //         throw new Exception($k);
-            //     }
-            // }
             $values = Sheets::collection($headers, $data);
             $rows = array_values($values->toArray());
-            $sheets_ids = array_map(fn($r) => self::order_sheet_id($sheet, $r['Order ID']), $rows);
-            $orders_ids = array_values($this->orders->whereIn('sheets_id', $sheets_ids)->pluck('sheets_id')->toArray());
+
+            $orders_ids = array_values(Order::where('sheets_id', 'like', $sheet_id . '***' . $sheet_name . "%")->get()->pluck('sheets_id')->toArray());
 
             $newRows = array_filter($rows, function ($row) use ($orders_ids, $sheet) {
-                return !in_array( self::order_sheet_id($sheet, $row['Order ID']), $orders_ids);
+                return !in_array( self::order_sheet_id($sheet, $row['Order ID']), $orders_ids)
+                && !!data_get($row, 'SKU')
+                && !!data_get($row, 'Full name')
+                && !!data_get($row, 'Phone');
             });
 
             if($save) {
@@ -59,7 +50,7 @@ class SheetHelper {
             return array_values($newRows);
         } catch (\Throwable $th) {
             $message = json_decode($th->getMessage(), true);
-            
+
             if(isset($message['error']) && $message['error']['status'] == 'PERMISSION_DENIED') {
                 throw new Exception('PERMISSION_DENIED');
             } else {
@@ -88,34 +79,32 @@ class SheetHelper {
                 $product_name = array_key_exists('Product name', $o) ? $o['Product name'] : '';
                 $source = array_key_exists('Source', $o) ? $o['Source'] : '';
 
-                if(!$sku || !$phone) continue;
-                $product_exists = DB::table('products')->where('ref', $sku)->where('status',1)->exists();
+                if(!$sku || !$phone || !$fullname) continue;
 
-                if(!$product_exists) {
+                $product = Product::where('ref', $sku)->first();
+                if(!$product) {
                     $productNotFoundOrders[] = $o;
                     continue;
                 };
 
-                $order_exists = DB::table('orders')->where('sheets_id', self::order_sheet_id($sheet, $o['Order ID']))->exists();
-                if(!!$order_exists) {
-                    $alreadyExistsOrders[] = $o;
-                    continue;
-                };
+                // $order_exists = DB::table('orders')->where('sheets_id', self::order_sheet_id($sheet, $o['Order ID']))->exists();
+                // if(!!$order_exists) {
+                //     $alreadyExistsOrders[] = $o;
+                //     continue;
+                // };
 
-                $product = Product::where('ref', $sku)->first();
-
-            $order = Order::create([
-                'user_id' => $sheet->user_id,
-                'fullname' => $fullname,
-                'phone' => $phone,
-                'city' => $city,
-                'adresse' => $adresse,
-                'price' => 0,
-                'sheets_id' => self::order_sheet_id($sheet, $o['Order ID']),
-                'counts_from_warehouse' => true,
-                'product_name' => $product_name,
-                'source' => $source
-            ]);
+                $order = Order::create([
+                    'user_id' => $sheet->user_id,
+                    'fullname' => $fullname,
+                    'phone' => $phone,
+                    'city' => $city,
+                    'adresse' => $adresse,
+                    'price' => 0,
+                    'sheets_id' => self::order_sheet_id($sheet, $o['Order ID']),
+                    'counts_from_warehouse' => true,
+                    'product_name' => $product_name,
+                    'source' => $source
+                ]);
 
                 if(isset($product)) {
                     $arr = explode('\n', $quantity);

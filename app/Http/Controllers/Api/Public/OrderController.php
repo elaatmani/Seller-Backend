@@ -1104,7 +1104,8 @@ class OrderController extends Controller
             $product_ids = ProductAgente::where('agente_id', $request->user()->id)->pluck('product_id');
 
             //Get the Order_ids related to the Product_ids handled by current agente
-            $OrderItems = OrderItem::whereIn('product_id', $product_ids)->pluck('order_id');
+            // $OrderItems = OrderItem::whereIn('product_id', $product_ids)->pluck('order_id');
+            $OrderItems = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')->whereNull('confirmation')->whereNull('orders.agente_id')->whereIn('product_id', $product_ids)->pluck('order_id');
 
             //Check and get the order_ids if they have both agente and confirmation null
             $AddOrder = Order::with(['items' => ['product', 'product_variation']])
@@ -1147,7 +1148,7 @@ class OrderController extends Controller
                     $AddOrder->save();
 
 
-               
+
                 DB::commit();
             } else {
                 return response()->json(
