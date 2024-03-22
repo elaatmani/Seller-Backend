@@ -35,12 +35,18 @@ class SourcingObserver
      * @return void
      */
     public function updated(Sourcing $sourcing)
-    {   
+    {
         $userRole = auth()->user()->roles->pluck('name')->first();
         if ($userRole == 'seller') {
             $adminRole = Role::where('name', 'admin')->first();
             $admins = $adminRole->users()->where('id', '!=', auth()->id())->get();
-            $message = auth()->user()->firstname . ' ' . auth()->user()->lastname . " has confirmed the sourcing for product " . $sourcing->product_name .".";
+            if($sourcing->quotation_status == 'confirmed') {
+                $message = "Sourcing  #" . $sourcing->id ." has been confirmed";
+            }
+
+            if($sourcing->quotation_status == 'cancelled') {
+                $message = "Sourcing  #" . $sourcing->id ." has been cancelled";
+            }
             $action = $sourcing->id;
 
             foreach ($admins as $admin) {
@@ -49,14 +55,16 @@ class SourcingObserver
         } elseif ($userRole == 'admin') {
             if ($sourcing->isDirty('quotation_status')) {
                 $mainUserId = $sourcing->user_id;
-                $message = auth()->user()->firstname . ' ' . auth()->user()->lastname . " has updated your sourcing for product " . $sourcing->product_name . " with status: " . $sourcing->quotation_status . ".";
+                $quotation = collect(config('status.sourcings.quotation_status.values'))->where('value', $sourcing->quotation_status)->first();
+                $message = "Sourcing #" . $sourcing->id . " has been updated with to '" . $quotation['name'] . "'.";
                 $action = $sourcing->id;
 
                 toggle_notification($mainUserId, $message,$action);
             }
             if ($sourcing->isDirty('sourcing_status')) {
                 $mainUserId = $sourcing->user_id;
-                $message = auth()->user()->firstname . ' ' . auth()->user()->lastname . " has updated your sourcing for product " . $sourcing->product_name . " with status: " . $sourcing->sourcing_status . ".";
+                $status = collect(config('status.sourcings.sourcing_status.values'))->where('value', $sourcing->sourcing_status)->first();
+                $message = "Sourcing #" . $sourcing->id . " has been updated to '" . $status['name'] . "'.";
                 $action = $sourcing->id;
 
                 toggle_notification($mainUserId, $message,$action);

@@ -22,9 +22,8 @@ return [
             'values' => [
                 [ 'name' => 'Pending', 'value' => 'pending' ],
                 [ 'name' => 'Quoting', 'value' => 'quoting' ],
-                [ 'name' => 'Processing', 'value' => 'processing' ],
-                [ 'name' => 'Accepted', 'value' => 'accepted' ],
-                [ 'name' => 'Refused', 'value' => 'refused' ],
+                [ 'name' => 'Cancelled', 'value' => 'cancelled' ],
+                [ 'name' => 'Confirmed', 'value' => 'confirmed' ],
             ]
         ],
         'sourcing_status' => [
@@ -32,8 +31,10 @@ return [
             'values' => [
                 [ 'name' => 'Pending', 'value' => 'pending' ],
                 [ 'name' => 'Processing', 'value' => 'processing' ],
-                [ 'name' => 'Accepted', 'value' => 'accepted' ],
-                [ 'name' => 'Refused', 'value' => 'refused' ],
+                [ 'name' => 'Packing', 'value' => 'packing' ],
+                [ 'name' => 'Shipped', 'value' => 'shipped' ],
+                [ 'name' => 'Delivered', 'value' => 'delivered' ],
+                [ 'name' => 'Cancelled', 'value' => 'cancelled' ],
             ]
         ]
     ]
