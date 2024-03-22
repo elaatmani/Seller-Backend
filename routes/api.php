@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\AdsController;
 use App\Http\Controllers\Api\Admin\BulkActionController;
 use App\Services\RoadRunnerService;
+use App\Http\Controllers\Api\NewNotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -279,6 +280,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/sourcings/{id}/history', [SourcingController::class, 'history']);
     Route::post('/sourcings/{id}', [SourcingController::class, 'update']);
     Route::delete('/sourcings/{id}', [SourcingController::class, 'destroy']);
+
+    //Notification Sourcing
+    Route::get('/app/notifications', [NewNotificationController::class,'index']);
+    Route::get('/app/changestatus', [NewNotificationController::class,'MarkAsRead']);
+    Route::get('/app/all', [NewNotificationController::class,'all']);
 
 
     // Settings
