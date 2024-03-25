@@ -231,7 +231,17 @@ class NewFactorisationController extends Controller
     
 
 
-
+    public function get_sum(){
+        $totalPrice = Factorisation::where([
+            ['user_id', auth()->id()],
+            ['close',1],
+            ['paid',0],
+        ])->sum('price');
+        return response()->json([
+            "code"=>"SUCCESS",
+            "totalPrice"=>$totalPrice
+        ]);
+    }
     public function get_options($request) {
         $filters = $request->input('filters', []);
         $search = $request->input('search', '');

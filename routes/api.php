@@ -265,6 +265,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/v1/factorisation/new', [NewFactorisationController::class, 'store']);
     Route::post('/v1/factorisation/update/{id}', [NewFactorisationController::class, 'update']);
     Route::delete('/v1/factorisation/delete/{id}', [NewFactorisationController::class, 'destroy']);
+    Route::get('/v1/factorisation/sum', [NewFactorisationController::class, 'get_sum']);
 
     // Supply Requests
     Route::post('/supply-requests', [SupplyRequestController::class, 'index']);
