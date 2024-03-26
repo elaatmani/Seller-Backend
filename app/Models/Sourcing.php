@@ -22,7 +22,9 @@ class Sourcing extends Model
         'sourcing_status',
         'cost_per_unit',
         'total_cost',
-        'additional_fees'
+        'additional_fees',
+        'paid_at',
+        'is_paid'
     ];
 
     protected $appends = ['seller_name'];

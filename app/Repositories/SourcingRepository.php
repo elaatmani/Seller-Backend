@@ -121,7 +121,7 @@ class SourcingRepository  implements SourcingRepositoryInterface {
         $sourcing->update(Arr::only($data, auth()->user()->hasRole('admin') ? $can_update_by_admin : $can_update_by_seller));
 
         $sourcing->fresh();
-        return $data;
+        return $sourcing;
     }
 
 

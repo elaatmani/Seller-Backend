@@ -36,6 +36,7 @@ class SourcingObserver
      */
     public function updated(Sourcing $sourcing)
     {
+        $this->track($sourcing);
         $userRole = auth()->user()->roles->pluck('name')->first();
         if ($userRole == 'seller') {
             $adminRole = Role::where('name', 'admin')->first();
