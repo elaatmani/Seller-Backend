@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
 use App\Http\Controllers\Api\Admin\NewFactorisationController;
 use App\Http\Controllers\Api\Admin\NewProductController;
+use App\Http\Controllers\Api\AlertController;
 use App\Http\Controllers\Api\Seller\SellerController;
 use App\Http\Controllers\Api\Export\FactorisationExportController;
 use App\Http\Controllers\Api\SettingsController;
@@ -291,6 +292,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Settings
     Route::get('/settings', [SettingsController::class, 'index']);
     Route::post('/settings/create', [SettingsController::class, 'create']);
+
+    // Alerts
+    Route::get('/my-alerts', [AlertController::class, 'alerts']);
+    Route::get('/alerts', [AlertController::class, 'index']);
+    Route::post('/alerts', [AlertController::class, 'store']);
+    Route::delete('/alerts/{id}', [AlertController::class, 'destroy']);
 
 
 });

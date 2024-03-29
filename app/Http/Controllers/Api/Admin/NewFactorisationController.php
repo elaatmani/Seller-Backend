@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Factorisation;
-use App\Repositories\Interfaces\FactorisationRepositoryInterface;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
+use Illuminate\Http\Request;
+use App\Models\Factorisation;
+use App\Models\FactorisationFee;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
+use App\Repositories\Interfaces\FactorisationRepositoryInterface;
 
 class NewFactorisationController extends Controller
 {
@@ -37,14 +38,14 @@ class NewFactorisationController extends Controller
        }
 
         $factorisation = $this->factorisationRepository->paginate($perPage, $sortBy, $sortAds, $options);
-        
+
 
         return response()->json([
             'code' => 'SUCCESS',
             'data' => [
                 'factorisation' => $factorisation,
 
-             
+
             ]
         ]);
     }
@@ -228,7 +229,7 @@ class NewFactorisationController extends Controller
             );
         }
     }
-    
+
 
 
     public function get_sum(){
@@ -236,16 +237,24 @@ class NewFactorisationController extends Controller
             ['user_id', auth()->id()],
             ['close',1],
             ['paid',0],
+            ['type', 'seller']
         ])->sum('price');
+        $ids = Factorisation::where([
+            ['user_id', auth()->id()],
+            ['close',1],
+            ['paid',0],
+        ])->get()->pluck('id')->toArray();
+
+        $totalFees = FactorisationFee::whereIn('factorisation_id', $ids)->sum('feeprice');
         return response()->json([
             "code"=>"SUCCESS",
-            "totalPrice"=>$totalPrice
+            "totalPrice"=>$totalPrice - $totalFees
         ]);
     }
     public function get_options($request) {
         $filters = $request->input('filters', []);
         $search = $request->input('search', '');
-        
+
 
         $orWhere = !$search ? [] : [
             ['id', 'LIKE', "%$search%"],
