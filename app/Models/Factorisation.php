@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\RoadRunnerService;
+
 
 class Factorisation extends Model
 {
@@ -64,11 +66,17 @@ class Factorisation extends Model
 
      public function getSellerOrderPriceAttribute()
      {
-        $totalPrice = $this->seller_orders->flatMap(function ($order) {
+         $totalRevenue = $this->seller_orders->flatMap(function ($order) {
             return [$order->price ?? 0, ...$order->items->pluck("price")];
         })->sum();
+        
+        $totalFees = $this->shippingFees() + $this->totalCOD();
 
-        return $totalPrice;
+        $otherFees = $this->fees->sum('feeprice');
+
+        $netPayment = $totalRevenue - ($totalFees + $otherFees);
+
+        return $netPayment;
      }
 
      public function delivery_orders(){
@@ -88,4 +96,34 @@ class Factorisation extends Model
 
         return $totalPrice;
      }
+   
+
+    /**
+     * Calculate the total shipping fees for all orders.
+     *
+     * @return float
+     */
+    private function shippingFees()
+    {
+        $shippingFees = $this->seller_orders->sum(function ($order) {
+            return $order->upsell == "oui" ? 10 : 8;
+        });
+    
+        return $shippingFees;
+    }
+
+
+    /**
+     * Calculate the total COD fees for all orders.
+     *
+     * @return float
+     */
+    private function totalCOD()
+    {
+        $totalCOD = $this->seller_orders->sum(function ($order) {
+            return RoadRunnerService::getPrice($order) * 0.04;
+        });
+
+        return $totalCOD;
+    }
 }
