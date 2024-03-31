@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api\Admin;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use App\Models\Factorisation;
+use App\Models\Order;
 use App\Models\FactorisationFee;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\Interfaces\FactorisationRepositoryInterface;
+use App\Services\RoadRunnerService;
 
 class NewFactorisationController extends Controller
 {
@@ -232,25 +234,54 @@ class NewFactorisationController extends Controller
 
 
 
-    public function get_sum(){
-        $totalPrice = Factorisation::where([
-            ['user_id', auth()->id()],
-            ['close',1],
-            ['paid',0],
-            ['type', 'seller']
-        ])->sum('price');
-        $ids = Factorisation::where([
-            ['user_id', auth()->id()],
-            ['close',1],
-            ['paid',0],
-        ])->get()->pluck('id')->toArray();
+    public function get_sum(Request $request){
+        $factorisationQuery = Factorisation::query();
+        $orders = Order::query();
 
-        $totalFees = FactorisationFee::whereIn('factorisation_id', $ids)->sum('feeprice');
-        return response()->json([
-            "code"=>"SUCCESS",
-            "totalPrice"=>$totalPrice - $totalFees
-        ]);
+        $factorisationQuery->when(
+            !auth()->user()->hasRole('admin'),
+            function ($query) use ($request) {
+                $query->where('user_id', $request->user()->id);
+            }
+        )->where('close', false);
+        $factorisationIds = $factorisationQuery->pluck('id');
+        $orders->whereIn('seller_factorisation_id', $factorisationIds);
+        $totalRevenue = $orders->get()->flatMap(function ($order) {
+            return [$order->price ?? 0, ...$order->items->pluck("price")];
+        })->sum();
+        $totalFees = $this->shippingFees($orders) + $this->totalCOD($orders);
+        $factorisationFees = $this->calculateFactorisationFees($orders);
+        $netPayment = $totalRevenue - ($totalFees + $factorisationFees);
+        return $netPayment;
     }
+
+    private function calculateFactorisationFees($orders)
+    {
+        $factorisationsIds = $orders->pluck('seller_factorisation_id');
+        $factorisationFees = FactorisationFee::whereIn('factorisation_id', $factorisationsIds);
+        $totalFees = $factorisationFees->sum('feeprice');
+        return $totalFees;
+    }
+
+    private function shippingFees($orders)
+    {
+        $shippingFees = 0;
+        foreach ($orders->get() as $order) {
+            $shippingFees += $order->upsell == "oui" ? 10 : 8;
+        }
+        return $shippingFees;
+    }
+
+    private function totalCOD($orders)
+    {
+        $totalCOD = 0;
+        foreach ($orders->get() as $order) {
+            $totalCOD += RoadRunnerService::getPrice($order) * 0.04;
+        }
+        return $totalCOD;
+    }
+
+
     public function get_options($request) {
         $filters = $request->input('filters', []);
         $search = $request->input('search', '');

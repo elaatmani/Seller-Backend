@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\Admin\NewProductController;
 use App\Http\Controllers\Api\AlertController;
 use App\Http\Controllers\Api\Seller\SellerController;
 use App\Http\Controllers\Api\Export\FactorisationExportController;
+use App\Http\Controllers\Api\Public\NetPayment;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SourcingController;
 use App\Http\Controllers\Api\SupplyRequestController;
@@ -153,8 +154,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Notification
     Route::get('/notifications', [NotificationController::class, 'notifications']);
     Route::get('/notifications/agente', [NotificationController::class, 'agenteNotifications']);
-    Route::get('/notifications/delivery', [NotificationController::class, 'deliveryNotifications']);
-
+    Route::get('/notifications/delivery', [NotificationController::class, 'deliveryNotifications']);    
 
 
     //Sales For Admin
@@ -267,6 +267,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/v1/factorisation/update/{id}', [NewFactorisationController::class, 'update']);
     Route::delete('/v1/factorisation/delete/{id}', [NewFactorisationController::class, 'destroy']);
     Route::get('/v1/factorisation/sum', [NewFactorisationController::class, 'get_sum']);
+    
 
     // Supply Requests
     Route::post('/supply-requests', [SupplyRequestController::class, 'index']);
