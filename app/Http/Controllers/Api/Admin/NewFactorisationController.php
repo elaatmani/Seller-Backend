@@ -252,7 +252,12 @@ class NewFactorisationController extends Controller
         $totalFees = $this->shippingFees($orders) + $this->totalCOD($orders);
         $factorisationFees = $this->calculateFactorisationFees($orders);
         $netPayment = $totalRevenue - ($totalFees + $factorisationFees);
-        return $netPayment;
+        return [
+            'code' => 'SUCCESS',
+            'data' => [
+                'totalPrice' => $netPayment
+            ]
+        ];
     }
 
     private function calculateFactorisationFees($orders)
