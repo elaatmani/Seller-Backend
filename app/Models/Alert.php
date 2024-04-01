@@ -19,6 +19,8 @@ class Alert extends Model
         'closeable'
     ];
 
+    protected $appends = [ 'to' ];
+
     public function getToAttribute() {
         switch ($this->type) {
             case 'user':
