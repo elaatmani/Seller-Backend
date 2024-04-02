@@ -55,7 +55,7 @@ class OrderObserver
 
     public function updating(Order $order)
     {
-        Log::channel('tracking')->info('Order Delivery Start: ' . $order->delivery);
+        Log::channel('tracking')->info('Order #' . $order->id. ' Delivery Start: ' . $order->delivery);
         $user = request()->user();
         $oldAttributes = $order->getOriginal(); // Old values
         $newAttributes = $order->getAttributes(); // New values
@@ -88,7 +88,7 @@ class OrderObserver
         FactorisationService::observe($order);
         // throw new Exception('Error admin');
 
-        Log::channel('tracking')->info('Order Delivery END: ' . $order->delivery);
+        Log::channel('tracking')->info('Order #' . $order->id. ' Delivery END: ' . $order->delivery);
 
 
 

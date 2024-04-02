@@ -78,7 +78,7 @@ class OrderHistoryService
                 'note' => $oldDelivery . ' -> ' . $newDelivery
             ]);
 
-            Log::channel('tracking')->info('Order Delivery: ' . $oldDelivery . ' => ' . $newDelivery);
+            Log::channel('tracking')->info('Order #' . $order->id. ' Delivery: ' . $oldDelivery . ' => ' . $newDelivery);
         }
 
         if ($oldUpsell != $oldUpsell) {
