@@ -10,6 +10,7 @@ use App\Services\OrderItemHistoryService;
 use App\Services\RoadRunnerCODSquad;
 use App\Services\RoadRunnerVoldo;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class OrderObserver
 {
@@ -54,6 +55,7 @@ class OrderObserver
 
     public function updating(Order $order)
     {
+        Log::channel('tracking')->info('Order Delivery Start: ' . $order->delivery);
         $user = request()->user();
         $oldAttributes = $order->getOriginal(); // Old values
         $newAttributes = $order->getAttributes(); // New values
@@ -77,7 +79,7 @@ class OrderObserver
         // $upsell = $order->upsell;
         // unset($order->items);
         // $newTotalQuantity = $order->items->sum('quantity');
-     
+
         // if ($newTotalQuantity <= $oldTotalQuantity && $upsell != "oui") {
         //     $order->upsell = null; // Set 'upsell' to null if quantity decreased
         // }
@@ -85,7 +87,9 @@ class OrderObserver
         OrderHistoryService::observe($order);
         FactorisationService::observe($order);
         // throw new Exception('Error admin');
-        
+
+        Log::channel('tracking')->info('Order Delivery END: ' . $order->delivery);
+
 
 
     }

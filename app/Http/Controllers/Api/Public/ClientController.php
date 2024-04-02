@@ -8,6 +8,7 @@ use App\Models\RoadRunnerRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Factorisation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
@@ -46,7 +47,7 @@ class ClientController extends Controller
 
             $idold = substr($request->reference_id, 3);
             $prefixold = strtolower(substr($request->reference_id, 0, 3));
-            
+
             $id = substr($request->reference_id, 4);
             $prefix = strtolower(substr($request->reference_id, 0, 4));
             if($prefix == 'cods' && is_numeric($id)){
@@ -136,6 +137,7 @@ class ClientController extends Controller
             // if($order->delivery == 'livrer'){
 
             // }
+            Log::channel('tracking')->info('Order Id: ' . $order->id . '; Order New Status: ' . $order->status . '; Request Status: ' . $newStatus);
             $order->save();
 
 
@@ -190,8 +192,8 @@ class ClientController extends Controller
 
                     // $id = $idBefore - 2000;
                     $prefixold = strtolower(substr($res['reference_id'], 0, 3));
-                    
-                    
+
+
                      $id = substr($res['reference_id'], 4);
 
                     // $id = $idBefore - 2000;
@@ -202,9 +204,9 @@ class ClientController extends Controller
                                 } else {
                         $order = null;
                     }
-                    
-                  
-                                
+
+
+
                     $roadrunner = RoadRunnerRequest::create([
                         'reference_id' => $res['reference_id'],
                         'status' => $res['status']

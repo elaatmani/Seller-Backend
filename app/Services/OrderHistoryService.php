@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Models\OrderHistory;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class OrderHistoryService
 {
@@ -76,6 +77,8 @@ class OrderHistoryService
                 'historique' => $oldDelivery . ' -> ' . $newDelivery,
                 'note' => $oldDelivery . ' -> ' . $newDelivery
             ]);
+
+            Log::channel('tracking')->info('Order Delivery: ' . $oldDelivery . ' => ' . $newDelivery);
         }
 
         if ($oldUpsell != $oldUpsell) {
@@ -97,6 +100,8 @@ class OrderHistoryService
                 'note' => $oldAgentId . ' -> ' . $newAgentId,
             ]);
         }
+
+
     }
 
 }
