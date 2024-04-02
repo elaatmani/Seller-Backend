@@ -297,6 +297,7 @@ class ClientController extends Controller
 
                 } catch (\Throwable $th) {
                     Log::channel('tracking')->info('Error Multiple updating: ' . $res['reference_id']);
+                    Log::channel('tracking')->info('Error: ' . $th->getMessage());
 
                     $failed[] = [
                         'reference_id' => $res['reference_id'],
