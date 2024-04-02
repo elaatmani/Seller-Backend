@@ -137,7 +137,7 @@ class ClientController extends Controller
             // if($order->delivery == 'livrer'){
 
             // }
-            Log::channel('tracking')->info('Order Id: #' . $order->id . '; Order New Status: ' . $order->status . '; Request Status: ' . $newStatus);
+            Log::channel('tracking')->info('Order Id: #' . $order->id . '; Order New Status: ' . $order->delivery . '; Request Status: ' . $newStatus);
             $order->save();
 
 
@@ -150,7 +150,7 @@ class ClientController extends Controller
                 'message' => "Order delivery status has changed to '" . $request->status . "'."
             ]);
         } catch (\Throwable $th) {
-            Log::channel('tracking')->info('Error updating: ' . $request->reference_id);
+            Log::channel('tracking')->info('Error Single updating: ' . $request->reference_id);
             DB::rollBack();
             $roadrunner = RoadRunnerRequest::create([
                 'reference_id' => $request->reference_id,
@@ -290,13 +290,13 @@ class ClientController extends Controller
                             $order->factorisation_id = null;
                         }
                     }
-                    Log::channel('tracking')->info('Order Id: #' . $order->id . '; Order New Status: ' . $order->status . '; Request Status: ' . $newStatus);
+                    Log::channel('tracking')->info('Order Id: #' . $order->id . '; Order New Status: ' . $order->delivery . '; Request Status: ' . $newStatus);
                     $order->save();
 
                     $success[] = $res['reference_id'];
 
                 } catch (\Throwable $th) {
-                    Log::channel('tracking')->info('Error updating: ' . $res['reference_id']);
+                    Log::channel('tracking')->info('Error Multiple updating: ' . $res['reference_id']);
 
                     $failed[] = [
                         'reference_id' => $res['reference_id'],
