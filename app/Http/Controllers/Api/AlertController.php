@@ -85,6 +85,7 @@ class AlertController extends Controller
                 'target' => $request->input('target'),
                 'content' => $request->input('content'),
                 'closeable' => $request->input('closeable'),
+                'direction' => $request->input('direction', 'rtl')
             ]);
 
             return response()->json([
