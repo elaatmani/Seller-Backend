@@ -243,7 +243,7 @@ class NewFactorisationController extends Controller
             function ($query) use ($request) {
                 $query->where('user_id', $request->user()->id);
             }
-        )->where('close', false);
+        )->where('paid', false);
         $factorisationIds = $factorisationQuery->pluck('id');
         $orders->whereIn('seller_factorisation_id', $factorisationIds);
         $totalRevenue = $orders->get()->flatMap(function ($order) {
