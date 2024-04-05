@@ -16,7 +16,8 @@ class Alert extends Model
         'is_active',
         'variant',
         'target',
-        'closeable'
+        'closeable',
+        'direction'
     ];
 
     protected $appends = [ 'to' ];

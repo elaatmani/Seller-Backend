@@ -29,17 +29,22 @@ class AlertController extends Controller
         $role = auth()->user()->roles()->first()->name;
         $id = auth()->id();
 
-        $alerts = Alert::where([
-            'type' => 'global'
-        ])
-        ->orWhere([
-            ['type', 'role'],
-            ['target', $role],
-        ])
-        ->orWhere([
-            ['type', 'user'],
-            ['target', $id],
-        ])->get();
+        if(auth()->user()->hasRole('admin')) {
+            $alerts = Alert::latest()->get();
+        } else {
+            $alerts = Alert::where([
+                'type' => 'global'
+            ])
+            ->orWhere([
+                ['type', 'role'],
+                ['target', $role],
+            ])
+            ->orWhere([
+                ['type', 'user'],
+                ['target', $id],
+            ])->get();
+        }
+
 
         return response()->json([
             'code' => 'SUCCESS',
