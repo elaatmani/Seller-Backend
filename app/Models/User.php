@@ -30,7 +30,8 @@ class User extends Authenticatable
         'password',
         'status',
         'last_action',
-        'having_all'
+        'having_all',
+        'password_changed_at'
     ];
 
     /**

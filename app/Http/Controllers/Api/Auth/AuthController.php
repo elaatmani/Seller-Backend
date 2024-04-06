@@ -173,6 +173,7 @@ class AuthController extends Controller
                         'data' => [
                             'token' => $user->createToken("API TOKEN")->plainTextToken,
                             'user' => [
+                                ...$user->toArray(),
                                 'id' => $user->id,
                                 'firstname' => $user->firstname,
                                 'lastname' => $user->lastname,

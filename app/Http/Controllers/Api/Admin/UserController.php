@@ -332,6 +332,7 @@ class UserController extends Controller
                 $user->username = $request->username;
                 if ($request->updatePassword == 'true') {
                     $user->password = Hash::make($request->password);
+                    $user->password_changed_at = now();
                 }
                 $user->status = $request->status;
 
@@ -1028,6 +1029,7 @@ class UserController extends Controller
                 $user->phone = $request->phone;
                 if ($request->updatePassword == 'true') {
                     $user->password = Hash::make($request->password);
+                    $user->password_changed_at = now();
                 }
 
                 $user->save();
@@ -1118,7 +1120,7 @@ class UserController extends Controller
             [
                 'id' => $u->id,
                 'name' => $u->firstname . ' ' . $u->lastname,
-            
+
             ]
         );
 
