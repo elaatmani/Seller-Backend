@@ -37,7 +37,7 @@ class History extends Model
         unset($array['trackable_id']);
         return [
             ...$array,
-            'action_by' => $this->seller ? $this->user->lastname . ' ' . $this->user->firstname : "Not Found ($this->actor_id)"
+            'action_by' => $this->user ? $this->user->lastname . ' ' . $this->user->firstname : "Not Found ($this->actor_id)"
         ];
     }
 
