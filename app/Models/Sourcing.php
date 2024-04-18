@@ -40,6 +40,6 @@ class Sourcing extends Model
     }
 
     public function getSellerNameAttribute() {
-        return $this->seller->firstname . ' ' . $this->seller->lastname;
+        return $this->seller ? $this->seller->firstname . ' ' . $this->seller->lastname : "Not Found ($this->user_id)";
     }
 }
