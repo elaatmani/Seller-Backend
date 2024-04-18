@@ -69,14 +69,14 @@ class Factorisation extends Model
          $totalRevenue = $this->seller_orders->flatMap(function ($order) {
             return [$order->price ?? 0, ...$order->items->pluck("price")];
         })->sum();
-        
+
         $totalFees = $this->shippingFees() + $this->totalCOD();
 
         $otherFees = $this->fees->sum('feeprice');
 
         $netPayment = $totalRevenue - ($totalFees + $otherFees);
 
-        return $netPayment;
+        return round($netPayment, 2);
      }
 
      public function delivery_orders(){
@@ -96,7 +96,7 @@ class Factorisation extends Model
 
         return $totalPrice;
      }
-   
+
 
     /**
      * Calculate the total shipping fees for all orders.
@@ -108,7 +108,7 @@ class Factorisation extends Model
         $shippingFees = $this->seller_orders->sum(function ($order) {
             return $order->upsell == "oui" ? 10 : 8;
         });
-    
+
         return $shippingFees;
     }
 
