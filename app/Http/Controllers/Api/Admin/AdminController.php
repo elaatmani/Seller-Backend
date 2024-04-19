@@ -203,6 +203,12 @@ class AdminController extends Controller
             }
         }
 
+        $in_warehouse = data_get($filters, 'in_warehouse');
+        if(!!$in_warehouse && $in_warehouse != 'all') {
+            $toFilter[] = [ 'scanned_at', '!=', null ];
+            $toFilter[] = [ 'in_warehouse', '=', $in_warehouse == 'in' ];
+        }
+
         $whereDate = [
             ['created_at', '>=', data_get($filtersDate, 'created_from', null)],
             ['created_at', '<=', data_get($filtersDate, 'created_to', null)],

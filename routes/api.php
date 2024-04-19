@@ -1,37 +1,38 @@
 <?php
 
 use App\Events\NewNotification;
-use App\Http\Controllers\Api\Admin\AdminController;
-use App\Http\Controllers\Api\Admin\AdsController;
-use App\Http\Controllers\Api\Admin\BulkActionController;
 use App\Services\RoadRunnerService;
-use App\Http\Controllers\Api\NewNotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
+use App\Http\Controllers\Api\AlertController;
+use App\Http\Controllers\Api\Public\NetPayment;
+use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\SourcingController;
+use App\Http\Controllers\Api\Admin\AdsController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\SaleController;
 use App\Http\Controllers\Api\Admin\ShopController;
 use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\SheetController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Public\AgentController;
 use App\Http\Controllers\Api\Public\OrderController;
 use App\Http\Controllers\Api\Admin\ProductController;
+use App\Http\Controllers\Api\Seller\SellerController;
+use App\Http\Controllers\Api\SupplyRequestController;
 use App\Http\Controllers\Api\Admin\InventoryController;
 use App\Http\Controllers\Api\Admin\WarehouseController;
+use App\Http\Controllers\Api\NewNotificationController;
 use App\Http\Controllers\Api\Public\FollowUpController;
+use App\Http\Controllers\Api\Admin\BulkActionController;
+use App\Http\Controllers\Api\Admin\NewProductController;
 use App\Http\Controllers\Api\Public\DashboardController;
 use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
+use App\Http\Controllers\Api\Public\OrderWarehouseController;
 use App\Http\Controllers\Api\Admin\NewFactorisationController;
-use App\Http\Controllers\Api\Admin\NewProductController;
-use App\Http\Controllers\Api\AlertController;
-use App\Http\Controllers\Api\Seller\SellerController;
 use App\Http\Controllers\Api\Export\FactorisationExportController;
-use App\Http\Controllers\Api\Public\NetPayment;
-use App\Http\Controllers\Api\SettingsController;
-use App\Http\Controllers\Api\SourcingController;
-use App\Http\Controllers\Api\SupplyRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -154,7 +155,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     //Notification
     Route::get('/notifications', [NotificationController::class, 'notifications']);
     Route::get('/notifications/agente', [NotificationController::class, 'agenteNotifications']);
-    Route::get('/notifications/delivery', [NotificationController::class, 'deliveryNotifications']);    
+    Route::get('/notifications/delivery', [NotificationController::class, 'deliveryNotifications']);
 
 
     //Sales For Admin
@@ -267,7 +268,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/v1/factorisation/update/{id}', [NewFactorisationController::class, 'update']);
     Route::delete('/v1/factorisation/delete/{id}', [NewFactorisationController::class, 'destroy']);
     Route::get('/v1/factorisation/sum', [NewFactorisationController::class, 'get_sum']);
-    
+
 
     // Supply Requests
     Route::post('/supply-requests', [SupplyRequestController::class, 'index']);
@@ -301,6 +302,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/alerts/{id}', [AlertController::class, 'destroy']);
 
 
+    // Order warehouse control
+    Route::post('/warehouse-control', OrderWarehouseController::class);
 });
 
 // Auto fetch

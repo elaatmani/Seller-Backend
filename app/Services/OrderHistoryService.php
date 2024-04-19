@@ -30,6 +30,9 @@ class OrderHistoryService
         $oldUpsell = data_get($oldAttributes, 'upsell', 'Select');
         $newUpsell = data_get($newAttributes, 'upsell', 'Select');
 
+        $oldInWarehouse = data_get($oldAttributes, 'in_warehouse');
+        $newInWarehouse = data_get($newAttributes, 'in_warehouse');
+
         $oldAgentId = data_get($oldAttributes, 'agente_id', 'None');
         $newAgentId = data_get($newAttributes, 'agente_id', 'None');
 
@@ -98,6 +101,16 @@ class OrderHistoryService
                 'type' => 'responsibility',
                 'historique' => $oldAgentId . ' -> ' . $newAgentId,
                 'note' => $oldAgentId . ' -> ' . $newAgentId,
+            ]);
+        }
+
+        if ($newInWarehouse != $oldInWarehouse) {
+            OrderHistory::create([
+                'order_id' => $order->id,
+                'user_id' => request()->user()->id,
+                'type' => 'in_warehouse',
+                'historique' => (!$oldInWarehouse ? 'OUT' : 'IN') . ' -> ' . (!$newInWarehouse ? 'OUT' : 'IN'),
+                'note' => $oldInWarehouse . ' -> ' . $newInWarehouse
             ]);
         }
 
