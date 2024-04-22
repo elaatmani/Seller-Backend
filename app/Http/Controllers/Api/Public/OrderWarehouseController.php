@@ -23,12 +23,14 @@ class OrderWarehouseController extends Controller
             ], 404);
         }
 
+        if($target == 'in') {
+            $order->delivery = 'in-warehouse';
+        }
         $targetParsed = $target == 'in';
+        $order->in_warehouse = $targetParsed;
+        $order->scanned_at = now();
 
-        // $order->in_warehouse = $targetParsed;
-        // $order->scanned_at = now();
-
-        // $order->save();
+        $order->save();
 
         return response()->json([
             'message' => 'Invoked.',

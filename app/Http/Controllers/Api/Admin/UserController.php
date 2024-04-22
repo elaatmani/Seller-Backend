@@ -732,6 +732,72 @@ class UserController extends Controller
     }
 
 
+    /**
+     * Create a permission.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function createPermission(Request $request)
+    {
+        try {
+            if (!$request->user()->hasRole('admin')) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'NOT_ALLOWED',
+                        'message' => 'You Dont Have Access To Create Permission',
+                    ],
+                    405
+                );
+            }
+            //Validated
+            $validateUser = Validator::make(
+                $request->all(),
+                [
+                    'name' => 'required',
+                ]
+            );
+
+            if ($validateUser->fails()) {
+                return response()->json(
+                    [
+                        'status' => false,
+                        'code' => 'VALIDATION_ERROR',
+                        'message' => 'validation error',
+                        'error' => $validateUser->errors()
+                    ],
+                    401
+                );
+            }
+
+
+            $permission = Permission::create(['name' => $request->name]);
+
+            return response()->json(
+                [
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'message' => 'Permissions added successfully!',
+                    'permission' => $permission
+                ],
+                200
+            );
+        } catch (\Throwable $th) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                    'error' => $validateUser->errors()
+                ],
+                500
+            );
+        }
+    }
+
+
+
 
     /**
      * Update a specified role.
@@ -870,7 +936,25 @@ class UserController extends Controller
         }
     }
 
+/**
+     * Show All permissions.
+     * @param  \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function permissions(Request $request)
+    {
 
+        $permissions = Permission::orderBy('name')->get();
+
+        return response()->json(
+            [
+                'status' => true,
+                'code' => 'SUCCESS',
+                'permissions' => $permissions
+            ],
+            200
+        );
+    }
 
 
     /**

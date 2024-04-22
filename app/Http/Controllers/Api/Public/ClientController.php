@@ -20,11 +20,15 @@ class ClientController extends Controller
         'Picked Up',
         'Transfer',
         'Delay',
+        'Delayed',
         'Delivered',
         'Cancel',
+        'Canceled',
         'Returned',
         'Delivered & Return',
-        'Paid'
+        'Paid',
+        'Printed',
+        'printed',
     ];
 
     public $references = [
@@ -32,11 +36,15 @@ class ClientController extends Controller
         'Picked Up' => 'expidier',
         'Transfer' => 'transfer',
         'Delay' => 'pas-de-reponse',
+        'Delayed' => 'pas-de-reponse',
         'Delivered' => 'livrer',
         'Cancel' => 'annuler',
+        'Canceleled' => 'annuler',
         'Returned' => 'retourner',
         'Delivered & Return' => 'livrer-et-retourner',
-        'Paid' => 'paid'
+        'Paid' => 'paid',
+        'Printed' => 'printed',
+        'printed' => 'printed',
     ];
 
     public function updateDelivery(Request $request)
