@@ -5,6 +5,8 @@ namespace App\Repositories;
 use App\Models\Product;
 use App\Models\ProductOffer;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
+use Illuminate\Support\Facades\Validator;
+
 
 class ProductRepository  implements ProductRepositoryInterface {
 
@@ -86,6 +88,17 @@ class ProductRepository  implements ProductRepositoryInterface {
     public static function createProductOffers($id, $offers) {
 
         foreach($offers as $offer) {
+            $validator = Validator::make($offer, [
+                'quantity' => 'required',
+                'price' => 'required',
+                'note' => 'nullable|string',
+            ]);
+
+            if ($validator->fails()) {
+                // Handle validation failure
+                throw new \Exception('Validation error: ' . $validator->errors()->first());
+            }
+
             $offer = ProductOffer::create([
                 'product_id' => $id,
                 'quantity' => $offer['quantity'],
