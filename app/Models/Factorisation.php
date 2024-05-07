@@ -22,7 +22,9 @@ class Factorisation extends Model
         'price',
         'close_at',
         'paid_at',
-        'comment'
+        'comment',
+        'withdrawal_method_id',
+        'attachement_image'
     ];
 
 
@@ -39,12 +41,17 @@ class Factorisation extends Model
         'comment' => 'string'
     ];
 
-    protected $with = ['delivery','seller'];
+    protected $with = ['delivery','seller', 'withdrawal_method'];
     protected $appends = ['seller_order_count','delivery_order_count','seller_order_price','delivery_order_price'];
     protected $hidden = ['seller_orders','delivery_orders'];
 
     public function delivery(){
        return $this->belongsTo(User::class,'delivery_id');
+    }
+
+    public function history()
+    {
+        return $this->morphMany(History::class, 'trackable');
     }
 
     public function seller(){
@@ -81,6 +88,10 @@ class Factorisation extends Model
 
      public function delivery_orders(){
         return $this->hasMany(Order::class , 'factorisation_id');
+     }
+
+     public function withdrawal_method(){
+        return $this->belongsTo(WithdrawalMethod::class , 'withdrawal_method_id', 'id');
      }
 
      public function getDeliveryOrderCountAttribute()
@@ -125,5 +136,13 @@ class Factorisation extends Model
         });
 
         return $totalCOD;
+    }
+
+    public function getTotalCodFeesAttribute() {
+        return $this->totalCOD();
+    }
+
+    public function getTotalShippingFeesAttribute() {
+        return $this->shippingFees();
     }
 }

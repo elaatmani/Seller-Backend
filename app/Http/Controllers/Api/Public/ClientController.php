@@ -26,7 +26,7 @@ class ClientController extends Controller
         'Canceled',
         'Returned',
         'Delivered & Return',
-        'Paid',
+        // 'Paid',
         'Printed',
         'printed',
     ];
@@ -42,7 +42,7 @@ class ClientController extends Controller
         'Canceleled' => 'annuler',
         'Returned' => 'retourner',
         'Delivered & Return' => 'livrer-et-retourner',
-        'Paid' => 'paid',
+        // 'Paid' => 'paid',
         'Printed' => 'printed',
         'printed' => 'printed',
     ];

@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\Admin\FactorisationController;
 use App\Http\Controllers\Api\Public\OrderWarehouseController;
 use App\Http\Controllers\Api\Admin\NewFactorisationController;
 use App\Http\Controllers\Api\Export\FactorisationExportController;
+use App\Http\Controllers\Api\Seller\WithdrawalMethodController;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,6 +101,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/factorisations', [FactorisationController::class, 'index']);
     Route::get('/factorisations/{id}', [FactorisationController::class, 'show']);
     Route::post('/factorisations/update/{id}', [FactorisationController::class, 'update']);
+    Route::post('/factorisations/update/{id}/attachement', [FactorisationController::class, 'updateImageAttachement']);
     Route::post('/factorisations/update/comment/{id}', [FactorisationController::class, 'updateComment']);
     Route::post('/factorisations/update/closing/{id}', [FactorisationController::class, 'updateClosing']);
     Route::post('/factorisations/update/payment/{id}', [FactorisationController::class, 'updatePayment']);
@@ -270,6 +272,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/v1/factorisation/update/{id}', [NewFactorisationController::class, 'update']);
     Route::delete('/v1/factorisation/delete/{id}', [NewFactorisationController::class, 'destroy']);
     Route::get('/v1/factorisation/sum', [NewFactorisationController::class, 'get_sum']);
+    Route::get('/v1/factorisation/{id}', [NewFactorisationController::class, 'history']);
+    Route::post('/v1/factorisation/update/{id}/method', [NewFactorisationController::class, 'update_method']);
+    Route::get('/v1/factorisation/{id}/history', [NewFactorisationController::class, 'history']);
 
 
     // Supply Requests
@@ -306,6 +311,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Order warehouse control
     Route::post('/warehouse-control', OrderWarehouseController::class);
+
+    // Withdrawal methods for sellers
+    Route::get('/withdrawal-methods', [WithdrawalMethodController::class, 'index']);
+    Route::post('/withdrawal-methods/setup', [WithdrawalMethodController::class, 'setup']);
+    Route::post('/withdrawal-methods/{id}', [WithdrawalMethodController::class, 'update']);
 });
 
 // Auto fetch

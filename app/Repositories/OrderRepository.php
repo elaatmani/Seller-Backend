@@ -41,10 +41,10 @@ class OrderRepository implements OrderRepositoryInterface {
         $query = Order::query();
 
         $query->where(function($q) use($options){
-            
+
             foreach(data_get($options, 'orWhere', []) as $w) {
                     $q->orWhere($w[0], $w[1], $w[2]);
-            }    
+            }
         });
 
         foreach(data_get($options, 'whereDate', []) as $wd) {
@@ -137,7 +137,7 @@ class OrderRepository implements OrderRepositoryInterface {
             DB::beginTransaction();
             $order = Order::where('id', $id)->first();
 
-            
+
             $items = $data['items'];
             $itemsIds = collect($items)->map(fn($i) => $i['id'])->values()->toArray();
 
@@ -166,7 +166,7 @@ class OrderRepository implements OrderRepositoryInterface {
 
     public function create($data) {
 
-       
+
         $order = Order::create([
             ...$data,
             'sheets_id' => 'created_by:' . auth()->id(),
@@ -186,10 +186,10 @@ class OrderRepository implements OrderRepositoryInterface {
             ]);
         }
         $order = $order->fresh();
-        
+
         $user = request()->user();
 
-        if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
+        // if($user->can('create_sale') && $user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
             switch ($order->affectation) {
                 case RoadRunnerVoldo::ROADRUNNER_ID:
                     RoadRunnerVoldo::insert($order);
@@ -203,7 +203,7 @@ class OrderRepository implements OrderRepositoryInterface {
                     # code...
                     break;
             }
-        };
+        // };
         return $order;
     }
 

@@ -14,7 +14,7 @@ class RoadRunnerVoldo
     const NOTIFY_ROADRUNNER = true;
     const ROADRUNNER_ID = 50;
     const TEST_URL = "https://systemtunes.com/apivoldo/";
-    const LIVE_URL = "https://roadrunner-lb.com/api/vooldo/";
+    const LIVE_URL = "https://roadrunnerlb.com/api/vooldo/";
     const TEST_MODE = false;
 
     const ERRORS = [
@@ -169,26 +169,26 @@ class RoadRunnerVoldo
         $result = '';
 
          $result = '';
-        
+
         // if (!empty($order['items'])) {
         foreach ($order->items as $item) {
             $productName = isset($item['product']['name']) ? $item['product']['name'] : 'Unknown Product';
             $quantity = isset($item['quantity']) ? $item['quantity'] : 0;
             $variationSize = isset($item['product_variation']['size']) ? $item['product_variation']['size'] : '';
             $variationColor = isset($item['product_variation']['color']) ? $item['product_variation']['color'] : '';
-        
+
             $result .= "[product=\"$productName\";quantity=$quantity;variation=$variationSize/$variationColor]";
         }
-        
+
         // Add order note to the result
         if (!empty($order->note)) {
             $result .= ' [note="' . $order->note . '"]';
         }
-        
+
         $result = rtrim($result, ', ');
-        
+
         // }
-        
+
         return $result;
     }
 
