@@ -23,8 +23,10 @@ class SourcingObserver
         $admins = $adminRole->users()->where('id', '!=', auth()->id())->get();
         $message = auth()->user()->firstname . ' ' . auth()->user()->lastname . " has added new sourcing.";
         $action = $sourcing->id;
+        $opt = ['type' => 'sourcing', 'target' => $action];
+
         foreach ($admins as $admin) {
-            toggle_notification($admin->id,$message,$action);
+            toggle_notification($admin->id,$message,$action,$opt);
         }
     }
 
