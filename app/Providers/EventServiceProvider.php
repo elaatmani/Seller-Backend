@@ -7,10 +7,14 @@ use App\Models\OrderItem;
 use App\Models\Sourcing;
 use App\Models\User;
 use App\Models\SupplyRequest;
+use App\Models\Factorisation;
+use App\Models\FactorisationFee;
 use App\Observers\OrderObserver;
 use App\Observers\OrderItemObserver;
 use App\Observers\SourcingObserver;
 use App\Observers\SupplyRequestObserver;
+use App\Observers\FactorisationFeeObserver;
+use App\Observers\FactorisationObserver;
 use App\Observers\UserObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -42,6 +46,8 @@ class EventServiceProvider extends ServiceProvider
         SupplyRequest::observe(SupplyRequestObserver::class);
         Sourcing::observe(SourcingObserver::class);
         User::observe(UserObserver::class);
+        Factorisation::observe(FactorisationObserver::class);
+        FactorisationFee::observe(FactorisationFeeObserver::class);
     }
 
     /**

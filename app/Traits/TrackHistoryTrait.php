@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 trait TrackHistoryTrait
 {
-    protected function track(Model $model, callable $func = null, $table = null, $id = null)
+    protected function track(Model $model, callable $func = null, $table = null, $id = null, $custom_fields = [])
     {
         // Allow for overriding of table if it's not the model table
         $table = $table ?: get_class($model);
@@ -26,12 +26,19 @@ trait TrackHistoryTrait
             $oldValue = $value['old_value'];
 
             return [
-                ...call_user_func_array($func, [$newValue, $oldValue, $field]),
                 'field' => $field,
                 'new_value' => $newValue,
                 'old_value' => $oldValue,
+                ...call_user_func_array($func, [$newValue, $oldValue, $field]),
             ];
         });
+
+        if(count($custom_fields) > 0) {
+            $updated->push(...$custom_fields);
+            Log::channel('tracking')->info(json_encode(json_encode($custom_fields)));
+            Log::channel('tracking')->info(json_encode('inside'));
+        }
+        Log::channel('tracking')->info(json_encode(json_encode($updated->toArray())));
 
         History::create([
             'trackable_type' => $table,

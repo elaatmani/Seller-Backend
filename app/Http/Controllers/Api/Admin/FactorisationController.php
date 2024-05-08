@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Factorisation;
-use App\Models\FactorisationFee;
 use App\Models\Order;
 use App\Models\OrderItem;
-use Barryvdh\DomPDF\Facade\Pdf as PDF;
-// use PDF;
 use Illuminate\Http\Request;
+use App\Models\Factorisation;
+use App\Models\FactorisationFee;
+use App\Http\Controllers\Controller;
+// use PDF;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Illuminate\Support\Facades\Storage;
 
 
 class FactorisationController extends Controller
@@ -36,7 +37,7 @@ class FactorisationController extends Controller
             return $query->where('user_id', auth()->id())->where('close', 1);
         })->with('delivery', 'seller','fees')->get();
 
-        
+
 
         return response()->json(
             [
@@ -208,7 +209,10 @@ class FactorisationController extends Controller
                 }
                 // Delete fees that are not present in $request->fees
                 if (!empty($existingFees)) {
-                    FactorisationFee::whereIn('feename', $existingFees)->delete();
+                    $fees = FactorisationFee::whereIn('feename', $existingFees)->get();
+                    foreach($fees as $f) {
+                        $f->delete();
+                    }
                 }
 
                 return response()->json(
@@ -586,5 +590,40 @@ class FactorisationController extends Controller
 
 
         return  $pdf->stream($factorisation->factorisation_id . '.pdf', 'UTF-8');
+    }
+
+
+    public function updateImageAttachement(Request $request, $id) {
+
+
+        $factorisation = Factorisation::where('id', $id)->first();
+
+        if(!$factorisation) return response()->json([
+                'code' => 'NOT_FOUND',
+        ]);
+
+
+
+        if ($request->hasFile('image')) {
+
+            $image = $request->file('image');
+            $imageName = 'invoice_' . $id . '_' . time() . '.' . $image->getClientOriginalExtension();
+
+            // Store the image in the storage/uploads directory
+            $storedImagePath = $image->storeAs('public/uploads/invoices', $imageName);
+
+            // Get the full path without including the domain
+            $imagePath = Storage::url($storedImagePath);
+
+            $factorisation->attachement_image = $imagePath;
+            $factorisation->save();
+
+            return response()->json(['code' => 'SUCCESS', 'image' => $imageName, 'factorisation' => $factorisation]);
+        }
+
+        return response()->json([
+            'message' => 'Image is required',
+            'code' => 'VALIDATION_ERROR'
+        ], 422);
     }
 }

@@ -24,8 +24,8 @@ class FactorisationService
         $oldDelivery = data_get($oldAttributes, 'delivery', 'Select');
         $newDelivery = data_get($newAttributes, 'delivery', 'Select');
 
-        
-        if ($oldConfirmation == 'confirmer' &&  $newDelivery == 'livrer') {
+
+        if ($oldConfirmation == 'confirmer' &&  $newDelivery == 'livrer' && ($newDelivery != $oldDelivery)) {
 
                 $order->cmd = 'CMD-' . date('dmY-His', strtotime($order->created_at));
                 $order->delivery_date = now();
@@ -67,9 +67,9 @@ class FactorisationService
                         'price' => RoadRunnerService::getPrice($order),
                     ]);
                     $order->factorisation_id = $newFactorization->id;
-                    
+
                 }
-                if(!$existingSellerFactorization){   
+                if(!$existingSellerFactorization){
                     $newSellerFactorization = Factorisation::create([
                         'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-SL',
                         'type'=> 'seller',
@@ -80,10 +80,10 @@ class FactorisationService
 
                     $order->seller_factorisation_id = $newSellerFactorization->id;
                 }
-            
+
 
             }
-            
+
             if ($order->factorisation_id) {
                 if ($newDelivery != 'livrer') {
                     $order->delivery_date = null;
@@ -99,7 +99,7 @@ class FactorisationService
                     $order->factorisation_id = null;
                 };
             };
-            
+
             if ($order->seller_factorisation_id) {
                 if ($newDelivery != 'livrer') {
                     $order->delivery_date = null;
@@ -108,7 +108,7 @@ class FactorisationService
                         $oldSellerFactorisation->price -= RoadRunnerService::getPrice($order);
                         $oldSellerFactorisation->commands_number -= 1;
                         $oldSellerFactorisation->save();
-                        
+
                         if ($oldSellerFactorisation->commands_number == 0 ) {
                             $oldSellerFactorisation->delete();
                         }
