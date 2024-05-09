@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Repositories\Interfaces\FactorisationRepositoryInterface;
+use App\Services\RoadRunnerCODSquad;
 use App\Services\RoadRunnerService;
 
 class NewFactorisationController extends Controller
@@ -412,11 +413,14 @@ class NewFactorisationController extends Controller
                     'message' => 'You are not authorized'
                 ], 403);
             }
+
+            $history = $factorisation->history()->where('actor_id', '!=', RoadRunnerCODSquad::ROADRUNNER_ID)->get();
+
             return [
                 'code' => 'SUCCESS',
                 'data' => [
                     'factorisation' => $factorisation,
-                    'history' => $factorisation->history
+                    'history' => $history
                 ]
             ];
 

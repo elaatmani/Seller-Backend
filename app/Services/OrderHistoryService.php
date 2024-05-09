@@ -110,7 +110,7 @@ class OrderHistoryService
                 'user_id' => request()->user()->id,
                 'type' => 'in_warehouse',
                 'historique' => (!$oldInWarehouse ? 'OUT' : 'IN') . ' -> ' . (!$newInWarehouse ? 'OUT' : 'IN'),
-                'note' => $oldInWarehouse . ' -> ' . $newInWarehouse
+                'note' => $oldInWarehouse . ' -> ' . $newInWarehouse . '(' . request()->input('scanned') . ')'
             ]);
         }
 

@@ -2,15 +2,18 @@
 
 namespace App\Observers;
 
+use Exception;
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderItemHistory;
+use App\Traits\TrackHistoryTrait;
 
+use Illuminate\Support\Facades\Log;
 use App\Services\OrderItemHistoryService;
-
-use Exception;
 
 class OrderItemObserver
 {
+    use TrackHistoryTrait;
     /**
      * Handle the OrderItem "created" event.
      *
@@ -19,7 +22,30 @@ class OrderItemObserver
      */
     public function created(OrderItem $orderItem)
     {
-        //
+        try {
+            $custom_fields = [
+                [
+                    'field' => 'event',
+                    'new_value' => 'created',
+                    'old_value' => null
+                ]
+            ];
+
+            $this->track($orderItem, table: Order::class, id: $orderItem->order_id, custom_fields: $custom_fields, func: function($new_value, $old_value, $field) {
+                return [
+                    'new_value' => $new_value,
+                    'old_value' => $old_value,
+                    'field' => 'order_item:' . $field
+                ];
+            });
+        } catch (\Throwable $th) {
+            $err = [
+                'order_item' => $orderItem->toArray(),
+                'error' => $th->getMessage()
+            ];
+
+            Log::channel('tracking')->info(json_encode($err));
+        }
     }
 
     /**
@@ -37,12 +63,35 @@ class OrderItemObserver
     {
 
 
-       
-        
+        try {
+            $custom_fields = [
+                [
+                    'field' => 'event',
+                    'new_value' => 'updated',
+                    'old_value' => null
+                ]
+            ];
+
+            $this->track($orderItem, table: Order::class, id: $orderItem->order_id, custom_fields: $custom_fields, func: function($new_value, $old_value, $field) {
+                return [
+                    'new_value' => $new_value,
+                    'old_value' => $old_value,
+                    'field' => 'order_item:' . $field
+                ];
+            });
+        } catch (\Throwable $th) {
+            $err = [
+                'order_item' => $orderItem->toArray(),
+                'error' => $th->getMessage()
+            ];
+
+            Log::channel('tracking')->info(json_encode($err));
+        }
+
         OrderItemHistoryService::observe($orderItem);
-       
+
         // throw new Exception($orderItem);
-        
+
 
 
     }
@@ -55,7 +104,30 @@ class OrderItemObserver
      */
     public function deleted(OrderItem $orderItem)
     {
-        //
+        try {
+            $custom_fields = [
+                [
+                    'field' => 'event',
+                    'new_value' => 'deleted',
+                    'old_value' => null
+                ]
+            ];
+
+            $this->track($orderItem, table: Order::class, id: $orderItem->order_id, custom_fields: $custom_fields, func: function($new_value, $old_value, $field) {
+                return [
+                    'new_value' => $new_value,
+                    'old_value' => $old_value,
+                    'field' => 'order_item:' . $field
+                ];
+            });
+        } catch (\Throwable $th) {
+            $err = [
+                'order_item' => $orderItem->toArray(),
+                'error' => $th->getMessage()
+            ];
+
+            Log::channel('tracking')->info(json_encode($err));
+        }
     }
 
     /**
