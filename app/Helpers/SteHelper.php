@@ -10,8 +10,8 @@ class SteHelper
     public static function apiSte($data, $endpoint)
     {
         $test_url = "https://systemtunes.com/apivoldo/";
-        $live_url = "https://roadrunner-lb.com/api/vooldo/";
-        
+        $live_url = "https://roadrunnerlb.com/api/vooldo/";
+
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
@@ -34,7 +34,7 @@ class SteHelper
             return $errorData;
         }
     }
-    
-    
+
+
 
 }

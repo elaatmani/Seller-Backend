@@ -33,7 +33,7 @@ class NewFactorisationController extends Controller
 
         $options = $this->get_options($request);
 
-       $options['with'] = 'fees';
+       $options['with'] = ['fees', 'withdrawal_method'];
        if(!auth()->user()->hasRole('admin')) {
            $options['where'][] = ['user_id', '=', auth()->id()];
            $options['where'][] = ['close','=',true];
@@ -173,6 +173,65 @@ class NewFactorisationController extends Controller
                     'status' => false,
                     'code' => 'SERVER_ERROR',
                     'message' => $th->getMessage(),
+                ],
+                500
+            );
+        }
+    }
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update_method(Request $request, $id)
+    {
+        try {
+            $factorisation = Factorisation::where('id', $id)->first();
+
+            if(!$factorisation) {
+                return response()->json([
+                    'code' => 'NOT_FOUND'
+                ], 404);
+            }
+
+            if(!auth()->user()->hasRole('admin') && $factorisation->user_id != auth()->id()) {
+                return response()->json([
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You are not authorized'
+                ], 403);
+            }
+
+            if($factorisation->paid && $factorisation->close) {
+                return response()->json([
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'Cannot update a paid invoice'
+                ], 403);
+            }
+
+            $factorisation = $this->factorisationRepository->update($id, $request->only('withdrawal_method_id'));
+
+            return [
+                'code' => 'SUCCESS',
+                'data' => [
+                    'factorisation' => $factorisation
+                ]
+            ];
+
+        } catch (\Throwable $th) {
+
+
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                    'line' => $th->getLine(),
+                    'file' => $th->getFile(),
+                    'trace' => $th->getTrace()
                 ],
                 500
             );
@@ -326,5 +385,55 @@ class NewFactorisationController extends Controller
         ];
 
         return $options;
+    }
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function history(Request $request, $id)
+    {
+        try {
+            $factorisation = Factorisation::where('id', $id)->first();
+
+            if(!$factorisation) {
+                return response()->json([
+                    'code' => 'NOT_FOUND'
+                ], 404);
+            }
+
+            if(!auth()->user()->hasRole('admin') && $factorisation->user_id != auth()->id()) {
+                return response()->json([
+                    'code' => 'NOT_ALLOWED',
+                    'message' => 'You are not authorized'
+                ], 403);
+            }
+            return [
+                'code' => 'SUCCESS',
+                'data' => [
+                    'factorisation' => $factorisation,
+                    'history' => $factorisation->history
+                ]
+            ];
+
+        } catch (\Throwable $th) {
+
+
+            return response()->json(
+                [
+                    'status' => false,
+                    'code' => 'SERVER_ERROR',
+                    'message' => $th->getMessage(),
+                    'line' => $th->getLine(),
+                    'file' => $th->getFile(),
+                    'trace' => $th->getTrace()
+                ],
+                500
+            );
+        }
     }
 }

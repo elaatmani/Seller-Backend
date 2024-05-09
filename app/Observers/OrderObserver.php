@@ -9,11 +9,13 @@ use App\Services\OrderHistoryService;
 use App\Services\OrderItemHistoryService;
 use App\Services\RoadRunnerCODSquad;
 use App\Services\RoadRunnerVoldo;
+use App\Traits\TrackHistoryTrait;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
 class OrderObserver
 {
+    use TrackHistoryTrait;
     /**
      * Handle the Order "created" event.
      *
@@ -55,7 +57,7 @@ class OrderObserver
 
     public function updating(Order $order)
     {
-        Log::channel('tracking')->info('Order #' . $order->id. ' Delivery Start: ' . $order->delivery);
+        $this->track($order);
         $user = request()->user();
         $oldAttributes = $order->getOriginal(); // Old values
         $newAttributes = $order->getAttributes(); // New values
@@ -69,11 +71,11 @@ class OrderObserver
             $order->followup_id = 14;
         }
 
-        if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
+        // if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
             // throw new Exception('Error admin');
             RoadRunnerCODSquad::sync($order);
             // RoadRunnerVoldo::sync($order);
-        };
+        // };
 
         // $oldTotalQuantity = $order->items->sum('quantity');
         // $upsell = $order->upsell;
@@ -85,13 +87,11 @@ class OrderObserver
         // }
 
         OrderHistoryService::observe($order);
+        if($newAttributes['delivery'] == 'paid') {
+            return;
+        }
         FactorisationService::observe($order);
         // throw new Exception('Error admin');
-
-        Log::channel('tracking')->info('Order #' . $order->id. ' Delivery END: ' . $order->delivery);
-
-
-
     }
 
     /**
