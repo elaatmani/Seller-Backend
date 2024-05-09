@@ -57,19 +57,29 @@ class OrderObserver
 
     public function updating(Order $order)
     {
-        $this->track($order);
         $user = request()->user();
         $oldAttributes = $order->getOriginal(); // Old values
         $newAttributes = $order->getAttributes(); // New values
+        $custom_fields = [];
+
+        if(data_get($oldAttributes, 'delivery') != data_get($newAttributes, 'delivery') && data_get($newAttributes, 'delivery') == 'in-warehouse') {
+            $custom_fields[] = [
+                'field' => 'scanned_code',
+                'old_value' => null,
+                'new_value' => request()->input('scanned', 'Not Exists')
+            ];
+        }
+
+        $this->track($order, custom_fields: $custom_fields);
 
         if($newAttributes['affectation'] != null && $newAttributes['delivery'] == null) {
             $order->delivery = 'dispatch';
             // throw new Exception('Error admin');
         }
 
-        if($newAttributes['delivery'] == 'annuler') {
-            $order->followup_id = 14;
-        }
+        // if($newAttributes['delivery'] == 'annuler') {
+        //     $order->followup_id = 14;
+        // }
 
         // if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
             // throw new Exception('Error admin');
