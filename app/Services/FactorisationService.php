@@ -25,7 +25,11 @@ class FactorisationService
             $oldDelivery = data_get($oldAttributes, 'delivery', 'Select');
             $newDelivery = data_get($newAttributes, 'delivery', 'Select');
 
-            
+            if($newDelivery == 'cleared') {
+                return;
+            }
+
+  
             if ($oldConfirmation == 'confirmer' &&  $newDelivery == 'livrer' && ($newDelivery != $oldDelivery)) {
                 $order->cmd = 'CMD-' . date('dmY-His', strtotime($order->created_at));
                 $order->delivery_date = now();
@@ -40,7 +44,7 @@ class FactorisationService
                 ->where('paid', false)
                 ->first();
                 
-                if ($existingDeliveryFactorization) {
+                if ($existingDeliveryFactorization && !$order->factorisation_id) {
                     // Update the existing factorization
                     $existingDeliveryFactorization->price += RoadRunnerService::getPrice($order);
                     $existingDeliveryFactorization->commands_number += 1;
@@ -48,7 +52,7 @@ class FactorisationService
                     
                     $order->factorisation_id = $existingDeliveryFactorization->id;
                 }
-                if ($existingSellerFactorization) {
+                if ($existingSellerFactorization && !$order->seller_factorisation_id) {
                     
                     $existingSellerFactorization->price += RoadRunnerService::getPrice($order);
                     $existingSellerFactorization->commands_number += 1;
@@ -56,7 +60,7 @@ class FactorisationService
                     
                     $order->seller_factorisation_id = $existingSellerFactorization->id;
                 }
-                if (!$existingDeliveryFactorization) {
+                if (!$existingDeliveryFactorization && !$order->factorisation_id) {
                     // Create a new factorization
                     $newFactorization = Factorisation::create([
                         'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-DL',
@@ -68,7 +72,7 @@ class FactorisationService
                     $order->factorisation_id = $newFactorization->id;
 
                 }
-                if (!$existingSellerFactorization) {
+                if (!$existingSellerFactorization && !$order->seller_factorisation_id) {
                     
                     $newSellerFactorization = Factorisation::create([
                         'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-SL',
@@ -85,7 +89,7 @@ class FactorisationService
 
 
             if ($order->factorisation_id) {
-                if ($newDelivery != 'livrer' && $newDelivery != 'paid') {
+                if ($newDelivery != 'livrer' && $newDelivery != 'paid') { // livrer !in_array($newDelivery, ['livrer', 'paid']) delivered
                     $oldFactorisation = Factorisation::find($order->factorisation_id);
                    if($oldFactorisation->close || $oldFactorisation->paid) return;
                     $order->delivery_date = null;
@@ -93,7 +97,7 @@ class FactorisationService
                         $oldFactorisation->price -= RoadRunnerService::getPrice($order);
                         $oldFactorisation->commands_number -= 1;
                         $oldFactorisation->save();
-                        if ($oldFactorisation->commands_number == 0) {
+                        if ($oldFactorisation->delivery_orders()->count() == 1) {
                             $oldFactorisation->delete();
                         }
                     }
@@ -103,7 +107,7 @@ class FactorisationService
 
 
             if ($order->seller_factorisation_id) {
-                if ($newDelivery != 'livrer' && $newDelivery != 'paid') {
+                if ($newDelivery != 'livrer' && $newDelivery != 'paid') { // livrer !in_array($newDelivery, ['livrer', 'paid']) delivered
                     $oldSellerFactorisation = Factorisation::find($order->seller_factorisation_id);
                     if($oldSellerFactorisation->close || $oldSellerFactorisation->paid) return;
                     $order->delivery_date = null;
@@ -112,7 +116,7 @@ class FactorisationService
                         $oldSellerFactorisation->commands_number -= 1;
                         $oldSellerFactorisation->save();
 
-                        if ($oldSellerFactorisation->commands_number == 0) {
+                        if ($oldSellerFactorisation->seller_orders()->count() == 1) {
                             $oldSellerFactorisation->delete();
                         }
                     }

@@ -382,6 +382,18 @@ class FactorisationController extends Controller
             $factorisation = Factorisation::find($id);
 
             if ($factorisation) {
+                if($factorisation->paid) {
+                    return response()->json(
+                        [
+                            'status' => false,
+                            'message' => 'Cannot unclose a paid invoice.',
+                            'code' => 'ERROR'
+                        ],
+                        500
+                    );
+                }
+
+
                 $factorisation->close = $request->close;
                 if ($request->close == true) {
                     $factorisation->close_at = now();

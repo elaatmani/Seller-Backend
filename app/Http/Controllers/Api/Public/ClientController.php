@@ -86,12 +86,21 @@ class ClientController extends Controller
 
             $roadrunner->success = true;
             $roadrunner->message = "Order delivery status has changed to '" . $request->status . "'.";
-
+            
             if (!in_array($request->status, $this->statuses)) {
                 $newStatus = $order->delivery;
                 $roadrunner->message = "The state '" . $request->status . "' was not found. order delivery stays in '" . $order->delivery . "'.";
             } else {
-                $newStatus = $this->references[$request->status];
+                if(in_array($request->status , ['Paid', 'paid'])) {
+                    $newStatus = $order->delivery;
+
+                    $isDelievered = $request->delivered;
+                    $isCanceled = $request->canceled;
+
+                    $roadrunner->message = "Order paid. current status '" . $newStatus . "'. is delivered: " . ($isDelievered ? 'TRUE' : 'FALSE') .  ". is canceled: " .  ($isCanceled ? 'TRUE' : 'FALSE');
+                } else {
+                    $newStatus = $this->references[$request->status];
+                }
 
             }
 
@@ -114,7 +123,7 @@ class ClientController extends Controller
 
             return response()->json([
                 'code' => 'SUCCESS',
-                'message' => "Order delivery status has changed to '" . $request->status . "'."
+                'message' => "Order delivery status has changed to '" . $request->status . "'..."
             ]);
         } catch (\Throwable $th) {
             Log::channel('tracking')->info('Error Single updating: ' . $request->reference_id);
@@ -194,7 +203,7 @@ class ClientController extends Controller
 
 
                     $roadrunner->success = true;
-                    $roadrunner->message = "Order delivery status has changed to '" . $res['status'] . "'.";
+                    $roadrunner->message = "Order delivery status has changed to '" . $res['status'] . "'...";
 
                     if (!in_array($res['status'], $this->statuses)) {
                         $newStatus = $order->delivery;
@@ -207,7 +216,15 @@ class ClientController extends Controller
                         continue;
 
                     } else {
-                        $newStatus = $this->references[$res['status']];
+                        if(in_array($res['status'] , ['Paid', 'paid'])) {
+                            $newStatus = $order->delivery;
+                            $isDelievered = data_get($res, 'delivered', null);
+                            $isCanceled = data_get($res, 'canceled', null);
+
+                            $roadrunner->message = "Order paid. current status '" . $newStatus . "'. is delivered: " . ($isDelievered ? 'TRUE' : 'FALSE') .  ". is canceled: " .  ($isCanceled ? 'TRUE' : 'FALSE');
+                        } else {
+                            $newStatus = $this->references[$res['status']];
+                        }
 
                     }
 
@@ -232,6 +249,13 @@ class ClientController extends Controller
                         'reference_id' => $res['reference_id'],
                         'error' => $th->getMessage()
                     ];
+
+                    $roadrunner = RoadRunnerRequest::create([
+                        'reference_id' => $res['reference_id'],
+                        'status' => $res['status'],
+                        'success' => false,
+                        'message' => $th->getMessage()
+                    ]);
                     continue;
                 }
             }
