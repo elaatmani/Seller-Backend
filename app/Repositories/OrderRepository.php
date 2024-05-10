@@ -141,7 +141,10 @@ class OrderRepository implements OrderRepositoryInterface {
             $items = $data['items'];
             $itemsIds = collect($items)->map(fn($i) => $i['id'])->values()->toArray();
 
-            OrderItem::where('order_id', $id)->whereNotIn('id', $itemsIds)->delete();
+            $orderItems = OrderItem::where('order_id', $id)->whereNotIn('id', $itemsIds)->get();
+            foreach($orderItems as $o) {
+                $o->delete();
+            }
 
             foreach($items as $item) {
                 OrderItem::updateOrCreate(

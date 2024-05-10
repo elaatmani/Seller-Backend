@@ -26,7 +26,7 @@ class ClientController extends Controller
         'Canceled',
         'Returned',
         'Delivered & Return',
-        // 'Paid',
+        'Paid',
         'Printed',
         'printed',
     ];
@@ -42,7 +42,7 @@ class ClientController extends Controller
         'Canceleled' => 'annuler',
         'Returned' => 'retourner',
         'Delivered & Return' => 'livrer-et-retourner',
-        // 'Paid' => 'paid',
+        'Paid' => 'livrer',
         'Printed' => 'printed',
         'printed' => 'printed',
     ];
@@ -86,12 +86,21 @@ class ClientController extends Controller
 
             $roadrunner->success = true;
             $roadrunner->message = "Order delivery status has changed to '" . $request->status . "'.";
-
+            
             if (!in_array($request->status, $this->statuses)) {
                 $newStatus = $order->delivery;
                 $roadrunner->message = "The state '" . $request->status . "' was not found. order delivery stays in '" . $order->delivery . "'.";
             } else {
-                $newStatus = $this->references[$request->status];
+                if(in_array($request->status , ['Paid', 'paid'])) {
+                    $newStatus = $order->delivery;
+
+                    $isDelievered = $request->delivered;
+                    $isCanceled = $request->canceled;
+
+                    $roadrunner->message = "Order paid. current status '" . $newStatus . "'. is delivered: " . ($isDelievered ? 'TRUE' : 'FALSE') .  ". is canceled: " .  ($isCanceled ? 'TRUE' : 'FALSE');
+                } else {
+                    $newStatus = $this->references[$request->status];
+                }
 
             }
 
@@ -99,52 +108,11 @@ class ClientController extends Controller
 
             $order->delivery = $newStatus;
 
-            if ($order->confirmation === 'confirmer' && $newStatus === 'livrer') {
-                $order->cmd = 'CMD-' . date('dmY-His', strtotime($order->created_at));
-                $order->delivery_date = now();
-                $existingFactorization = Factorisation::where('delivery_id', $order->affectation)
-                    ->where('close', false)
-                    ->first();
 
-                if ($existingFactorization) {
-                    // Update the existing factorization
-                    $existingFactorization->price += $order->price;
-                    $existingFactorization->commands_number += 1;
-                    $existingFactorization->save();
-
-                    $order->factorisation_id = $existingFactorization->id;
-                } else {
-                    // Create a new factorization
-                    $newFactorization = Factorisation::create([
-                        'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)),
-                        'delivery_id' => $order->affectation,
-                        'commands_number' => +1,
-                        'price' => $order->price,
-                    ]);
-
-                    $order->factorisation_id = $newFactorization->id;
-                }
+            if(in_array($request->status , ['Paid', 'paid'])){
+                $order->is_paid_by_delivery = true;
             }
-
-            if ($order->factorisation_id) {
-                if ($newStatus !== 'livrer') {
-                    $order->delivery_date = null;
-
-                    $oldFactorisation = Factorisation::find($order->factorisation_id);
-                    if ($oldFactorisation) {
-                        $oldFactorisation->price -= $order->price;
-                        $oldFactorisation->commands_number -= 1;
-                        $oldFactorisation->save();
-                        if ($oldFactorisation->commands_number == 0) {
-                            $oldFactorisation->delete();
-                        }
-                    }
-                    $order->factorisation_id = null;
-                }
-            }
-            // if($order->delivery == 'livrer'){
-
-            // }
+            
             Log::channel('tracking')->info('Order Id: #' . $order->id . '; Order New Status: ' . $order->delivery . '; Request Status: ' . $newStatus);
             $order->save();
 
@@ -155,7 +123,7 @@ class ClientController extends Controller
 
             return response()->json([
                 'code' => 'SUCCESS',
-                'message' => "Order delivery status has changed to '" . $request->status . "'."
+                'message' => "Order delivery status has changed to '" . $request->status . "'..."
             ]);
         } catch (\Throwable $th) {
             Log::channel('tracking')->info('Error Single updating: ' . $request->reference_id);
@@ -235,7 +203,7 @@ class ClientController extends Controller
 
 
                     $roadrunner->success = true;
-                    $roadrunner->message = "Order delivery status has changed to '" . $res['status'] . "'.";
+                    $roadrunner->message = "Order delivery status has changed to '" . $res['status'] . "'...";
 
                     if (!in_array($res['status'], $this->statuses)) {
                         $newStatus = $order->delivery;
@@ -248,56 +216,26 @@ class ClientController extends Controller
                         continue;
 
                     } else {
-                        $newStatus = $this->references[$res['status']];
+                        if(in_array($res['status'] , ['Paid', 'paid'])) {
+                            $newStatus = $order->delivery;
+                            $isDelievered = data_get($res, 'delivered', null);
+                            $isCanceled = data_get($res, 'canceled', null);
+
+                            $roadrunner->message = "Order paid. current status '" . $newStatus . "'. is delivered: " . ($isDelievered ? 'TRUE' : 'FALSE') .  ". is canceled: " .  ($isCanceled ? 'TRUE' : 'FALSE');
+                        } else {
+                            $newStatus = $this->references[$res['status']];
+                        }
 
                     }
 
                     $roadrunner->save();
 
                     $order->delivery = $newStatus;
-                    if ($order->confirmation === 'confirmer' && $newStatus === 'livrer') {
-                        $order->cmd = 'CMD-' . date('dmY-His', strtotime($order->created_at));
-                        $order->delivery_date = now();
-                        $existingFactorization = Factorisation::where('delivery_id', $order->affectation)
-                            ->where('close', false)
-                            ->first();
 
-                        if ($existingFactorization) {
-                            // Update the existing factorization
-                            $existingFactorization->price += $order->price;
-                            $existingFactorization->commands_number += 1;
-                            $existingFactorization->save();
-
-                            $order->factorisation_id = $existingFactorization->id;
-                        } else {
-                            // Create a new factorization
-                            $newFactorization = Factorisation::create([
-                                'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)),
-                                'delivery_id' => $order->affectation,
-                                'commands_number' => +1,
-                                'price' => $order->price,
-                            ]);
-
-                            $order->factorisation_id = $newFactorization->id;
-                        }
+                    if(in_array($res['status'] , ['Paid', 'paid'])){
+                        $order->is_paid_by_delivery = true;
                     }
 
-                    if ($order->factorisation_id) {
-                        if ($newStatus !== 'livrer') {
-                            $order->delivery_date = null;
-
-                            $oldFactorisation = Factorisation::find($order->factorisation_id);
-                            if ($oldFactorisation) {
-                                $oldFactorisation->price -= $order->price;
-                                $oldFactorisation->commands_number -= 1;
-                                $oldFactorisation->save();
-                                if ($oldFactorisation->commands_number == 0) {
-                                    $oldFactorisation->delete();
-                                }
-                            }
-                            $order->factorisation_id = null;
-                        }
-                    }
                     Log::channel('tracking')->info('Order Id: #' . $order->id . '; Order New Status: ' . $order->delivery . '; Request Status: ' . $newStatus);
                     $order->save();
 
@@ -311,6 +249,13 @@ class ClientController extends Controller
                         'reference_id' => $res['reference_id'],
                         'error' => $th->getMessage()
                     ];
+
+                    $roadrunner = RoadRunnerRequest::create([
+                        'reference_id' => $res['reference_id'],
+                        'status' => $res['status'],
+                        'success' => false,
+                        'message' => $th->getMessage()
+                    ]);
                     continue;
                 }
             }

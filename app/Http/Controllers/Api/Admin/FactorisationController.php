@@ -35,7 +35,7 @@ class FactorisationController extends Controller
 
         $factorisation = Factorisation::when(!auth()->user()->hasRole('admin'), function ($query) {
             return $query->where('user_id', auth()->id())->where('close', 1);
-        })->with('delivery', 'seller','fees')->get();
+        })->with('delivery', 'seller', 'fees')->get();
 
 
 
@@ -210,7 +210,7 @@ class FactorisationController extends Controller
                 // Delete fees that are not present in $request->fees
                 if (!empty($existingFees)) {
                     $fees = FactorisationFee::whereIn('feename', $existingFees)->get();
-                    foreach($fees as $f) {
+                    foreach ($fees as $f) {
                         $f->delete();
                     }
                 }
@@ -382,6 +382,18 @@ class FactorisationController extends Controller
             $factorisation = Factorisation::find($id);
 
             if ($factorisation) {
+                if($factorisation->paid) {
+                    return response()->json(
+                        [
+                            'status' => false,
+                            'message' => 'Cannot unclose a paid invoice.',
+                            'code' => 'ERROR'
+                        ],
+                        500
+                    );
+                }
+
+
                 $factorisation->close = $request->close;
                 if ($request->close == true) {
                     $factorisation->close_at = now();
@@ -438,18 +450,25 @@ class FactorisationController extends Controller
             }
 
             $factorisation = Factorisation::find($id);
-
-             if ($factorisation) {
+            if ($factorisation) {
                 $factorisation->paid = $request->paid;
                 if ($request->paid == true) {
                     $factorisation->paid_at = now();
                     if ($factorisation->type == "seller") {
-                        Order::where('seller_factorisation_id', $id)->update(['delivery' => 'paid']);
+                        $orders = Order::where('seller_factorisation_id', $id)->get();
+                        foreach($orders as $order) {
+                            $order->delivery = 'paid';
+                            $order->save();
+                        }
                     }
                 } else {
                     $factorisation->paid_at = null;
                     if ($factorisation->type == "seller") {
-                        Order::where('seller_factorisation_id', $id)->update(['delivery' => 'livrer']);
+                        $orders = Order::where('seller_factorisation_id', $id)->get();
+                        foreach($orders as $order) {
+                            $order->delivery = 'livrer';
+                            $order->save();
+                        }
                     }
                 }
                 $factorisation->save();
@@ -558,7 +577,7 @@ class FactorisationController extends Controller
     {
 
 
-        $factorisation = Factorisation::with('seller', 'delivery', 'delivery.deliveryPlaces', 'delivery.deliveryPlaces.city','fees')
+        $factorisation = Factorisation::with('seller', 'delivery', 'delivery.deliveryPlaces', 'delivery.deliveryPlaces.city', 'fees')
             ->where('id', $id)
             ->first(); // Retrieve the user based on the ID
 
@@ -593,13 +612,14 @@ class FactorisationController extends Controller
     }
 
 
-    public function updateImageAttachement(Request $request, $id) {
+    public function updateImageAttachement(Request $request, $id)
+    {
 
 
         $factorisation = Factorisation::where('id', $id)->first();
 
-        if(!$factorisation) return response()->json([
-                'code' => 'NOT_FOUND',
+        if (!$factorisation) return response()->json([
+            'code' => 'NOT_FOUND',
         ]);
 
 

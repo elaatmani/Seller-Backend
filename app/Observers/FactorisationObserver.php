@@ -85,11 +85,13 @@ class FactorisationObserver
             ])->first();
 
 
-            $custom_fields[] = [
-                'field' => 'withdrawal_method_details',
-                'new_value' => $wm->toArray(),
-                'old_value' => null,
-            ];
+            if($wm){
+                $custom_fields[] = [
+                    'field' => 'withdrawal_method_details',
+                    'new_value' => $wm->toArray(),
+                    'old_value' => null,
+                ];
+            }
 
             $custom_fields[] = [
                 'field' => 'amount_paid',

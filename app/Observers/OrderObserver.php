@@ -57,38 +57,49 @@ class OrderObserver
 
     public function updating(Order $order)
     {
-        $this->track($order);
         $user = request()->user();
         $oldAttributes = $order->getOriginal(); // Old values
         $newAttributes = $order->getAttributes(); // New values
+        $custom_fields = [];
+
+        if(data_get($oldAttributes, 'delivery') != data_get($newAttributes, 'delivery') && data_get($newAttributes, 'delivery') == 'in-warehouse') {
+            $custom_fields[] = [
+                'field' => 'scanned_code',
+                'old_value' => null,
+                'new_value' => request()->input('scanned', 'Not Exists')
+            ];
+        }
+
+        if(in_array(data_get($newAttributes, 'delivery'), ['paid', 'cleared'])) {
+            $order->is_paid_to_seller = true;
+        } else {
+            $order->is_paid_to_seller = false;
+
+        }
+
+        
 
         if($newAttributes['affectation'] != null && $newAttributes['delivery'] == null) {
             $order->delivery = 'dispatch';
             // throw new Exception('Error admin');
         }
 
-        if($newAttributes['delivery'] == 'annuler') {
-            $order->followup_id = 14;
+        if(data_get($oldAttributes, 'delivery') == 'cleared') {
+            $order->delivery = 'cleared';
+
+            if(data_get($oldAttributes, 'delivery') != data_get($newAttributes, 'delivery')) {
+                $custom_fields[] = [
+                    'field' => 'delivery_after_cleared',
+                    'old_value' => 'cleared',
+                    'new_value' => data_get($newAttributes, 'delivery')
+                ];
+            }
         }
 
-        // if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
-            // throw new Exception('Error admin');
-            RoadRunnerCODSquad::sync($order);
-            // RoadRunnerVoldo::sync($order);
-        // };
-
-        // $oldTotalQuantity = $order->items->sum('quantity');
-        // $upsell = $order->upsell;
-        // unset($order->items);
-        // $newTotalQuantity = $order->items->sum('quantity');
-
-        // if ($newTotalQuantity <= $oldTotalQuantity && $upsell != "oui") {
-        //     $order->upsell = null; // Set 'upsell' to null if quantity decreased
-        // }
-
+        RoadRunnerCODSquad::sync($order);
         OrderHistoryService::observe($order);
         FactorisationService::observe($order);
-        // throw new Exception('Error admin');
+        $this->track($order, custom_fields: $custom_fields);
     }
 
     /**
