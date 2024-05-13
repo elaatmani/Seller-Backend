@@ -33,7 +33,7 @@ class FactorisationFeeObserver
                 'old_value' => $old_value,
                 'field' => 'factorisation_fee:' . $field
             ];
-        });
+        }, event: 'create');
     }
 
     /**
@@ -58,7 +58,7 @@ class FactorisationFeeObserver
                 'old_value' => $old_value,
                 'field' => 'factorisation_fee:' . $field
             ];
-        });
+        }, event: 'update');
     }
 
     /**
@@ -91,7 +91,7 @@ class FactorisationFeeObserver
                 'old_value' => $old_value,
                 'field' => 'factorisation_fee:' . $field
             ];
-        });
+        }, event: 'delete');
 
     } catch (\Throwable $th) {
         Log::channel('tracking')->info(json_encode($th));

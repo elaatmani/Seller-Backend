@@ -124,7 +124,7 @@ class FactorisationObserver
             ];
         }
 
-        $this->track($factorisation, custom_fields: $custom_fields);
+        $this->track($factorisation, custom_fields: $custom_fields, event: 'update');
 
         } catch (\Throwable $th) {
             Log::channel('tracking')->info(json_encode($th));

@@ -37,7 +37,7 @@ class OrderItemObserver
                     'old_value' => $old_value,
                     'field' => 'order_item:' . $field
                 ];
-            });
+            }, event: 'create');
         } catch (\Throwable $th) {
             $err = [
                 'order_item' => $orderItem->toArray(),
@@ -78,7 +78,7 @@ class OrderItemObserver
                     'old_value' => $old_value,
                     'field' => 'order_item:' . $field
                 ];
-            });
+            }, event: 'update');
         } catch (\Throwable $th) {
             $err = [
                 'order_item' => $orderItem->toArray(),
@@ -119,7 +119,7 @@ class OrderItemObserver
                     'old_value' => $old_value,
                     'field' => 'order_item:' . $field
                 ];
-            });
+            }, event: 'delete');
         } catch (\Throwable $th) {
             $err = [
                 'order_item' => $orderItem->toArray(),
