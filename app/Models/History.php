@@ -16,7 +16,8 @@ class History extends Model
         'trackable_id',
         'actor_id',
         'body',
-        'fields'
+        'fields',
+        'event'
     ];
 
 
