@@ -145,28 +145,6 @@ class OrderRepository implements OrderRepositoryInterface
             DB::beginTransaction();
             $order = Order::where('id', $id)->first();
 
-            if ($data['parent_id']) {
-
-                $parentOrder = Order::where('id', $data['parent_id'])->first();
-
-                if (!$parentOrder) {
-                    throw new \Exception('Order with parent id not found', 500);
-                }
-
-                $existingSellerFactorization = Factorisation::where('user_id', $data['user_id'])
-                    ->where('close', false)
-                    ->where('paid', false)
-                    ->first();
-
-                if ($existingSellerFactorization) {
-                    FactorisationFee::create([
-                        'factorisation_id' => $existingSellerFactorization->id,
-                        'feename' => "Refund For Order: $parentOrder->id" ,
-                        'feeprice' => OrderHelper::getPrice($parentOrder)
-                    ]);
-                }
-            }
-
             $items = $data['items'];
             $itemsIds = collect($items)->map(fn ($i) => $i['id'])->values()->toArray();
 
@@ -197,31 +175,6 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function create($data)
     {
-
-        $parentOrder = Order::where('id', $data['parent_id'])->first();
-
-        if ($data['parent_id']) {
-
-            $parentOrder = Order::where('id', $data['parent_id'])->first();
-
-            if (!$parentOrder) {
-                throw new \Exception('Order with parent id not found', 500);
-            }
-
-            $existingSellerFactorization = Factorisation::where('user_id', $data['user_id'])
-                ->where('close', false)
-                ->where('paid', false)
-                ->first();
-
-            if ($existingSellerFactorization) {
-                FactorisationFee::create([
-                    'factorisation_id' => $existingSellerFactorization->id,
-                    'feename' => "Refund For Order: $parentOrder->id",
-                    'feeprice' => OrderHelper::getPrice($parentOrder)
-                ]);
-            }
-        }
-
         $order = Order::create([
             ...$data,
             'sheets_id' => 'created_by:' . auth()->id(),

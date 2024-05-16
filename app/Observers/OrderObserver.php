@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Models\Order;
+use App\Models\Factorisation;
+use App\Models\FactorisationFee;
 use App\Models\OrderHistory;
 use App\Services\FactorisationService;
 use App\Services\OrderHistoryService;
@@ -24,6 +26,33 @@ class OrderObserver
      */
     public function created(Order $order)
     {
+        $newAttributes = $order->getAttributes(); // New values
+
+        if($newAttributes['confirmation'] == 'refund') {
+            $parentOrder = Order::where('id', $newAttributes['parent_id'])->first();
+
+            if ($newAttributes['parent_id']) {
+
+                $parentOrder = Order::where('id', $newAttributes['parent_id'])->first();
+    
+                if (!$parentOrder) {
+                    throw new \Exception('Order with parent id not found', 500);
+                }
+    
+                $existingSellerFactorization = Factorisation::where('user_id', $newAttributes['user_id'])
+                    ->where('close', false)
+                    ->where('paid', false)
+                    ->first();
+    
+                if ($existingSellerFactorization) {
+                    FactorisationFee::create([
+                        'factorisation_id' => $existingSellerFactorization->id,
+                        'feename' => "Refund For Order: $parentOrder->id",
+                        'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
+                    ]);
+                }
+            }
+        }
         // $user = request()->user();
 
         // if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
@@ -82,6 +111,32 @@ class OrderObserver
             // throw new Exception('Error admin');
         }
 
+        
+        if($newAttributes['confirmation'] == 'refund' && $oldAttributes['confirmation'] != 'refund') {
+            $parentOrder = Order::where('id', $newAttributes['parent_id'])->first();
+
+            if ($newAttributes['parent_id']) {
+
+                $parentOrder = Order::where('id', $newAttributes['parent_id'])->first();
+    
+                if (!$parentOrder) {
+                    throw new \Exception('Order with parent id not found', 500);
+                }
+    
+                $existingSellerFactorization = Factorisation::where('user_id', $newAttributes['user_id'])
+                    ->where('close', false)
+                    ->where('paid', false)
+                    ->first();
+    
+                if ($existingSellerFactorization) {
+                    FactorisationFee::create([
+                        'factorisation_id' => $existingSellerFactorization->id,
+                        'feename' => "Refund For Order: $parentOrder->id",
+                        'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
+                    ]);
+                }
+            }
+        }
 
         if($newAttributes['confirmation'] != 'refund' && $oldAttributes['confirmation'] == 'refund') {
             $order->parent_id = null;
