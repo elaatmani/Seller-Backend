@@ -77,10 +77,14 @@ class OrderObserver
 
         }
 
-        
-
         if($newAttributes['affectation'] != null && $newAttributes['delivery'] == null) {
             $order->delivery = 'dispatch';
+            // throw new Exception('Error admin');
+        }
+
+
+        if($newAttributes['confirmation'] != 'refund' && $oldAttributes['confirmation'] == 'refund') {
+            $order->parent_id = null;
             // throw new Exception('Error admin');
         }
 

@@ -13,6 +13,7 @@ class Order extends Model
         'user_id',
         'fullname',
         'agente_id',
+        'parent_id',
         'factorisation_id',
         'seller_factorisation_id',
         'upsell',
