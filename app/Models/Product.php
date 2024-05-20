@@ -109,4 +109,9 @@ class Product extends Model
     public function seller_user() {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+
+    public function metadata()
+    {
+        return $this->morphMany(Metadata::class, 'model');
+    }
 }
