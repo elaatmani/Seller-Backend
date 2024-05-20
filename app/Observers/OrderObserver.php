@@ -51,6 +51,22 @@ class OrderObserver
                         'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
                     ]);
                 }
+
+                if (!$existingSellerFactorization) {
+                    $newFactorization = Factorisation::create([
+                        'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-SL',
+                        'type' => 'seller',
+                        'user_id' => $newAttributes['user_id'],
+                        'commands_number' => +1,
+                        'price' => RoadRunnerCODSquad::getPrice($order), // should i make it order or newAttributes
+                    ]);
+
+                    FactorisationFee::create([
+                        'factorisation_id' => $newFactorization->id,
+                        'feename' => "Refund For Order: $parentOrder->id",
+                        'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
+                    ]);
+                }
             }
         }
         // $user = request()->user();
@@ -135,6 +151,20 @@ class OrderObserver
                         'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
                     ]);
                 }
+
+                  $newFactorization = Factorisation::create([
+                    'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-SL',
+                    'type' => 'seller',
+                    'user_id' => $newAttributes['user_id'],
+                    'commands_number' => +1,
+                    'price' => RoadRunnerCODSquad::getPrice($order), // should i make it order or newAttributes
+                ]);
+
+                FactorisationFee::create([
+                    'factorisation_id' => $newFactorization->id,
+                    'feename' => "Refund For Order: $parentOrder->id",
+                    'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
+                ]);
             }
         }
 
