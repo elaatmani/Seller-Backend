@@ -28,18 +28,18 @@ class OrderObserver
     {
         $newAttributes = $order->getAttributes(); // New values
 
-        if($newAttributes['confirmation'] == 'refund') {
+        if(data_get($newAttributes, 'confirmation', null) == 'refund') {
             $parentOrder = Order::where('id', $newAttributes['parent_id'])->first();
 
-            if ($newAttributes['parent_id']) {
+            if (data_get($newAttributes, 'parent_id', null)) {
 
-                $parentOrder = Order::where('id', $newAttributes['parent_id'])->first();
+                $parentOrder = Order::where('id', \data_get($newAttributes, 'parent_id', null))->first();
     
                 if (!$parentOrder) {
                     throw new \Exception('Order with parent id not found', 500);
                 }
     
-                $existingSellerFactorization = Factorisation::where('user_id', $newAttributes['user_id'])
+                $existingSellerFactorization = Factorisation::where('user_id', data_get(newAttributes, 'user_id', null))
                     ->where('close', false)
                     ->where('paid', false)
                     ->first();
@@ -56,7 +56,7 @@ class OrderObserver
                     $newFactorization = Factorisation::create([
                         'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-SL',
                         'type' => 'seller',
-                        'user_id' => $newAttributes['user_id'],
+                        'user_id' => data_get($newAttributes, 'user_id', null),
                         'commands_number' => +1,
                         'price' => RoadRunnerCODSquad::getPrice($order), // should i make it order or newAttributes
                     ]);
@@ -122,24 +122,24 @@ class OrderObserver
 
         }
 
-        if($newAttributes['affectation'] != null && $newAttributes['delivery'] == null) {
+        if(\data_get($newAttributes, 'affectation', null) != null && \data_get($newAttributes, 'delivery', null) == null) {
             $order->delivery = 'dispatch';
             // throw new Exception('Error admin');
         }
 
         
-        if($newAttributes['confirmation'] == 'refund' && $oldAttributes['confirmation'] != 'refund') {
-            $parentOrder = Order::where('id', $newAttributes['parent_id'])->first();
+        if(\data_get($newAttributes, 'confirmation', null) == 'refund' && \data_get($oldAttributes, 'confirmation', null) != 'refund') {
+            $parentOrder = Order::where('id', \data_get($newAttributes, 'parent_id', null))->first();
 
-            if ($newAttributes['parent_id']) {
+            if (\data_get($newAttributes, 'parent_id', null)) {
 
-                $parentOrder = Order::where('id', $newAttributes['parent_id'])->first();
+                $parentOrder = Order::where('id', data_get($newAttributes, 'parent_id', null))->first();
     
                 if (!$parentOrder) {
                     throw new \Exception('Order with parent id not found', 500);
                 }
     
-                $existingSellerFactorization = Factorisation::where('user_id', $newAttributes['user_id'])
+                $existingSellerFactorization = Factorisation::where('user_id', data_get($newAttributes, 'user_id', null))
                     ->where('close', false)
                     ->where('paid', false)
                     ->first();
@@ -155,7 +155,7 @@ class OrderObserver
                   $newFactorization = Factorisation::create([
                     'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-SL',
                     'type' => 'seller',
-                    'user_id' => $newAttributes['user_id'],
+                    'user_id' => data_get($newAttributes, 'user_id', null),
                     'commands_number' => +1,
                     'price' => RoadRunnerCODSquad::getPrice($order), // should i make it order or newAttributes
                 ]);
@@ -168,7 +168,7 @@ class OrderObserver
             }
         }
 
-        if($newAttributes['confirmation'] != 'refund' && $oldAttributes['confirmation'] == 'refund') {
+        if(\data_get($newAttributes, 'confirmation', null) != 'refund' && \data_get($oldAttributes, 'confirmation', null) == 'refund') {
             $order->parent_id = null;
             // throw new Exception('Error admin');
         }
