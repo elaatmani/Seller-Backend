@@ -21,6 +21,7 @@ return [
             'default' => [ 'name' => 'Pending', 'value' => 'pending' ],
             'values' => [
                 [ 'name' => 'Pending', 'value' => 'pending' ],
+                [ 'name' => 'Processing', 'value' => 'processing' ],
                 [ 'name' => 'Quoting', 'value' => 'quoting' ],
                 [ 'name' => 'Cancelled', 'value' => 'cancelled' ],
                 [ 'name' => 'Confirmed', 'value' => 'confirmed' ],
