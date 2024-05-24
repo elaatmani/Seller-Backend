@@ -586,9 +586,11 @@ class FactorisationController extends Controller
             ->get();
 
 
-        $salesSeller = Order::with('delivery_user', 'delivery_user.deliveryPlaces', 'delivery_user.deliveryPlaces.city', 'items', 'items.product')
-            ->where('seller_factorisation_id', $factorisation->id)
-            ->get();
+        // $salesSeller = Order::with('delivery_user', 'delivery_user.deliveryPlaces', 'delivery_user.deliveryPlaces.city', 'items', 'items.product')
+        //     ->where('seller_factorisation_id', $factorisation->id)
+        //     ->get();
+
+        $salesSeller = $factorisation->seller_orders()->with('delivery_user', 'delivery_user.deliveryPlaces', 'delivery_user.deliveryPlaces.city', 'items', 'items.product')->get();
 
         // dd($salesSeller);
 
