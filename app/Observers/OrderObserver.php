@@ -39,7 +39,7 @@ class OrderObserver
                     throw new \Exception('Order with parent id not found', 500);
                 }
     
-                $existingSellerFactorization = Factorisation::where('user_id', data_get(newAttributes, 'user_id', null))
+                $existingSellerFactorization = Factorisation::where('user_id', data_get($newAttributes, 'user_id', null))
                     ->where('close', false)
                     ->where('paid', false)
                     ->first();
