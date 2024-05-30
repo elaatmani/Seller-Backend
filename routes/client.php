@@ -12,7 +12,7 @@ Route::post('order/delivery', [ClientController::class, 'updateDelivery'])->midd
 Route::post('order/delivery/multiple', [ClientController::class, 'updateMultipleDelivery'])->middleware('bearer:delivery-update');
 
 Route::post('getToken', function() {
-    $token = User::find(4)->createToken('API TOKEN', ["delivery:update"])->plainTextToken;
+    $token = User::find(3)->createToken('API TOKEN', ["delivery:update"])->plainTextToken;
     return $token;
 });
 
