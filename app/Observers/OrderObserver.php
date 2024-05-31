@@ -3,8 +3,11 @@
 namespace App\Observers;
 
 use App\Models\Order;
+use App\Models\Factorisation;
+use App\Models\FactorisationFee;
 use App\Models\OrderHistory;
 use App\Services\FactorisationService;
+use App\Services\NewFactorisationService;
 use App\Services\OrderHistoryService;
 use App\Services\OrderItemHistoryService;
 use App\Services\RoadRunnerCODSquad;
@@ -24,23 +27,31 @@ class OrderObserver
      */
     public function created(Order $order)
     {
-        // $user = request()->user();
+        $newAttributes = $order->getAttributes(); // New values
 
-        // if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
-        //     switch ($order->affectation) {
-        //         // case RoadRunnerVoldo::ROADRUNNER_ID:
-        //         //     RoadRunnerVoldo::insert($order);
-        //         // break;
+        if(data_get($newAttributes, 'confirmation', null) == 'refund') {
+            $parentOrder = Order::where('id', $newAttributes['parent_id'])->first();
 
-        //         case RoadRunnerCODSquad::ROADRUNNER_ID:
-        //             RoadRunnerCODSquad::insert($order);
-        //         break;
+            if (data_get($newAttributes, 'parent_id', null)) {
 
-        //         default:
-        //             # code...
-        //             break;
-        //     }
-        // };
+                $parentOrder = Order::where('id', \data_get($newAttributes, 'parent_id', null))->first();
+    
+                if (!$parentOrder) {
+                    throw new \Exception('Order with parent id not found', 500);
+                }
+    
+                $activeSellerInvoice = NewFactorisationService::getActiveSellerInvoice(data_get($newAttributes, 'user_id', null));
+    
+                if ($activeSellerInvoice) {
+                    FactorisationFee::create([
+                        'factorisation_id' => $activeSellerInvoice->id,
+                        'feename' => "Refund For Order: $parentOrder->id",
+                        'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
+                    ]);
+                }
+
+            }
+        }
 
     }
 
@@ -72,15 +83,46 @@ class OrderObserver
 
         if(in_array(data_get($newAttributes, 'delivery'), ['paid', 'cleared'])) {
             $order->is_paid_to_seller = true;
-        } else {
-            $order->is_paid_to_seller = false;
+        } 
+        
+        // else {
+        //     $order->is_paid_to_seller = false;
 
+        // }
+
+        if(\data_get($newAttributes, 'affectation', null) != null && \data_get($newAttributes, 'delivery', null) == null) {
+            $order->delivery = 'dispatch';
+            // throw new Exception('Error admin');
         }
 
         
+        if(\data_get($newAttributes, 'confirmation', null) == 'refund' && \data_get($oldAttributes, 'confirmation', null) != 'refund') {
+            $parentOrder = Order::where('id', \data_get($newAttributes, 'parent_id', null))->first();
 
-        if($newAttributes['affectation'] != null && $newAttributes['delivery'] == null) {
-            $order->delivery = 'dispatch';
+            if (\data_get($newAttributes, 'parent_id', null)) {
+
+                $parentOrder = Order::where('id', data_get($newAttributes, 'parent_id', null))->first();
+    
+                if (!$parentOrder) {
+                    throw new \Exception('Order with parent id not found', 500);
+                }
+
+                
+    
+                $activeSellerInvoice = NewFactorisationService::getActiveSellerInvoice(data_get($newAttributes, 'user_id', null));
+    
+                if ($activeSellerInvoice) {
+                    FactorisationFee::create([
+                        'factorisation_id' => $activeSellerInvoice->id,
+                        'feename' => "Refund For Order: $parentOrder->id",
+                        'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
+                    ]);
+                }
+            }
+        }
+
+        if(\data_get($newAttributes, 'confirmation', null) != 'refund' && \data_get($oldAttributes, 'confirmation', null) == 'refund') {
+            $order->parent_id = null;
             // throw new Exception('Error admin');
         }
 
@@ -98,7 +140,8 @@ class OrderObserver
 
         RoadRunnerCODSquad::sync($order);
         OrderHistoryService::observe($order);
-        FactorisationService::observe($order);
+        NewFactorisationService::observe($order);
+        // FactorisationService::observe($order);
         $this->track($order, custom_fields: $custom_fields);
     }
 

@@ -13,6 +13,7 @@ class Order extends Model
         'user_id',
         'fullname',
         'agente_id',
+        'parent_id',
         'factorisation_id',
         'seller_factorisation_id',
         'upsell',
@@ -38,7 +39,9 @@ class Order extends Model
         'followup_id',
         'followup_confirmation',
         'followup_reported_note',
-        'followup_reported_date'
+        'followup_reported_date',
+        'is_delivered',
+        'is_canceled',
     ];
 
     protected $casts = [
@@ -67,7 +70,9 @@ class Order extends Model
         'delivery_date'  => 'datetime',
         'cmd'  => 'string',
         'double' => 'integer',
-        'source' => 'string'
+        'source' => 'string',
+        'is_delivered' => 'boolean',
+        'is_canceled' => 'boolean',
     ];
 
     protected $with = ['seller_user','items' => ['product_variation.warehouse', 'product'], 'factorisations'];

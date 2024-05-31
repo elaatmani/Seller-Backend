@@ -166,9 +166,7 @@ class FactorisationObserver
 
 
     public function getOrders(Factorisation $factorisation) {
-        $orders = Order::where([
-            [ 'seller_factorisation_id', $factorisation->id ]
-        ])->get();
+        $orders = $factorisation->seller_orders;
 
         return $orders->map(fn($o) => ([
             'id' => $o->id,

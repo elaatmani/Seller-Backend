@@ -38,6 +38,7 @@ class SheetHelper {
             $newRows = array_filter($rows, function ($row) use ($orders_ids, $sheet) {
                 return !in_array( self::order_sheet_id($sheet, $row['Order ID']), $orders_ids)
                 && !!data_get($row, 'SKU')
+                && data_get($row, 'SKU') != 'N/A'
                 && !!data_get($row, 'Full name')
                 && !!data_get($row, 'Phone');
             });
@@ -81,7 +82,7 @@ class SheetHelper {
 
                 if(!$sku || !$phone || !$fullname) continue;
 
-                $product = Product::where('ref', $sku)->first();
+                $product = Product::where([['ref', $sku], ['user_id', $sheet->user_id], ['status', 1]])->first();
                 if(!$product) {
                     $productNotFoundOrders[] = $o;
                     continue;
