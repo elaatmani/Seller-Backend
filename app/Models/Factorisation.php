@@ -64,11 +64,15 @@ class Factorisation extends Model
 
      public function seller_orders(){
         $paidByDeliveryImplemetedAt = '2024-05-17';
+        $isDeliveredImplemetedAt = '2024-05-30';
         // return $this->hasMany(Order::class , 'seller_factorisation_id')->where('confirmation', 'confirmer')->where('is_paid_by_delivery', 1);
         return $this->hasMany(Order::class, 'seller_factorisation_id')
             ->where('confirmation', 'confirmer')
             ->when($this->created_at > $paidByDeliveryImplemetedAt, function($query) use ($paidByDeliveryImplemetedAt) {
                 return $query->where('is_paid_by_delivery', 1);
+            })
+            ->when($this->created_at > $isDeliveredImplemetedAt, function($query) use ($paidByDeliveryImplemetedAt) {
+                return $query->where('is_delivered', 1);
             });
      }
 
