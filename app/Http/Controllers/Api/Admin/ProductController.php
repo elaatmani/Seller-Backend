@@ -162,7 +162,7 @@ class ProductController extends Controller
             foreach($deliveries as $delivery ){
 
                 ProductDelivery::Create([
-                    'delivery_id' => $delivery['delivery_id'],
+                    'delivery_id' => $delivery[4],
                     'product_id' => $product->id
                 ]);
             }
