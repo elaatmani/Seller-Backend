@@ -7,6 +7,7 @@ use App\Models\Factorisation;
 use App\Models\FactorisationFee;
 use App\Models\OrderHistory;
 use App\Services\FactorisationService;
+use App\Services\NewFactorisationService;
 use App\Services\OrderHistoryService;
 use App\Services\OrderItemHistoryService;
 use App\Services\RoadRunnerCODSquad;
@@ -39,53 +40,18 @@ class OrderObserver
                     throw new \Exception('Order with parent id not found', 500);
                 }
     
-                $existingSellerFactorization = Factorisation::where('user_id', data_get($newAttributes, 'user_id', null))
-                    ->where('close', false)
-                    ->where('paid', false)
-                    ->first();
+                $activeSellerInvoice = NewFactorisationService::getActiveSellerInvoice(data_get($newAttributes, 'user_id', null));
     
-                if ($existingSellerFactorization) {
+                if ($activeSellerInvoice) {
                     FactorisationFee::create([
-                        'factorisation_id' => $existingSellerFactorization->id,
+                        'factorisation_id' => $activeSellerInvoice->id,
                         'feename' => "Refund For Order: $parentOrder->id",
                         'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
                     ]);
                 }
 
-                if (!$existingSellerFactorization) {
-                    $newFactorization = Factorisation::create([
-                        'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-SL',
-                        'type' => 'seller',
-                        'user_id' => data_get($newAttributes, 'user_id', null),
-                        'commands_number' => +1,
-                        'price' => RoadRunnerCODSquad::getPrice($order), // should i make it order or newAttributes
-                    ]);
-
-                    FactorisationFee::create([
-                        'factorisation_id' => $newFactorization->id,
-                        'feename' => "Refund For Order: $parentOrder->id",
-                        'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
-                    ]);
-                }
             }
         }
-        // $user = request()->user();
-
-        // if($user->hasRole('admin') || $user->hasRole('follow-up') || $user->hasRole('agente')) {
-        //     switch ($order->affectation) {
-        //         // case RoadRunnerVoldo::ROADRUNNER_ID:
-        //         //     RoadRunnerVoldo::insert($order);
-        //         // break;
-
-        //         case RoadRunnerCODSquad::ROADRUNNER_ID:
-        //             RoadRunnerCODSquad::insert($order);
-        //         break;
-
-        //         default:
-        //             # code...
-        //             break;
-        //     }
-        // };
 
     }
 
@@ -117,10 +83,12 @@ class OrderObserver
 
         if(in_array(data_get($newAttributes, 'delivery'), ['paid', 'cleared'])) {
             $order->is_paid_to_seller = true;
-        } else {
-            $order->is_paid_to_seller = false;
+        } 
+        
+        // else {
+        //     $order->is_paid_to_seller = false;
 
-        }
+        // }
 
         if(\data_get($newAttributes, 'affectation', null) != null && \data_get($newAttributes, 'delivery', null) == null) {
             $order->delivery = 'dispatch';
@@ -138,33 +106,18 @@ class OrderObserver
                 if (!$parentOrder) {
                     throw new \Exception('Order with parent id not found', 500);
                 }
+
+                
     
-                $existingSellerFactorization = Factorisation::where('user_id', data_get($newAttributes, 'user_id', null))
-                    ->where('close', false)
-                    ->where('paid', false)
-                    ->first();
+                $activeSellerInvoice = NewFactorisationService::getActiveSellerInvoice(data_get($newAttributes, 'user_id', null));
     
-                if ($existingSellerFactorization) {
+                if ($activeSellerInvoice) {
                     FactorisationFee::create([
-                        'factorisation_id' => $existingSellerFactorization->id,
+                        'factorisation_id' => $activeSellerInvoice->id,
                         'feename' => "Refund For Order: $parentOrder->id",
                         'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
                     ]);
                 }
-
-                  $newFactorization = Factorisation::create([
-                    'factorisation_id' => 'FCT-' . date('dmY-His', strtotime($order->delivery_date)) . '-SL',
-                    'type' => 'seller',
-                    'user_id' => data_get($newAttributes, 'user_id', null),
-                    'commands_number' => +1,
-                    'price' => RoadRunnerCODSquad::getPrice($order), // should i make it order or newAttributes
-                ]);
-
-                FactorisationFee::create([
-                    'factorisation_id' => $newFactorization->id,
-                    'feename' => "Refund For Order: $parentOrder->id",
-                    'feeprice' => RoadRunnerCODSquad::getPrice($parentOrder)
-                ]);
             }
         }
 
@@ -187,7 +140,8 @@ class OrderObserver
 
         RoadRunnerCODSquad::sync($order);
         OrderHistoryService::observe($order);
-        FactorisationService::observe($order);
+        NewFactorisationService::observe($order);
+        // FactorisationService::observe($order);
         $this->track($order, custom_fields: $custom_fields);
     }
 

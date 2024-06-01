@@ -97,6 +97,14 @@ class ClientController extends Controller
                     $isDelievered = $request->delivered;
                     $isCanceled = $request->canceled;
 
+                    if($isDelievered){
+                        $order->is_delivered = true;
+                        $order->is_paid_by_delivery = true;
+                    }
+                    if($isCanceled){
+                        $order->is_canceled = true;
+                    }
+
                     $roadrunner->message = "Order paid. current status '" . $newStatus . "'. is delivered: " . ($isDelievered ? 'TRUE' : 'FALSE') .  ". is canceled: " .  ($isCanceled ? 'TRUE' : 'FALSE');
                 } else {
                     $newStatus = $this->references[$request->status];
@@ -108,10 +116,6 @@ class ClientController extends Controller
 
             $order->delivery = $newStatus;
 
-
-            if(in_array($request->status , ['Paid', 'paid'])){
-                $order->is_paid_by_delivery = true;
-            }
             
             Log::channel('tracking')->info('Order Id: #' . $order->id . '; Order New Status: ' . $order->delivery . '; Request Status: ' . $newStatus);
             $order->save();
@@ -221,6 +225,14 @@ class ClientController extends Controller
                             $isDelievered = data_get($res, 'delivered', null);
                             $isCanceled = data_get($res, 'canceled', null);
 
+                            if($isDelievered){
+                                $order->is_delivered = true;
+                                $order->is_paid_by_delivery = true;
+                            }
+                            if($isCanceled){
+                                $order->is_canceled = true;
+                            }
+
                             $roadrunner->message = "Order paid. current status '" . $newStatus . "'. is delivered: " . ($isDelievered ? 'TRUE' : 'FALSE') .  ". is canceled: " .  ($isCanceled ? 'TRUE' : 'FALSE');
                         } else {
                             $newStatus = $this->references[$res['status']];
@@ -232,9 +244,6 @@ class ClientController extends Controller
 
                     $order->delivery = $newStatus;
 
-                    if(in_array($res['status'] , ['Paid', 'paid'])){
-                        $order->is_paid_by_delivery = true;
-                    }
 
                     Log::channel('tracking')->info('Order Id: #' . $order->id . '; Order New Status: ' . $order->delivery . '; Request Status: ' . $newStatus);
                     $order->save();
