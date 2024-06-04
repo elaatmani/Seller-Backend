@@ -20,6 +20,8 @@ use App\Models\ProductDelivery;
 use App\Models\ProductImage;
 use App\Models\User;
 use App\Repositories\ProductRepository;
+use App\Services\RoadRunnerCODSquad;
+
 // use Spatie\Permission\Models\Role;
 
 class ProductController extends Controller
@@ -158,11 +160,16 @@ class ProductController extends Controller
             }
 
             $deliveries = json_decode($request->deliveries, true) ?? [];
-
-            foreach($deliveries as $delivery ){
-
+            if(auth()->user()->hasRole('admin')){
+                foreach($deliveries as $delivery ){
+                    ProductDelivery::Create([
+                        'delivery_id' => $delivery['delivery_id'],
+                        'product_id' => $product->id
+                    ]);
+                }
+            }else{
                 ProductDelivery::Create([
-                    'delivery_id' => $delivery[4],
+                    'delivery_id' => RoadRunnerCODSquad::ROADRUNNER_ID,
                     'product_id' => $product->id
                 ]);
             }
