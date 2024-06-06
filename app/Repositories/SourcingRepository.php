@@ -88,6 +88,7 @@ class SourcingRepository  implements SourcingRepositoryInterface {
             'user_id' => auth()->id(),
             'product_name' => data_get($data, 'product_name'),
             'product_url' => data_get($data, 'product_url'),
+            'video_url' => data_get($data, 'video_url'),
             'estimated_quantity' => data_get($data, 'estimated_quantity'),
             'destination_country' => data_get($data, 'destination_country'),
             'note_by_seller' => data_get($data, 'note_by_seller'),

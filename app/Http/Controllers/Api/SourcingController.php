@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sourcing\StoreSourcingRequest;
+use App\Http\Requests\Sourcing\UpdateSourcingRequest;
 use App\Repositories\Interfaces\SourcingRepositoryInterface;
 
 class SourcingController extends Controller
@@ -128,7 +129,7 @@ class SourcingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreSourcingRequest $request, $id)
+    public function update(UpdateSourcingRequest $request, $id)
     {
         try {
             DB::beginTransaction();

@@ -4,7 +4,7 @@ namespace App\Http\Requests\Sourcing;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreSourcingRequest extends FormRequest
+class UpdateSourcingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,7 +28,6 @@ class StoreSourcingRequest extends FormRequest
             'shipping_method' => [ 'required', 'not_in:not-selected' ],
             'product_name' => [ 'required' ],
             'product_url' => [ 'required' ],
-            'video_url' => [ 'required' ],
             'estimated_quantity' => [ 'required', 'numeric' ],
         ];
     }
