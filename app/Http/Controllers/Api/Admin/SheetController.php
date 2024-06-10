@@ -16,22 +16,18 @@ class SheetController extends Controller
      */
     public function index(Request $request)
     {
-        // Add permission
-        // if (!$request->user()->can('show_all_sheets')) {
-        //     return response()->json(
-        //         [
-        //             'status' => false,
-        //             'code' => 'NOT_ALLOWED',
-        //             'message' => 'You Dont Have Access To See Google Sheets',
-        //         ],
-        //         405
-        //     );
-        // }
-
-        $sheets = Sheet::when(!auth()->user()->hasRole('admin'), function ($query) {
-            return $query->where('user_id', auth()->id());
+        $userId = $request->get('user_id');
+    
+        $sheets = Sheet::when(auth()->user()->hasRole('admin') && $userId !== 'all', function ($query) use ($userId) {
+            return $query->where('user_id', $userId);
+        }, function ($query) use ($userId) {
+            if (auth()->user()->hasRole('admin') && $userId === 'all') {
+                return $query;
+            } else {
+                return $query->where('user_id', auth()->id());
+            }
         })->get();
-
+    
         return response()->json(
             [
                 'status' => true,
@@ -43,7 +39,6 @@ class SheetController extends Controller
             200
         );
     }
-
     /**
      * Show the form for creating a new resource.
      *
@@ -89,7 +84,7 @@ class SheetController extends Controller
                 );
             }
 
-            $sheet = Sheet::create([...$sheetValidator->validated(),'user_id'=>auth()->id()]);
+            $sheet = Sheet::create([...$sheetValidator->validated(),'user_id'=>auth()->id(),'username'=>auth()->id()]);
 
             return response()->json([
                 'status' => true,
