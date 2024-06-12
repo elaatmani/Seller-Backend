@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('sourcings', function (Blueprint $table) {
-            $table->text('video_url')->nullable()->default(null);
+        Schema::create('tags', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
         });
     }
 
@@ -25,8 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('sourcings', function (Blueprint $table) {
-            $table->dropColumn('video_url');
-        });
+        Schema::dropIfExists('tags');
     }
 };

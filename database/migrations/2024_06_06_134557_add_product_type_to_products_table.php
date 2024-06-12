@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('sourcings', function (Blueprint $table) {
-            $table->text('video_url')->nullable()->default(null);
+        Schema::table('products', function (Blueprint $table) {
+            $table->string('product_type')->nullable()->default('normal');
+            $table->string('category_id')->nullable()->default(null);
         });
     }
 
@@ -25,8 +26,9 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('sourcings', function (Blueprint $table) {
-            $table->dropColumn('video_url');
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropColumn('product_type');
+            $table->dropColumn('category_id');
         });
     }
 };

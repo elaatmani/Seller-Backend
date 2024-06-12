@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('sourcings', function (Blueprint $table) {
-            $table->text('video_url')->nullable()->default(null);
+        Schema::table('orders', function (Blueprint $table) {
+            $table->boolean('is_affiliate')->default(false);
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('sourcings', function (Blueprint $table) {
-            $table->dropColumn('video_url');
+        Schema::table('orders', function (Blueprint $table) {
+            $table->dropColumn('is_affiliate');
         });
     }
 };

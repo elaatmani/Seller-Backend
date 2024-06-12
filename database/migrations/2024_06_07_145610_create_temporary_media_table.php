@@ -13,8 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('sourcings', function (Blueprint $table) {
-            $table->text('video_url')->nullable()->default(null);
+        Schema::create('temporary_media', function (Blueprint $table) {
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->string('collection_name')->nullable()->default('temporary_files');
+            $table->timestamps();
         });
     }
 
@@ -25,8 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('sourcings', function (Blueprint $table) {
-            $table->dropColumn('video_url');
-        });
+        Schema::dropIfExists('temporary_media');
     }
 };

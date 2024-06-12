@@ -5,8 +5,10 @@ use App\Events\NewNotification;
 use App\Services\RoadRunnerService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
+use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\AlertController;
 use App\Http\Controllers\Api\Public\NetPayment;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SourcingController;
 use App\Http\Controllers\Api\Admin\AdsController;
@@ -22,6 +24,7 @@ use App\Http\Controllers\Api\Public\OrderController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Seller\SellerController;
 use App\Http\Controllers\Api\SupplyRequestController;
+use App\Http\Controllers\Api\TemporaryMediaController;
 use App\Http\Controllers\Api\Admin\InventoryController;
 use App\Http\Controllers\Api\Admin\WarehouseController;
 use App\Http\Controllers\Api\NewNotificationController;
@@ -33,8 +36,8 @@ use App\Http\Controllers\Api\Admin\GoogleSheetController;
 use App\Http\Controllers\Api\Admin\FactorisationController;
 use App\Http\Controllers\Api\Public\OrderWarehouseController;
 use App\Http\Controllers\Api\Admin\NewFactorisationController;
-use App\Http\Controllers\Api\Export\FactorisationExportController;
 use App\Http\Controllers\Api\Seller\WithdrawalMethodController;
+use App\Http\Controllers\Api\Export\FactorisationExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -342,6 +345,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/withdrawal-methods', [WithdrawalMethodController::class, 'index']);
     Route::post('/withdrawal-methods/setup', [WithdrawalMethodController::class, 'setup']);
     Route::post('/withdrawal-methods/{id}', [WithdrawalMethodController::class, 'update']);
+    
+    // Files
+    Route::post('/temporary-file', [TemporaryMediaController::class, 'uploadFile']);
+
+    Route::resource('categories', CategoryController::class);
+    Route::resource('tags', TagController::class);
+
 });
 
 // Auto fetch
