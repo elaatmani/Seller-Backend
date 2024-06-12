@@ -22,11 +22,11 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call(RolesAndPermissionsSeeder::class);
         $this->call(UserSeeder::class);
-        $this->call(WarehouseSeeder::class);
+        // $this->call(WarehouseSeeder::class);
         // $this->call(ProductSeeder::class);
         // $this->call(OrderSeeder::class);
         // $this->call(CitySeeder::class);
-        $this->call(CityLebanonSeeder::class);
+        // $this->call(CityLebanonSeeder::class);
         // $this->call(InventoryMovementSeeder::class);
         // $this->call(SheetSeeder::class);
     }
