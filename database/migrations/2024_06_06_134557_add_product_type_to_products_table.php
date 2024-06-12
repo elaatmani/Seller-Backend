@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->string('product_type')->nullable()->default('normal');
+            $table->string('category_id')->nullable()->default(null);
         });
     }
 
@@ -27,6 +28,7 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->dropColumn('product_type');
+            $table->dropColumn('category_id');
         });
     }
 };

@@ -13,8 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('sourcings', function (Blueprint $table) {
-            $table->text('video_url')->nullable()->default(null);
+        Schema::create('model_tag', function (Blueprint $table) {
+            $table->unsignedInteger('taggable_type');
+            $table->unsignedInteger('taggable_id');
+            $table->unsignedInteger('tag_id');
         });
     }
 
@@ -25,8 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('sourcings', function (Blueprint $table) {
-            $table->dropColumn('video_url');
-        });
+        Schema::dropIfExists('model_tag');
     }
 };

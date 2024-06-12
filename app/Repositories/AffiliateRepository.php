@@ -2,8 +2,15 @@
 
 namespace App\Repositories;
 
+use App\Models\Tag;
 use App\Models\Product;
+use App\Models\Warehouse;
 use App\Models\ProductOffer;
+use App\Models\TemporaryMedia;
+use App\Models\ProductDelivery;
+use App\Models\ProductVariation;
+use Illuminate\Support\Facades\DB;
+use App\Services\RoadRunnerCODSquad;
 use App\Repositories\Interfaces\AffiliateRepositoryInterface;
 
 class AffiliateRepository  implements AffiliateRepositoryInterface {
@@ -98,8 +105,111 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
     }
 
 
-    public static function updateProductOffers($id, $offers) {
+    public static function store($data) {
 
+        try {
+            DB::beginTransaction();
+            $product = Product::create([
+                'name' => data_get($data, 'name', ''),
+                'description' => data_get($data, 'description', ''),
+                'buying_price' => data_get($data, 'buying_price', 0),
+                'selling_price' => data_get($data, 'selling_price', 0),
+
+                'user_id' => auth()->id(),
+
+                'status' => data_get($data, 'status') == 'true',
+                'ref' => data_get($data, 'sku'),
+                'category_id' => data_get($data, 'category_id'),
+            ]);
+
+            self::storeVariations($product, data_get($data, 'variations', []), data_get($data, 'has_variations', false), Warehouse::first()->id);
+            self::storeTags($product, data_get($data, 'tags', []));
+            self::storeMediaFromUUID($product, data_get($data,'media', []));
+            self::storeDeliveries($product, data_get($data,'deliveries', []));
+
+            DB::commit();
+
+            return $product;
+        } catch (\Throwable $th) {
+            DB::rollback();
+            throw $th;
+        }
+
+
+    }
+
+    public static function storeVariations($product, $data, $has_variations, $warehouse) {
+
+        $variations = [];
+        $warehouse_id = Warehouse::first()?->id;
+
+        if(!$has_variations) {
+            ProductVariation::create([
+                'product_id' => $product->id,
+                'product_ref' => $product->ref,
+                'warehouse_id' => $warehouse_id,
+                'color' => '',
+                'size' => '',
+                'quantity' => data_get($data, 'initial_quantity', 0),
+                'stockAlert' => data_get($data,'stock_alert', 0)
+            ]);
+            return;
+        }
+        
+        if(count($data) == 0) {
+            return;
+        };
+
+        foreach($data as $variation) {
+            $variation = ProductVariation::create([
+                'product_id' => $product->id,
+                'product_ref' => $product->ref,
+                'warehouse_id' => $warehouse_id,
+                'size' => data_get($variation, 'size', ''),
+                'color' => data_get($variation, 'color', ''),
+                'quantity' => data_get($variation, 'quantity', 0),
+                'stockAlert' => data_get($variation, 'stock_alert', 0)
+            ]);
+            $variations[] = $variation;
+        }
+
+        return $variations;
+    }
+
+    public static function storeTags($product, $data) {
+        foreach($data as $t) {
+            $t = Tag::where('name', $t)->first();
+            if(!$t) {
+                $t = Tag::create([
+                    'name' => $t,
+                ]);
+            }
+            $product->tags()->attach($tag);
+        }
+    }
+
+    public static function storeDeliveries($product, $deliveries = []) {	
+        return ProductDelivery::create([
+            'product_id' => $product->id,
+            'delivery_id' => RoadRunnerCODSquad::ROADRUNNER_ID,
+        ]);
+    }
+
+
+    public static function storeMediaFromUUID($product, $media) {
+
+        foreach ($media as $file) {
+            $temporaryMedia = TemporaryMedia::where('uuid', data_get($file, 'uuid'))->first();
+            $collection_name = data_get($file, 'collection_name', 'default');
+            
+            if ($temporaryMedia) {
+                $mediaItem = $temporaryMedia->getMedia($collection_name)->first();
+                if($mediaItem) {
+                    $movedMediaItem = $mediaItem->move($product, $collection_name);
+                }
+            }
+        }
+    
     }
 
 }

@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Product extends Model
+class Product extends Model implements HasMedia
 {
     use HasFactory;
+    use InteractsWithMedia;
 
 
     protected $fillable = [
@@ -23,6 +26,7 @@ class Product extends Model
         'buying_price',
         'description',
         'status',
+        'category_id',
         'note'
     ];
 
@@ -113,5 +117,15 @@ class Product extends Model
     public function metadata()
     {
         return $this->morphMany(Metadata::class, 'model');
+    }
+
+    public function tags(): MorphToMany
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
+    }
+
+    public function category(): MorphToMany
+    {
+        return $this->belongsTo(Category::class);
     }
 }
