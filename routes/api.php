@@ -38,6 +38,7 @@ use App\Http\Controllers\Api\Public\OrderWarehouseController;
 use App\Http\Controllers\Api\Admin\NewFactorisationController;
 use App\Http\Controllers\Api\Seller\WithdrawalMethodController;
 use App\Http\Controllers\Api\Export\FactorisationExportController;
+use App\Http\Controllers\Api\Seller\AffiliateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,8 +64,9 @@ Route::get('/export/factorisations/{id}', [FactorisationExportController::class,
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
-    //pusher 
 
+    Route::post('/storeimport', [AffiliateController::class, 'storeImport']);
+    //pusher 
     Route::post('/pusher_auth', function (Request $request) {
         $socketId = $request->input('socket_id');
         $channelName = $request->input('channel_name');
