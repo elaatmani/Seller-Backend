@@ -27,7 +27,8 @@ class Product extends Model implements HasMedia
         'description',
         'status',
         'category_id',
-        'note'
+        'note',
+        'product_type',
     ];
 
 
@@ -119,12 +120,12 @@ class Product extends Model implements HasMedia
         return $this->morphMany(Metadata::class, 'model');
     }
 
-    public function tags(): MorphToMany
+    public function tags()
     {
-        return $this->morphToMany(Tag::class, 'taggable');
+        return $this->morphToMany(Tag::class, 'taggable', 'model_tag');
     }
 
-    public function category(): MorphToMany
+    public function category()
     {
         return $this->belongsTo(Category::class);
     }

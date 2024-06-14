@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Carbon\Carbon;
 use App\Models\Tag;
 use App\Models\Product;
 use App\Models\Warehouse;
@@ -60,29 +61,13 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
 
     }
 
-
     public function paginate(
         int $perPage = 10,
         string $sortBy = 'created_at',
         string $sortOrder = 'desc',
         array $options = []
     ) {
-         // Number of records per page
-        $options['get'] = false;
-
-        // Get the query builder instance for the 'users' table
-        $query = $this->all($options);
-
-        $validSortOrders = ['asc', 'desc'];
-
-        if (!in_array($sortOrder, $validSortOrders)) {
-            $sortOrder = 'desc'; // Set default if the provided sort order is invalid
-        }
-
-        // Apply the sorting to the query
-        $query->orderBy($sortBy, $sortOrder);
-
-        // $query->where('agente_id', 18);
+        $query = Product::query()->where('product_type', 'affiliate')->orderBy($sortBy, $sortOrder);
 
         // Retrieve the paginated results
         $products = $query->paginate($perPage);
@@ -105,7 +90,7 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
     }
 
 
-    public static function store($data) {
+    public function store($data) {
 
         try {
             DB::beginTransaction();
@@ -120,9 +105,10 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
                 'status' => data_get($data, 'status') == 'true',
                 'ref' => data_get($data, 'sku'),
                 'category_id' => data_get($data, 'category_id'),
+                'product_type' => 'affiliate',
             ]);
 
-            self::storeVariations($product, data_get($data, 'variations', []), data_get($data, 'has_variations', false), Warehouse::first()->id);
+            self::storeVariations($product, data_get($data, 'variations', []), data_get($data, 'has_variations', false), data_get($data, 'initial_quantity', 0));
             self::storeTags($product, data_get($data, 'tags', []));
             self::storeMediaFromUUID($product, data_get($data,'media', []));
             self::storeDeliveries($product, data_get($data,'deliveries', []));
@@ -138,7 +124,7 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
 
     }
 
-    public static function storeVariations($product, $data, $has_variations, $warehouse) {
+    public static function storeVariations($product, $data, $has_variations, $initial_quantity = 0) {
 
         $variations = [];
         $warehouse_id = Warehouse::first()?->id;
@@ -150,7 +136,7 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
                 'warehouse_id' => $warehouse_id,
                 'color' => '',
                 'size' => '',
-                'quantity' => data_get($data, 'initial_quantity', 0),
+                'quantity' => $initial_quantity,
                 'stockAlert' => data_get($data,'stock_alert', 0)
             ]);
             return;
@@ -178,9 +164,9 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
 
     public static function storeTags($product, $data) {
         foreach($data as $t) {
-            $t = Tag::where('name', $t)->first();
-            if(!$t) {
-                $t = Tag::create([
+            $tag = Tag::where('name', $t)->first();
+            if(!$tag) {
+                $tag = Tag::create([
                     'name' => $t,
                 ]);
             }
@@ -210,6 +196,13 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
             }
         }
     
+    }
+
+    public function get($id) {
+        return Product::where([
+            'product_type' => 'affiliate',
+            'id' => $id
+        ])->first();
     }
 
 }

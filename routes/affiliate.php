@@ -18,5 +18,7 @@ Route::get('/', function() {
 
 
 Route::group(['prefix' => 'products'], function() {
+    Route::get('/', [AffiliateProductController::class, 'index']);
+    Route::get('/{id}', [AffiliateProductController::class, 'show']);
     Route::post('/', [AffiliateProductController::class, 'store']);
 });

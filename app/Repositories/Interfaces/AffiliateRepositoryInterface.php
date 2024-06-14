@@ -8,7 +8,9 @@ interface AffiliateRepositoryInterface {
 
     // public function update($id, $data);
 
-    // public function create($data);
+    public function get($id);
+
+    public function store($data);
 
     public function paginate(int $perPage, string $sortBy, string $sortOrder, array $options = []);
 
