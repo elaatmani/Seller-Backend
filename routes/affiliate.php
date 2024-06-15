@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Services\NewFactorisationService;
 use App\Http\Controllers\Api\Admin\AffiliateProductController;
-
+use App\Http\Controllers\Api\Seller\AffiliateController;
 
 Route::get('/', function() {
     return response()->json([
@@ -20,3 +20,4 @@ Route::get('/', function() {
 Route::group(['prefix' => 'products'], function() {
     Route::post('/', [AffiliateProductController::class, 'store']);
 });
+Route::post('/storeimport', [AffiliateController::class, 'storeImport']);

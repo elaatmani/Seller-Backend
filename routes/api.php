@@ -172,8 +172,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
 
-
-
     //Product
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/for-order/{id?}', [ProductController::class, 'productsForOrder']);
