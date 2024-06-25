@@ -14,6 +14,9 @@ class ProductCollectionResource extends JsonResource
      */
     public function toArray($request)
     {
+        $hasTikTok = $this->getMedia("tiktok_ads")?->count() > 0;
+        $hasFacebook = $this->getMedia("facebook_ads")?->count() > 0;
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -21,6 +24,10 @@ class ProductCollectionResource extends JsonResource
             'created_at' => $this->created_at,
             'thumbnail' => $this->getMedia("thumbnail")->first()?->getFullUrl(),
             // 'tags' => $this->tags,
+            'media' => [
+                'facebook_ads' => $hasFacebook,
+                'tiktok_ads' => $hasTikTok,
+            ],
             'tags' => [ 'car', 'mirror', 'sun' ],
             'category' => $this->category?->name,
         ];
