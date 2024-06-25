@@ -216,9 +216,9 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
       </tr>
       @foreach ($salesSeller as $sale)
       <tr align="center">
-         <td>{{ $i++ }}</td>
+        <td>{{ $i++ }}</td>
         <td>{{ $sale->id }}</td>
-        <td class="arabic-font">{{ translateProductNameToArabic($sale->product_name) }}</td>
+        <td class="arabic-font">{{ translateProductNameToArabic($sale->items()->first()->product->name) }}</td>
         <td>{{ implode(", ", $sale->items->pluck("quantity")->toArray()) }}</td>
         <td>{{ salePrice($sale) }}$</td>
         <td>{{ $sale->upsell == "oui" ? 10 : 8 }}$</td>
