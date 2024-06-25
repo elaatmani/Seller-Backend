@@ -17,4 +17,14 @@ class Sheet extends Model
         'auto_fetch',
         'active'
     ];
+    protected $appends = ['username'];
+
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User', 'user_id');
+    }
+    public function getUsernameAttribute()
+    {
+        return $this->user->username;
+    }
 }
