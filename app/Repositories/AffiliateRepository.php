@@ -100,6 +100,9 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
                 'buying_price' => data_get($data, 'buying_price', 0),
                 'selling_price' => data_get($data, 'selling_price', 0),
 
+                'delivery_rate' => data_get($data, 'delivery_rate', 0),
+                'confirmation_rate' => data_get($data, 'confirmation_rate', 0),
+
                 'user_id' => auth()->id(),
 
                 'status' => data_get($data, 'status') == 'true',
@@ -112,6 +115,7 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
             self::storeTags($product, data_get($data, 'tags', []));
             self::storeMediaFromUUID($product, data_get($data,'media', []));
             self::storeDeliveries($product, data_get($data,'deliveries', []));
+            self::storeMetadata($product, data_get($data,'metadata', []));
 
             DB::commit();
 
@@ -179,6 +183,15 @@ class AffiliateRepository  implements AffiliateRepositoryInterface {
             'product_id' => $product->id,
             'delivery_id' => RoadRunnerCODSquad::ROADRUNNER_ID,
         ]);
+    }
+
+    public static function storeMetadata($product, $metadata = []) {	
+        foreach ($metadata as $value) {
+            $product->metadata()->create([
+                'meta_key' => $value['meta_key'],
+                'meta_value' => $value['meta_value']
+            ]);
+        }
     }
 
 

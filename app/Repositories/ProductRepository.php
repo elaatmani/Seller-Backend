@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Product;
 use App\Models\ProductOffer;
+use Illuminate\Support\Carbon;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 
 class ProductRepository  implements ProductRepositoryInterface {
@@ -17,12 +18,14 @@ class ProductRepository  implements ProductRepositoryInterface {
 
 
         $query->where(function($q) use($options){
-
             foreach(data_get($options, 'orWhere', []) as $w) {
                     $q->orWhere($w[0], $w[1], $w[2]);
             }
         });
 
+        if(data_get($options, 'query', null)) {
+            $query->where(data_get($options, 'query'));
+        }
         foreach(data_get($options, 'whereDate', []) as $wd) {
             if(!$wd[2]) continue;
             $query->whereDate($wd[0], $wd[1], Carbon::make($wd[2])->toDate());

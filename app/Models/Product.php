@@ -29,6 +29,8 @@ class Product extends Model implements HasMedia
         'category_id',
         'note',
         'product_type',
+        'delivery_rate',
+        'confirmation_rate'
     ];
 
 
@@ -44,6 +46,8 @@ class Product extends Model implements HasMedia
         'selling_price' => 'float',
         'buying_price' => 'float',
         'description' => 'string',
+        'delivery_rate' => 'float',
+        'confirmation_rate' => 'float'
     ];
 
     protected $appends = [
@@ -107,6 +111,9 @@ class Product extends Model implements HasMedia
             'status' => $this->status,
             'offers' => $this->offers,
             'created_at' => $this->created_at,
+            'type' => $this->product_type,
+            'imported_count' => $this->imported_users()->count(),
+            'wishlisted_count' => $this->wishlisted_users()->count(),
         ];
     }
 
@@ -128,5 +135,13 @@ class Product extends Model implements HasMedia
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function imported_users() {
+        return $this->belongsToMany(User::class, UserProduct::class, 'product_id', 'user_id')->where('type', 'import');
+    }
+
+    public function wishlisted_users() {
+        return $this->belongsToMany(User::class, UserProduct::class, 'product_id', 'user_id')->where('type', 'wishlist');
     }
 }

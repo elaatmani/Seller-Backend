@@ -26,6 +26,7 @@ class NewProductController extends Controller
             $options['with'] = [
                     'variations'
             ];
+
             if(!auth()->user()->hasRole('admin')){
                 $options['where'][] = ['user_id','=',auth()->id()];
             }

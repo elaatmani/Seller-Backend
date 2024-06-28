@@ -32,6 +32,10 @@ class StoreProductRequest extends FormRequest
 
             'category_id' => ['nullable'],
             'status' => ['nullable'],
+
+            'delivery_rate' => ['nullable', 'numeric'],
+            'confirmation_rate' => ['nullable', 'numeric'],
+            'metadata' => ['nullable', 'array'],
             
             'media' => ['required'],
 

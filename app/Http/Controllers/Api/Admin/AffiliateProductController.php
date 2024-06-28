@@ -30,6 +30,28 @@ class AffiliateProductController extends Controller
         ]);
     }
 
+    public function imported(Request $request) {
+        $products = auth()->user()->imported_products()->orderBy('created_at', 'desc')->paginate(10);
+
+        $products->getCollection()->transform(fn($product) => new ProductCollectionResource($product));
+
+        return response()->json([
+            'code' => 'SUCCESS',
+            'products' => $products
+        ]);
+    }
+
+    public function wishlisted(Request $request) {
+        $products = auth()->user()->wishlisted_products()->orderBy('created_at', 'desc')->paginate(10);
+
+        $products->getCollection()->transform(fn($product) => new ProductCollectionResource($product));
+
+        return response()->json([
+            'code' => 'SUCCESS',
+            'products' => $products
+        ]);
+    }
+
     public function store(StoreProductRequest $request)
     {
 

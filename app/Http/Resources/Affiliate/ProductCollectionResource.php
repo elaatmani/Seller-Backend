@@ -22,6 +22,8 @@ class ProductCollectionResource extends JsonResource
             'name' => $this->name,
             'selling_price' => $this->selling_price,
             'created_at' => $this->created_at,
+            'confirmation_rate' => $this->confirmation_rate,
+            'delivery_rate' => $this->delivery_rate,
             'thumbnail' => $this->getMedia("thumbnail")->first()?->getFullUrl(),
             // 'tags' => $this->tags,
             'media' => [
@@ -30,6 +32,8 @@ class ProductCollectionResource extends JsonResource
             ],
             'tags' => [ 'car', 'mirror', 'sun' ],
             'category' => $this->category?->name,
+            'imported' => $this->imported_users()->where('user_id', auth()->id())->exists(),
+            'wishlisted' => $this->wishlisted_users()->where('user_id', auth()->id())->exists(),
         ];
     }
 }
