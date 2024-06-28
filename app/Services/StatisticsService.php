@@ -246,8 +246,24 @@ class StatisticsService
         ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to))
         ->when(!!$dropped_from, fn($q) => $q->whereDate('dropped_at', '>=', $dropped_from))
         ->when(!!$dropped_to, fn($q) => $q->whereDate('dropped_at', '<=', $dropped_to))
-        ->when(!!$delivered_from, fn($q) => $q->whereDate('delivery_date', '>=', $delivered_from))
-        ->when(!!$delivered_to, fn($q) => $q->whereDate('delivery_date', '<=', $delivered_to))
+        ->when($delivered_from, function($q) use ($delivered_from) {
+            $q->whereIn('id', function ($query) use ($delivered_from) {
+                $query->select('trackable_id')
+                    ->from('history')
+                    ->where('trackable_type', Order::class)
+                    ->where('fields', 'like', '%"new_value":"livrer"%')
+                    ->whereDate('created_at', '>=', $delivered_from);
+            });
+        })
+        ->when($delivered_to, function($q) use ($delivered_to) {
+            $q->whereIn('id', function ($query) use ($delivered_to) {
+                $query->select('trackable_id')
+                    ->from('history')
+                    ->where('trackable_type', Order::class)
+                    ->where('fields', 'like', '%"new_value":"livrer"%')
+                    ->whereDate('created_at', '<=', $delivered_to);
+            });
+        })
         ->when($affectation != 'all', fn($q) => $q->where('affectation', '=', $affectation))
         ->when($confirmation != 'all', fn($q) => $q->where('confirmation', '=', $confirmation))
         ->when($delivery != 'all', fn($q) => $q->where('delivery', '=', $delivery))
@@ -543,8 +559,24 @@ class StatisticsService
         ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to))
         ->when(!!$dropped_from, fn($q) => $q->whereDate('dropped_at', '>=', $dropped_from))
         ->when(!!$dropped_to, fn($q) => $q->whereDate('dropped_at', '<=', $dropped_to))
-        ->when(!!$delivered_from, fn($q) => $q->whereDate('delivery_date', '>=', $delivered_from))
-        ->when(!!$delivered_to, fn($q) => $q->whereDate('delivery_date', '<=', $delivered_to))
+        ->when($delivered_from, function($q) use ($delivered_from) {
+            $q->whereIn('id', function ($query) use ($delivered_from) {
+                $query->select('trackable_id')
+                    ->from('history')
+                    ->where('trackable_type', Order::class)
+                    ->where('fields', 'like', '%"new_value":"livrer"%')
+                    ->whereDate('created_at', '>=', $delivered_from);
+            });
+        })
+        ->when($delivered_to, function($q) use ($delivered_to) {
+            $q->whereIn('id', function ($query) use ($delivered_to) {
+                $query->select('trackable_id')
+                    ->from('history')
+                    ->where('trackable_type', Order::class)
+                    ->where('fields', 'like', '%"new_value":"livrer"%')
+                    ->whereDate('created_at', '<=', $delivered_to);
+            });
+        })
         ->when($affectation != 'all', fn($q) => $q->where('affectation', '=', $affectation))
         ->when($confirmation != 'all', fn($q) => $q->where('confirmation', '=', $confirmation))
         ->when($delivery != 'all', fn($q) => $q->where('delivery', '=', $delivery))
