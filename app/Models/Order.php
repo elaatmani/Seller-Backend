@@ -42,6 +42,7 @@ class Order extends Model
         'followup_reported_date',
         'is_delivered',
         'is_canceled',
+        'is_affiliate'
     ];
 
     protected $casts = [
@@ -73,6 +74,7 @@ class Order extends Model
         'source' => 'string',
         'is_delivered' => 'boolean',
         'is_canceled' => 'boolean',
+        'is_affiliate' => 'boolean',
     ];
 
     protected $with = ['seller_user','items' => ['product_variation.warehouse', 'product'], 'factorisations'];

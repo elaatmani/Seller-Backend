@@ -33,7 +33,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        abort(500, 'query');
+        // abort(500, 'query');
         if (!$request->user()->can('show_all_products')) {
             return response()->json(
                 [
@@ -52,7 +52,7 @@ class ProductController extends Controller
         ->get()
         ->map(fn($product) => ProductHelper::with_state($product));
 
-   
+
         return response()->json(
             [
                 'status' => true,

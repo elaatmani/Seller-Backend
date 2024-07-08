@@ -110,7 +110,8 @@ class SheetHelper {
                     'sheets_id' => self::order_sheet_id($sheet, $o['Order ID']),
                     'counts_from_warehouse' => true,
                     'product_name' => $product_name,
-                    'source' => $source
+                    'source' => $source,
+                    'is_affiliate' => $product->product_type == 'affiliate',
                 ]);
 
                 if(isset($product)) {

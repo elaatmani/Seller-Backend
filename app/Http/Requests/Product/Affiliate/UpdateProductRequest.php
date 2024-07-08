@@ -5,7 +5,7 @@ namespace App\Http\Requests\Product\Affiliate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProductRequest extends FormRequest
+class UpdateProductRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,7 +27,7 @@ class StoreProductRequest extends FormRequest
         return [
             'name' => ['required','string','max:255'],
             'description' => ['string'],
-            'sku' => ['required', 'unique:products,ref'],
+            // 'sku' => ['required', 'unique:products,ref'],
             'buying_price' => ['required', 'numeric'],
             'selling_price' => ['required', 'numeric'],
 

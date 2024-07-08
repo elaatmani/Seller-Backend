@@ -23,7 +23,10 @@ Route::group(['prefix' => 'products'], function() {
     Route::get('/imported', [AffiliateProductController::class, 'imported']);
     Route::get('/wishlisted', [AffiliateProductController::class, 'wishlisted']);
     Route::get('/{id}', [AffiliateProductController::class, 'show']);
+    Route::get('/{id}/details', [AffiliateProductController::class, 'details']);
+    Route::get('/{id}/edit', [AffiliateProductController::class, 'edit']);
     Route::post('/', [AffiliateProductController::class, 'store']);
+    Route::post('/{id}', [AffiliateProductController::class, 'update']);
 });
 
 Route::post('/import', [AffiliateController::class, 'import']);

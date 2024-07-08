@@ -52,6 +52,10 @@ class ProductResource extends JsonResource
             'tags' => $this->tags,
             'tags' => [ 'car', 'mirror', 'sun' ],
             'category' => $this->category?->name,
+            'metadata' => $this->metadata->map(fn($m) => [
+                'meta_key' => $m->meta_key,
+                'meta_value' => $m->meta_value,
+            ]),
             'variations' => $this->variations->map(fn($v) => [
                 'id' => $v->id,
                 'size' => $v->size,

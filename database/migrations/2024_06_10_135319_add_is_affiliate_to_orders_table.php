@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->boolean('is_affiliate')->default(false);
+            $table->boolean('is_affiliate')->nullable()->default(false);
         });
     }
 

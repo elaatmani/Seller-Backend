@@ -23,6 +23,7 @@ function translateProductNameToArabic($productName)
 }
 
 
+$productCostFees = $factorisation->productCostFees();
 $closeAt = new DateTime($factorisation->close_at);
 $sevenDaysAgo = $closeAt->modify('-7 days');
 $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
@@ -217,7 +218,7 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
       @foreach ($salesSeller as $sale)
       <tr align="center">
         <td>{{ $i++ }}</td>
-        <td>{{ $sale->id }}</td>
+        <td>{{ $sale->id }}@if($sale->is_affiliate) (A) @endif</td>
         <td class="arabic-font">{{ translateProductNameToArabic($sale->items()->first()->product->name) }}</td>
         <td>{{ implode(", ", $sale->items->pluck("quantity")->toArray()) }}</td>
         <td>{{ salePrice($sale) }}$</td>
@@ -231,12 +232,16 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
           <div class="total-part">
             <table class="table w-20 mt-10" style="margin-left:auto">
               <tr>
-                <th class="w-50">Total Revenue</th>
+                <th style="text-align: start" class="w-50">Total Revenue</th>
                 <td>{{$totalPrice}}$</td>
               </tr>
               <tr>
-                <th class="w-50">Total Fees</th>
+                <th style="text-align: start" class="w-50">Total Fees</th>
                 <td>{{$shippingFees + $totalCOD}}$</td>
+              </tr>
+              <tr>
+                <th style="text-align: start" class="w-50">Affiliate Product Fees</th>
+                <td>{{ $productCostFees }}$</td>
               </tr>
               @php
                   $otherFees = 0;                
@@ -246,13 +251,13 @@ $factorisationLastWeek = $sevenDaysAgo->format('Y-m-d h:m:s');
                     $otherFees += $fee->feeprice;                
                 @endphp
                 <tr>
-                    <th class="w-50">{{$fee->feename}}</th>
+                    <th style="text-align: start" class="w-50">{{$fee->feename}}</th>
                     <td>{{$fee->feeprice}}$</td>
                 </tr>
               @endforeach
               <tr>
-                <th class="w-50">Net Payment</th>
-                <td>{{$totalPrice - ($shippingFees + $totalCOD + $otherFees)}}$</td>
+                <th style="text-align: start" class="w-50">Net Payment</th>
+                <td>{{$totalPrice - ($shippingFees + $totalCOD + $otherFees + $productCostFees)}}$</td>
               </tr>
             </table>
             <div style="clear: both;"></div>

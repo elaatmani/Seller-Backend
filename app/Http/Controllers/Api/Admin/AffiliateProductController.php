@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Product\Affiliate\StoreProductRequest;
-use App\Http\Resources\Affiliate\ProductCollectionResource;
 use App\Http\Resources\Affiliate\ProductResource;
+use App\Http\Resources\Affiliate\ProductEditResource;
+use App\Http\Resources\Affiliate\ProductCollectionResource;
+use App\Http\Requests\Product\Affiliate\StoreProductRequest;
+use App\Http\Requests\Product\Affiliate\UpdateProductRequest;
 use App\Repositories\Interfaces\AffiliateRepositoryInterface;
 
 class AffiliateProductController extends Controller
@@ -20,7 +23,7 @@ class AffiliateProductController extends Controller
     }
 
     public function index(Request $request) {
-        $products = $this->repository->paginate(10, 'created_at', 'desc');
+        $products = $this->repository->paginate(100, 'created_at', 'desc');
 
         $products->getCollection()->transform(fn($product) => new ProductCollectionResource($product));
 
@@ -65,6 +68,19 @@ class AffiliateProductController extends Controller
         ]);
     }
 
+    public function update(UpdateProductRequest $request, $id)
+    {
+
+        $data = $request->validated();
+
+        $product = $this->repository->update($id, $request->all());
+        
+        return response()->json([
+            'code' => 'SUCCESS',
+            'product' => $product
+        ]);
+    }
+
 
     public function show(Request $request, $id)
     {
@@ -78,6 +94,46 @@ class AffiliateProductController extends Controller
         }
         
         $product = new ProductResource($product);
+
+        return response()->json([
+            'code' => 'SUCCESS',
+            'product' => $product
+        ]);
+    }
+
+    public function edit(Request $request, $id)
+    {
+        $product = $this->repository->get($id);
+
+        if(!$product) {
+            return response()->json([
+                'code' => 'ERROR',
+                'message' => 'Product not found'
+            ], 404);
+        }
+        
+        $product = new ProductEditResource($product);
+
+        return response()->json([
+            'code' => 'SUCCESS',
+            'product' => $product
+        ]);
+    }
+
+    public function details(Request $request, $id)
+    {
+        $product = $this->repository->details($id);
+
+        if(!$product) {
+            return response()->json([
+                'code' => 'ERROR',
+                'message' => 'Product not found'
+            ], 404);
+        }
+        
+        // $product = new ProductResource($product);
+        // $count_orders = Order::whereRelation('items', 'product_id', $product->id)->count();
+        // $sellers = $product->sellers;
 
         return response()->json([
             'code' => 'SUCCESS',

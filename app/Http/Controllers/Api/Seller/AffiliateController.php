@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Models\UserProduct;
 
@@ -33,6 +34,13 @@ class AffiliateController extends Controller
     public function unimport(Request $request, UserProduct $userProduct)
     {
         $id = $request->product_id;
+
+        Order::where('user_id', auth()->id())->whereRelation('items', 'product_id', $id);
+
+        return response()->json([
+            'code' => 'ORDERS_EXISTS',
+            'message' => 'Product cannot be removed from import list because it has orders'
+        ]);
 
         $userProduct->where('user_id', auth()->id())
             ->where('product_id', $id)

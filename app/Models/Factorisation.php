@@ -91,7 +91,9 @@ class Factorisation extends Model
 
         $otherFees = $this->fees->sum('feeprice');
 
-        $netPayment = $totalRevenue - ($totalFees + $otherFees);
+        $productCostFees = $this->productCostFees();
+
+        $netPayment = $totalRevenue - ($totalFees + $otherFees + $productCostFees);
 
         return round($netPayment, 2);
      }
@@ -131,6 +133,26 @@ class Factorisation extends Model
         });
 
         return $shippingFees;
+    }
+    
+    /**
+     * Calculate the total product cost fees for all orders.
+     *
+     * @return float
+     */
+    public function productCostFees()
+    {
+        
+        $productCostFees = $this->seller_orders->map(
+            function ($order) {
+                return $order->items->sum(function ($item) {
+                    $product = $item->product;
+                    return $product->product_type == 'affiliate' ? $product->selling_price * $item->quantity : 0;
+                });
+            }
+        )->sum();
+
+        return $productCostFees;
     }
 
 
