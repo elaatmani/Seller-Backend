@@ -112,15 +112,21 @@ class FactorisationObserver
             ];
 
             $custom_fields[] = [
+                'field' => 'product_cost_fees',
+                'new_value' => $factorisation->productCostFees(),
+                'old_value' => 0,
+            ];
+
+            $custom_fields[] = [
                 'field' => 'total_other_fees',
                 'new_value' => $factorisation->fees()->sum('feeprice'),
-                'old_value' => null,
+                'old_value' => 0,
             ];
 
             $custom_fields[] = [
                 'field' => 'orders',
                 'new_value' => $this->getOrders($factorisation),
-                'old_value' => null,
+                'old_value' => 0,
             ];
         }
 
@@ -174,7 +180,9 @@ class FactorisationObserver
             'delivery' => $o->delivery,
             'delivery_date' => $o->delivery_date,
             'price' => RoadRunnerCODSquad::getPrice($o),
-            'upsell' => $o->upsell
+            'upsell' => $o->upsell,
+            'is_affiliate' => $o->is_affiliate,
+
         ]))->toArray();
 
 

@@ -21,13 +21,21 @@ class NewProductController extends Controller
             $sortBy = $request->input('sort_by');
             $sortOrder = $request->input('sort_order');
             $perPage = $request->input('per_page');
+            $isAffiliate = $request->input('is_affiliate');
 
             $options = $this->get_options($request);
             $options['with'] = [
                     'variations'
             ];
+
             if(!auth()->user()->hasRole('admin')){
                 $options['where'][] = ['user_id','=',auth()->id()];
+            }
+
+            if($isAffiliate){
+                $options['where'][] = ['product_type','=','affiliate'];
+            } else {
+                $options['where'][] = ['product_type','=','normal'];
             }
             $products = $this->productRepository->paginate($perPage, $sortBy, $sortOrder, $options);
 

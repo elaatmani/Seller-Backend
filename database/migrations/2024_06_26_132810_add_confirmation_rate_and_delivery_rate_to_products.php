@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->boolean('is_affiliate')->nullable()->default(false);
+        Schema::table('products', function (Blueprint $table) {
+            $table->float('confirmation_rate')->default(0)->nullable();
+            $table->float('delivery_rate')->default(0)->nullable();
         });
     }
 
@@ -25,8 +26,9 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('is_affiliate');
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropColumn('confirmation_rate');
+            $table->dropColumn('delivery_rate');
         });
     }
 };

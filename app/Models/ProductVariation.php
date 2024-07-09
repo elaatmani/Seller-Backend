@@ -39,6 +39,14 @@ class ProductVariation extends Model
         return  $this->belongsTo(Product::class,'product_id');
     }
 
+    public function order_items(){
+        return  $this->hasMany(OrderItem::class, 'product_variation_id');
+    }
+
+    public function orders(){
+        return  $this->through('order_items')->has('orders');
+    }
+
     public function warehouse(){
         return  $this->belongsTo(Warehouse::class, 'warehouse_id');
     }

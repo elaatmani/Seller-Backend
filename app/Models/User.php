@@ -97,6 +97,12 @@ class User extends Authenticatable
         return $this->firstname . ' ' . $this->lastname;
     }
 
+    public function imported_products() {
+        return $this->belongsToMany(Product::class, UserProduct::class, 'user_id', 'product_id')->where('type', 'import');
+    }
 
+    public function wishlisted_products() {
+        return $this->belongsToMany(Product::class, UserProduct::class, 'user_id', 'product_id')->where('type', 'wishlist');
+    }
 
 }

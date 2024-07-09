@@ -67,6 +67,7 @@ class SheetHelper {
         $newOrders = [];
         $productNotFoundOrders = [];
         $alreadyExistsOrders = [];
+        $affiliateProductIds = DB::table('user_product')->select('product_id')->where('user_id', $sheet->user_id)->get()->pluck('product_id')->toArray();
 
         foreach($orders as $o) {
             try {
@@ -82,7 +83,12 @@ class SheetHelper {
 
                 if(!$sku || !$phone || !$fullname) continue;
 
-                $product = Product::where([['ref', $sku], ['user_id', $sheet->user_id], ['status', 1]])->first();
+                
+
+                $product = Product::where([['ref', $sku], ['user_id', $sheet->user_id], ['status', 1]])->orWhere(function($query) use($sheet, $affiliateProductIds) {
+                    $query->whereIn('id', $affiliateProductIds)->where('status', 1);
+                })->first();
+
                 if(!$product) {
                     $productNotFoundOrders[] = $o;
                     continue;
@@ -104,7 +110,8 @@ class SheetHelper {
                     'sheets_id' => self::order_sheet_id($sheet, $o['Order ID']),
                     'counts_from_warehouse' => true,
                     'product_name' => $product_name,
-                    'source' => $source
+                    'source' => $source,
+                    'is_affiliate' => $product->product_type == 'affiliate',
                 ]);
 
                 if(isset($product)) {

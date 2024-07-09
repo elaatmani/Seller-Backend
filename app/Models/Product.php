@@ -27,7 +27,10 @@ class Product extends Model implements HasMedia
         'description',
         'status',
         'category_id',
-        'note'
+        'note',
+        'product_type',
+        'delivery_rate',
+        'confirmation_rate'
     ];
 
 
@@ -43,6 +46,8 @@ class Product extends Model implements HasMedia
         'selling_price' => 'float',
         'buying_price' => 'float',
         'description' => 'string',
+        'delivery_rate' => 'float',
+        'confirmation_rate' => 'float'
     ];
 
     protected $appends = [
@@ -106,6 +111,9 @@ class Product extends Model implements HasMedia
             'status' => $this->status,
             'offers' => $this->offers,
             'created_at' => $this->created_at,
+            'type' => $this->product_type,
+            'imported_count' => $this->imported_users()->count(),
+            'wishlisted_count' => $this->wishlisted_users()->count(),
         ];
     }
 
@@ -119,13 +127,29 @@ class Product extends Model implements HasMedia
         return $this->morphMany(Metadata::class, 'model');
     }
 
-    public function tags(): MorphToMany
+    public function tags()
     {
-        return $this->morphToMany(Tag::class, 'taggable');
+        return $this->morphToMany(Tag::class, 'taggable', 'model_tag');
     }
 
-    public function category(): MorphToMany
+    public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function order_items() {
+        return $this->hasMany(OrderItem::class, 'product_id');
+    }
+
+    public function orders() {
+        return $this->belongsToMany(Order::class, OrderItem::class, 'product_id', 'order_id');
+    }
+
+    public function imported_users() {
+        return $this->belongsToMany(User::class, UserProduct::class, 'product_id', 'user_id')->where('type', 'import');
+    }
+
+    public function wishlisted_users() {
+        return $this->belongsToMany(User::class, UserProduct::class, 'product_id', 'user_id')->where('type', 'wishlist');
     }
 }

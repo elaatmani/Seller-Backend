@@ -162,6 +162,9 @@ class OrderRepository implements OrderRepositoryInterface
                     $item
                 );
             }
+            if($data['agente_id']){
+                unset($data['agente_id']);
+            }
             $order->update($data);
             $order = $order->fresh();
             DB::commit();
