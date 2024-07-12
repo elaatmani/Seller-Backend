@@ -24,7 +24,7 @@ class ProductCollectionResource extends JsonResource
             'created_at' => $this->created_at,
             'confirmation_rate' => $this->confirmation_rate,
             'delivery_rate' => $this->delivery_rate,
-            'thumbnail' => $this->getMedia("thumbnail")->first()?->getFullUrl(),
+            'thumbnail' => str_replace('/media', 'public/media', $this->getMedia("thumbnail")->first()?->getFullUrl()),
             // 'tags' => $this->tags,
             'media' => [
                 'facebook_ads' => $hasFacebook,

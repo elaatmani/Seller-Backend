@@ -17,7 +17,7 @@ class ProductResource extends JsonResource
         // $media = collect($this->getMedia("normal")?->map(fn($m) => ['url' => $m->getFullUrl(), 'type' => $m->mime_type]));
 
         $media = collect($this->getMedia("*")?->map(fn($m) => [
-            'url' => $m->getFullUrl(), 
+            'url' => str_replace('/media', 'public/media', $m->getFullUrl()), 
             'id' => $m->id,
             'type' => $m->mime_type,
             'category' => explode('/', $m->mime_type)[0] ?? null,
@@ -28,7 +28,7 @@ class ProductResource extends JsonResource
 
         if($thumbnail) {
             $thumbnail = [
-                'url' => $thumbnail->getFullUrl(),
+                'url' => str_replace('/media', 'public/media', $thumbnail->getFullUrl()),
                 'id' => $thumbnail->id,
                 'type' => $thumbnail->mime_type,
                 'category' => explode('/', $thumbnail->mime_type)[0] ?? null,
