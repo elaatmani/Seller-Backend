@@ -61,57 +61,24 @@ class OrderStatisticService
     }
 
 
-    public static function getConfirmationRate()
+    public static function getConfirmationsCount()
     {
-        $result = DB::table('orders')
-            ->select(
-                DB::raw('SUM(CASE WHEN confirmation = "confirmer" THEN 1 ELSE 0 END) as confirmed_orders'),
-                DB::raw('SUM(CASE WHEN confirmation = "double" THEN 1 ELSE 0 END) as double_orders'),
-                DB::raw('COUNT(*) as total_orders')
-            )
-            ->first();
+        $confirmations = DB::table('orders')
+            ->select('confirmation', DB::raw('count(*) as count'))
+            ->groupBy('confirmation')
+            ->get();
 
-        $confirmedOrders = $result->confirmed_orders;
-        $doubleOrders = $result->double_orders;
-        $totalOrders = $result->total_orders;
-
-        $effectiveOrders = $totalOrders - $doubleOrders;
-
-        // Avoid division by zero
-        if ($effectiveOrders == 0) {
-            return 0;
-        }
-
-        $confirmationRate = ($confirmedOrders / $effectiveOrders) * 100;
-
-        return $confirmationRate;
+        return $confirmations;
     }
 
-    public static function getDeliveryRate()
+    public static function getDeliveriesCount()
     {
-        $result = DB::table('orders')
-            ->whereIn('confirmation', ['confirmer', 'change'])
-            ->whereIn('confirmation', ['confirmer', 'change'])
-            ->select(
-                DB::raw('SUM(CASE WHEN confirmation IN ("confirmer", "change") AND delivery IN () THEN 1 ELSE 0 END) as confirmed_orders'),
-                DB::raw('SUM(CASE WHEN confirmation = "double" THEN 1 ELSE 0 END) as double_orders'),
-                DB::raw('COUNT(*) as total_orders')
-            )
-            ->first();
+        $delivery = DB::table('orders')
+            ->whereIn('confirmation', ['confirmer', 'change', 'refund'])
+            ->select('delivery', DB::raw('count(*) as count'))
+            ->groupBy('delivery')
+            ->get();
 
-        $confirmedOrders = $result->confirmed_orders;
-        $doubleOrders = $result->double_orders;
-        $totalOrders = $result->total_orders;
-
-        $effectiveOrders = $totalOrders - $doubleOrders;
-
-        // Avoid division by zero
-        if ($effectiveOrders == 0) {
-            return 0;
-        }
-
-        $confirmationRate = ($confirmedOrders / $effectiveOrders) * 100;
-
-        return $confirmationRate;
+        return $delivery;
     }
 }
