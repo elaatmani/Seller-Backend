@@ -4,9 +4,11 @@ namespace App\Repositories;
 
 use Carbon\Carbon;
 use App\Models\Tag;
+use App\Models\User;
 use App\Models\Product;
 use App\Models\Warehouse;
 use App\Models\ProductOffer;
+use App\Models\ProductAgente;
 use App\Models\TemporaryMedia;
 use App\Models\ProductDelivery;
 use App\Models\ProductVariation;
@@ -123,6 +125,16 @@ class AffiliateRepository  implements AffiliateRepositoryInterface
             self::storeMediaFromUUID($product, data_get($data, 'media', []));
             self::storeDeliveries($product, data_get($data, 'deliveries', []));
             self::storeMetadata($product, data_get($data, 'metadata', []));
+
+            $users = User::where('having_all',1)->get('id');
+            if($users){
+                foreach($users as $user){
+                    ProductAgente::create([
+                        'agente_id'=> $user->id,
+                        'product_id' => $product->id
+                    ]);
+                }
+            }
 
             DB::commit();
 

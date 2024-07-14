@@ -147,6 +147,15 @@ Route::get('storage/uploads/invoices/{filename}', function ($filename) {
     }
 });
 
+Route::get('media/{id}/{filename}', function ($id, $filename) {
+    $path = public_path('media/' . $id) . '/' . $filename;
+    if (file_exists($path)) {
+        return response()->file($path);
+    } else {
+        abort(404);
+    }
+});
+
 Route::get('/sync', [GoogleSheetController::class, 'index']);
 
 

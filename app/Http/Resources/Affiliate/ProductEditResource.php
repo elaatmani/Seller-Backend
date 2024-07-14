@@ -16,7 +16,7 @@ class ProductEditResource extends JsonResource
     {
         $media = collect($this->getMedia("*")?->map(fn($m) => [
             'id' => $m->id,
-            'url' => $m->getFullUrl(), 
+            'url' => str_replace('/media', 'public/media', $m->getFullUrl()), 
             'type' => $m->mime_type,
             'category' => explode('/', $m->mime_type)[0],
             'collection_name' => $m->collection_name,
