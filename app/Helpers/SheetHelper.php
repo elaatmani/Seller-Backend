@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\UserProduct;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -99,6 +100,17 @@ class SheetHelper {
                 //     $alreadyExistsOrders[] = $o;
                 //     continue;
                 // };
+
+                if($product->product_type == 'affiliate') {
+                    $isImported = UserProduct::where([
+                        'product_id' => $product->id,
+                        'user_id' => $sheet->user_id,
+                    ])->exists();
+
+                    if(!$isImported) {
+                        continue;
+                    }
+                }
 
                 $order = Order::create([
                     'user_id' => $sheet->user_id,
