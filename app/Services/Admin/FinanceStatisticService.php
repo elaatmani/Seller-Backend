@@ -18,14 +18,20 @@ class FinanceStatisticService
             DB::raw('SUM(CASE WHEN orders.delivery = "livrer" THEN order_items.price ELSE 0 END) as sum_livrer'),
             DB::raw('SUM(CASE WHEN orders.delivery = "livrer" AND NOT is_paid_by_delivery THEN order_items.price ELSE 0 END) as not_paid_by_delivery'),
             DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN order_items.price ELSE 0 END) as sum_paid'),
+            DB::raw('count(DISTINCT CASE WHEN orders.delivery = "paid" THEN order_items.order_id ELSE NULL END) as count_orders')
             // DB::raw('SUM(CASE WHEN orders.delivery != "paid" AND orders.is_paid_by_delivery AND NOT orders.is_paid_to_seller THEN order_items.price ELSE 0 END) as sum_to_be_paid'),
             // DB::raw('SUM(CASE WHEN orders.delivery = "cleared" THEN order_items.price ELSE 0 END) as sum_cleared'),
             // DB::raw('SUM(order_items.price) as sum_total')
         )
         ->first();
 
+        $result->cod_fees =  $result->sum_paid * 0.04;
+        $result->shipping_fees =  $result->count_orders * 8;
+        $result->net_paid =  $result->sum_paid - ($result->cod_fees + $result->shipping_fees);
+
         return $result;
     }
+
 
     public static function getAverageOrderValue($from = null, $to = null, $seller_id = null) {
         $ordersCount = DB::table('orders')
