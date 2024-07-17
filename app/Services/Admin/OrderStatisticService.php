@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Http;
 
 class OrderStatisticService
@@ -35,6 +36,8 @@ class OrderStatisticService
         );
 
         $result = $query->get();
+
+        return $result;
 
         $dateCounts = [];
         foreach ($result as $result) {
@@ -80,5 +83,26 @@ class OrderStatisticService
             ->get();
 
         return $delivery;
+    }
+
+    public static function getOrdersBySellers($from = null, $to = null, $seller_id = null)
+    {
+        $sellers = Role::where('name', 'seller')->first()->users()->where('status', 1)->select('id')->get()->pluck('id')->toArray();
+
+        $result = DB::table('orders')
+            ->join('users', 'orders.user_id', '=', 'users.id')
+            ->whereIn('orders.user_id', $sellers)
+            ->select('users.username', 'orders.confirmation', DB::raw('count(*) as order_count'))
+            ->groupBy('users.username', 'orders.confirmation')
+            ->get()
+            ->groupBy('username')
+            ->map(function ($items, $key) {
+                return $items->keyBy('confirmation');
+            });
+
+        // Convert the result to an array if needed
+        $resultArray = $result->toArray();
+
+        return $result;
     }
 }

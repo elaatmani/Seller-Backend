@@ -5,6 +5,7 @@ namespace App\Services\Admin;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Http;
 
 class FinanceStatisticService
@@ -18,7 +19,8 @@ class FinanceStatisticService
             DB::raw('SUM(CASE WHEN orders.delivery = "livrer" THEN order_items.price ELSE 0 END) as sum_livrer'),
             DB::raw('SUM(CASE WHEN orders.delivery = "livrer" AND NOT is_paid_by_delivery THEN order_items.price ELSE 0 END) as not_paid_by_delivery'),
             DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN order_items.price ELSE 0 END) as sum_paid'),
-            DB::raw('count(DISTINCT CASE WHEN orders.delivery = "paid" THEN order_items.order_id ELSE NULL END) as count_orders')
+            DB::raw('count(DISTINCT CASE WHEN orders.delivery = "paid" THEN order_items.order_id ELSE NULL END) as count_orders'),
+            DB::raw('count(DISTINCT CASE WHEN orders.delivery in ("paid", "livrer") THEN order_items.order_id ELSE NULL END) as count_orders_paid_delivered')
             // DB::raw('SUM(CASE WHEN orders.delivery != "paid" AND orders.is_paid_by_delivery AND NOT orders.is_paid_to_seller THEN order_items.price ELSE 0 END) as sum_to_be_paid'),
             // DB::raw('SUM(CASE WHEN orders.delivery = "cleared" THEN order_items.price ELSE 0 END) as sum_cleared'),
             // DB::raw('SUM(order_items.price) as sum_total')
@@ -66,5 +68,7 @@ class FinanceStatisticService
             
         return $result;
     }
+
+    
 
 }

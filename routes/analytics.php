@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Analytics\Admin\OrderBySellerController;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Order;
@@ -22,3 +23,4 @@ Route::get('/orders-count-by-days', OrderCountController::class);
 Route::get('/confirmations-count', OrderConfirmationController::class);
 Route::get('/deliveries-count', OrderDeliveryController::class);
 Route::get('/revenue', [OrderRevenueController::class, 'index']);
+Route::get('/orders-by-sellers', OrderBySellerController::class);
