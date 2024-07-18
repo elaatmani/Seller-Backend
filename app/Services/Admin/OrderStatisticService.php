@@ -18,7 +18,7 @@ class OrderStatisticService
         $to = $to ?? now()->endOfDay();
 
         $query = DB::table('orders')
-            ->where('confirmation', '!=', 'double')
+            // ->where('confirmation', '!=', 'double')
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
             ->whereBetween('created_at', [$from, $to])
             ->groupBy(DB::raw('DATE(created_at)'))
@@ -32,12 +32,11 @@ class OrderStatisticService
         $period = new \DatePeriod(
             new \DateTime($from),
             new \DateInterval('P1D'),
-            (new \DateTime($to))->modify('+1 day')
+            (new \DateTime($to))->modify('+0 day')
         );
 
         $result = $query->get();
 
-        return $result;
 
         $dateCounts = [];
         foreach ($result as $result) {
@@ -87,22 +86,31 @@ class OrderStatisticService
 
     public static function getOrdersBySellers($from = null, $to = null, $seller_id = null)
     {
-        $sellers = Role::where('name', 'seller')->first()->users()->where('status', 1)->select('id')->get()->pluck('id')->toArray();
+        // Step 1: Get all seller IDs
+        $sellerIds = Role::where('name', 'seller')->first()->users()->where('status', 1)->pluck('id')->toArray();
 
+        // Step 2: Subquery to get the total orders count per seller
+        $subQuery = DB::table('orders')
+            ->select('user_id', DB::raw('COUNT(*) as total_orders'))
+            ->groupBy('user_id');
+
+        // Step 3: Main query to join with users and subquery, and group by confirmation
         $result = DB::table('orders')
             ->join('users', 'orders.user_id', '=', 'users.id')
-            ->whereIn('orders.user_id', $sellers)
-            ->select('users.username', 'orders.confirmation', DB::raw('count(*) as order_count'))
-            ->groupBy('users.username', 'orders.confirmation')
+            ->joinSub($subQuery, 'total_orders', function ($join) {
+                $join->on('orders.user_id', '=', 'total_orders.user_id');
+            })
+            ->whereIn('orders.user_id', $sellerIds)
+            ->select('users.username', 'orders.confirmation', DB::raw('count(orders.id) as order_count'), 'total_orders.total_orders')
+            ->groupBy('users.username', 'orders.confirmation', 'total_orders.total_orders')
+            ->orderBy('total_orders', 'desc')
             ->get()
             ->groupBy('username')
             ->map(function ($items, $key) {
                 return $items->keyBy('confirmation');
-            });
+            })->take(8);
 
-        // Convert the result to an array if needed
-        $resultArray = $result->toArray();
-
+        // Return the result
         return $result;
     }
 }
