@@ -6,7 +6,9 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class OrderStatisticService
 {
@@ -103,14 +105,15 @@ class OrderStatisticService
             ->whereIn('orders.user_id', $sellerIds)
             ->select('users.username', 'orders.confirmation', DB::raw('count(orders.id) as order_count'), 'total_orders.total_orders')
             ->groupBy('users.username', 'orders.confirmation', 'total_orders.total_orders')
-            ->orderBy('total_orders', 'desc')
+            ->orderBy('total_orders', request()->input('order_by', 'high') == 'high' ? 'desc' : 'asc')
             ->get()
             ->groupBy('username')
             ->map(function ($items, $key) {
                 return $items->keyBy('confirmation');
-            })->take(8);
+            });
 
-        // Return the result
-        return $result;
+            // Return the result
+        return new LengthAwarePaginator($result->forPage(request()->input('page', 1), request()->input('per_page', 10)), $result->count(), request()->input('per_page', 10), request()->input('page', 1));
+
     }
 }
