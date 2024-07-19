@@ -116,4 +116,25 @@ class OrderStatisticService
         return new LengthAwarePaginator($result->forPage(request()->input('page', 1), request()->input('per_page', 10)), $result->count(), request()->input('per_page', 10), request()->input('page', 1));
 
     }
+
+
+    public static function getProductsPerformance($from = null, $to = null, $seller_id = null)
+    {
+
+        $result = DB::table('order_items')
+        ->join('products', 'order_items.product_id', '=', 'products.id')
+        ->select(
+            'products.name',
+            'order_items.product_id as product',
+            DB::raw('count(order_items.order_id) as count_orders'),
+            DB::raw('sum(order_items.quantity) as total_quantity')
+        )
+        ->groupBy('products.name', 'order_items.product_id')
+        ->orderBy('count_orders', request()->input('order_by', 'high') == 'high' ? 'desc' : 'asc')
+        ->get();
+
+            // Return the result
+        return new LengthAwarePaginator($result->forPage(request()->input('page', 1), request()->input('per_page', 10)), $result->count(), request()->input('per_page', 10), request()->input('page', 1));
+
+    }
 }

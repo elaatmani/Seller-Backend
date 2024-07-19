@@ -11,7 +11,7 @@ use App\Http\Controllers\Api\Analytics\Admin\OrderCountController;
 use App\Http\Controllers\Api\Analytics\Admin\OrderRevenueController;
 use App\Http\Controllers\Api\Analytics\Admin\OrderDeliveryController;
 use App\Http\Controllers\Api\Analytics\Admin\OrderConfirmationController;
-
+use App\Http\Controllers\Api\Analytics\Admin\ProductPerformanceController;
 
 Route::get('/', function() {
     return response()->json([
@@ -24,3 +24,4 @@ Route::get('/confirmations-count', OrderConfirmationController::class);
 Route::get('/deliveries-count', OrderDeliveryController::class);
 Route::get('/revenue', [OrderRevenueController::class, 'index']);
 Route::get('/orders-by-sellers', OrderBySellerController::class);
+Route::get('/products-by-performance', ProductPerformanceController::class);

@@ -26,10 +26,18 @@ class FinanceStatisticService
             // DB::raw('SUM(order_items.price) as sum_total')
         )
         ->first();
+        
+        $fees = DB::table('factorisation_fees')
+        ->join('factorisations', 'factorisation_fees.factorisation_id', '=', 'factorisations.id')
+        ->where([
+            'close' => 1,
+            'paid' => 1
+        ])->sum('factorisation_fees.feeprice');
 
         $result->cod_fees =  $result->sum_paid * 0.04;
         $result->shipping_fees =  $result->count_orders * 8;
-        $result->net_paid =  $result->sum_paid - ($result->cod_fees + $result->shipping_fees);
+        $result->other_fees =  $fees;
+        $result->net_paid =  $result->sum_paid - ($result->cod_fees + $result->shipping_fees + $fees);
 
         return $result;
     }
