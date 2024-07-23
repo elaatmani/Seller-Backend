@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Analytics\Admin;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\Admin\OrderStatisticService;
@@ -18,7 +19,19 @@ class OrderConfirmationController extends Controller
     {
         $service = new OrderStatisticService();
 
-        $results = $service->getConfirmationsCount();
+        $from = $request->query('from');
+        $to = $request->query('to');
+    
+        if($from) {
+            $from = Carbon::parse($from);
+        }
+
+        if($to) {
+            $to = Carbon::parse($to);
+            $to = $to->endOfDay();
+        }
+
+        $results = $service->getConfirmationsCount($from, $to);
 
         return response()->json([
             'code' => 'SUCCESS',

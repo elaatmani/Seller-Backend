@@ -21,6 +21,12 @@ class OrderStatisticService
 
         $query = DB::table('orders')
             // ->where('confirmation', '!=', 'double')
+            ->when($from, function($query) use($from) {
+                $query->whereDate('orders.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('orders.created_at', '<=', $to);
+            })
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
             ->whereBetween('created_at', [$from, $to])
             ->groupBy(DB::raw('DATE(created_at)'))
@@ -65,9 +71,15 @@ class OrderStatisticService
     }
 
 
-    public static function getConfirmationsCount()
+    public static function getConfirmationsCount($from = null, $to = null)
     {
         $confirmations = DB::table('orders')
+            ->when($from, function($query) use($from) {
+                $query->whereDate('orders.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('orders.created_at', '<=', $to);
+            })
             ->select('confirmation', DB::raw('count(*) as count'))
             ->groupBy('confirmation')
             ->get();
@@ -75,9 +87,15 @@ class OrderStatisticService
         return $confirmations;
     }
 
-    public static function getDeliveriesCount()
+    public static function getDeliveriesCount($from = null, $to = null)
     {
         $delivery = DB::table('orders')
+            ->when($from, function($query) use($from) {
+                $query->whereDate('orders.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('orders.created_at', '<=', $to);
+            })
             ->whereIn('confirmation', ['confirmer', 'change', 'refund'])
             ->select('delivery', DB::raw('count(*) as count'))
             ->groupBy('delivery')
@@ -98,6 +116,12 @@ class OrderStatisticService
 
         // Step 3: Main query to join with users and subquery, and group by confirmation
         $result = DB::table('orders')
+            ->when($from, function($query) use($from) {
+                $query->whereDate('orders.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('orders.created_at', '<=', $to);
+            })
             ->join('users', 'orders.user_id', '=', 'users.id')
             ->joinSub($subQuery, 'total_orders', function ($join) {
                 $join->on('orders.user_id', '=', 'total_orders.user_id');
@@ -112,9 +136,8 @@ class OrderStatisticService
                 return $items->keyBy('confirmation');
             });
 
-            // Return the result
+        // Return the result
         return new LengthAwarePaginator($result->forPage(request()->input('page', 1), request()->input('per_page', 10)), $result->count(), request()->input('per_page', 10), request()->input('page', 1));
-
     }
 
 
@@ -122,19 +145,39 @@ class OrderStatisticService
     {
 
         $result = DB::table('order_items')
-        ->join('products', 'order_items.product_id', '=', 'products.id')
-        ->select(
-            'products.name',
-            'order_items.product_id as product',
-            DB::raw('count(order_items.order_id) as count_orders'),
-            DB::raw('sum(order_items.quantity) as total_quantity')
-        )
-        ->groupBy('products.name', 'order_items.product_id')
-        ->orderBy('count_orders', request()->input('order_by', 'high') == 'high' ? 'desc' : 'asc')
-        ->get();
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->when($from, function($query) use($from) {
+                $query->whereDate('order_items.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('order_items.created_at', '<=', $to);
+            })
+            ->select(
+                'products.name',
+                'order_items.product_id as product',
+                DB::raw('count(order_items.order_id) as count_orders'),
+                DB::raw('sum(order_items.quantity) as total_quantity')
+            )
+            ->groupBy('products.name', 'order_items.product_id')
+            ->orderBy('count_orders', request()->input('order_by', 'high') == 'high' ? 'desc' : 'asc')
+            ->get();
 
-            // Return the result
-        return new LengthAwarePaginator($result->forPage(request()->input('page', 1), request()->input('per_page', 10)), $result->count(), request()->input('per_page', 10), request()->input('page', 1));
+        // Convert collection to a simple array
+        $resultArray = $result->toArray();
 
+        // Pagination parameters
+        $page = request()->input('page', 1);
+        $perPage = request()->input('per_page', 10);
+        $total = count($resultArray);
+
+        // Create a new LengthAwarePaginator instance
+        $paginator = new LengthAwarePaginator(
+            array_slice($resultArray, ($page - 1) * $perPage, $perPage),
+            $total,
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+        return $paginator;
     }
 }

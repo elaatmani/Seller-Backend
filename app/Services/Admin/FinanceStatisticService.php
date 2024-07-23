@@ -15,6 +15,12 @@ class FinanceStatisticService
         $result = DB::table('order_items')
         ->join('orders', 'order_items.order_id', '=', 'orders.id')
         ->where('orders.confirmation', '=', 'confirmer')
+        ->when($from, function($query) use($from) {
+            $query->whereDate('orders.created_at', '>=', $from);
+        })
+        ->when($to, function($query) use($to) {
+            $query->whereDate('orders.created_at', '<=', $to);
+        })
         ->select(
             DB::raw('SUM(CASE WHEN orders.delivery = "livrer" THEN order_items.price ELSE 0 END) as sum_livrer'),
             DB::raw('SUM(CASE WHEN orders.delivery = "livrer" AND NOT is_paid_by_delivery THEN order_items.price ELSE 0 END) as not_paid_by_delivery'),
@@ -46,6 +52,12 @@ class FinanceStatisticService
     public static function getAverageOrderValue($from = null, $to = null, $seller_id = null) {
         $ordersCount = DB::table('orders')
             ->where('orders.confirmation', '=', 'confirmer')
+            ->when($from, function($query) use($from) {
+                $query->whereDate('orders.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('orders.created_at', '<=', $to);
+            })
             ->whereIn('orders.delivery', ['paid', 'cleared', 'livrer'])
             ->count();
                 
@@ -58,6 +70,12 @@ class FinanceStatisticService
     public static function getDeliveredOrdersRevenue($from = null, $to = null, $seller_id = null) {
                 
         $result = DB::table('order_items')
+            ->when($from, function($query) use($from) {
+                $query->whereDate('orders_items.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('orders_items.created_at', '<=', $to);
+            })
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('orders.confirmation', '=', 'confirmer')
             ->whereIn('orders.delivery', ['livrer'])
@@ -69,6 +87,12 @@ class FinanceStatisticService
     public static function getPaidOrdersRevenue($from = null, $to = null, $seller_id = null) {
                 
         $result = DB::table('order_items')
+            ->when($from, function($query) use($from) {
+                $query->whereDate('orders_items.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('orders_items.created_at', '<=', $to);
+            })
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('orders.confirmation', '=', 'confirmer')
             ->whereIn('orders.delivery', ['paid', 'cleared'])

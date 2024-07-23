@@ -2,15 +2,28 @@
 
 namespace App\Http\Controllers\Api\Analytics\Admin;
 
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\Admin\FinanceStatisticService;
-use Illuminate\Http\Request;
 
 class OrderRevenueController extends Controller
 {
     public function index(Request $request)
     {
-        $revenue = FinanceStatisticService::getRevenue();
+        $from = $request->query('from');
+        $to = $request->query('to');
+    
+        if($from) {
+            $from = Carbon::parse($from);
+        }
+
+        if($to) {
+            $to = Carbon::parse($to);
+            $to = $to->endOfDay();
+        }
+        $revenue = FinanceStatisticService::getRevenue($from, $to);
+        
         return response()->json([
             'revenue' => $revenue
         ]);

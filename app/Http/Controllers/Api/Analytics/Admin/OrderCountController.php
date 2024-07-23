@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api\Analytics\Admin;
 
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use App\Models\Order;
-use App\Services\Admin\OrderStatisticService;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Services\Admin\OrderStatisticService;
 
 class OrderCountController extends Controller
 {
@@ -18,8 +19,19 @@ class OrderCountController extends Controller
     public function __invoke(Request $request)
     {
         $service = new OrderStatisticService();
+        $from = $request->query('from');
+        $to = $request->query('to');
+    
+        if($from) {
+            $from = Carbon::parse($from);
+        }
 
-        $results = $service->getOrdersCountByDays();
+        if($to) {
+            $to = Carbon::parse($to);
+            $to = $to->endOfDay();
+        }
+
+        $results = $service->getOrdersCountByDays($from, $to);
         $count = Order::count();
 
         return response()->json([

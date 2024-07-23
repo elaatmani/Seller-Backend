@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Analytics\Admin;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\Admin\OrderStatisticService;
@@ -18,7 +19,19 @@ class ProductPerformanceController extends Controller
     {
         $service = new OrderStatisticService();
 
-        $results = $service->getProductsPerformance();
+        $from = $request->query('from');
+        $to = $request->query('to');
+    
+        if($from) {
+            $from = Carbon::parse($from);
+        }
+
+        if($to) {
+            $to = Carbon::parse($to);
+            $to = $to->endOfDay();
+        }
+
+        $results = $service->getProductsPerformance($from, $to);
 
         return response()->json([
             'code' => 'SUCCESS',
