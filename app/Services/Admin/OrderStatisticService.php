@@ -21,10 +21,10 @@ class OrderStatisticService
 
         $query = DB::table('orders')
             // ->where('confirmation', '!=', 'double')
-            ->when($from, function($query) use($from) {
+            ->when($from, function ($query) use ($from) {
                 $query->whereDate('orders.created_at', '>=', $from);
             })
-            ->when($to, function($query) use($to) {
+            ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
             })
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
@@ -74,10 +74,10 @@ class OrderStatisticService
     public static function getConfirmationsCount($from = null, $to = null)
     {
         $confirmations = DB::table('orders')
-            ->when($from, function($query) use($from) {
+            ->when($from, function ($query) use ($from) {
                 $query->whereDate('orders.created_at', '>=', $from);
             })
-            ->when($to, function($query) use($to) {
+            ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
             })
             ->select('confirmation', DB::raw('count(*) as count'))
@@ -90,10 +90,10 @@ class OrderStatisticService
     public static function getDeliveriesCount($from = null, $to = null)
     {
         $delivery = DB::table('orders')
-            ->when($from, function($query) use($from) {
+            ->when($from, function ($query) use ($from) {
                 $query->whereDate('orders.created_at', '>=', $from);
             })
-            ->when($to, function($query) use($to) {
+            ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
             })
             ->whereIn('confirmation', ['confirmer', 'change', 'refund'])
@@ -116,10 +116,10 @@ class OrderStatisticService
 
         // Step 3: Main query to join with users and subquery, and group by confirmation
         $result = DB::table('orders')
-            ->when($from, function($query) use($from) {
+            ->when($from, function ($query) use ($from) {
                 $query->whereDate('orders.created_at', '>=', $from);
             })
-            ->when($to, function($query) use($to) {
+            ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
             })
             ->join('users', 'orders.user_id', '=', 'users.id')
@@ -140,16 +140,15 @@ class OrderStatisticService
         return new LengthAwarePaginator($result->forPage(request()->input('page', 1), request()->input('per_page', 10)), $result->count(), request()->input('per_page', 10), request()->input('page', 1));
     }
 
-
     public static function getProductsPerformance($from = null, $to = null, $seller_id = null)
     {
 
         $result = DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->when($from, function($query) use($from) {
+            ->when($from, function ($query) use ($from) {
                 $query->whereDate('order_items.created_at', '>=', $from);
             })
-            ->when($to, function($query) use($to) {
+            ->when($to, function ($query) use ($to) {
                 $query->whereDate('order_items.created_at', '<=', $to);
             })
             ->select(
