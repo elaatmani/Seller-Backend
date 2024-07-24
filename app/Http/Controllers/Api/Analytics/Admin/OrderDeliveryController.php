@@ -20,6 +20,7 @@ class OrderDeliveryController extends Controller
         $service = new OrderStatisticService();
         $from = $request->query('from');
         $to = $request->query('to');
+        $sellers = $request->query('sellers', null);
     
         if($from) {
             $from = Carbon::parse($from);
@@ -30,7 +31,7 @@ class OrderDeliveryController extends Controller
             $to = $to->endOfDay();
         }
 
-        $results = $service->getDeliveriesCount($from, $to);
+        $results = $service->getDeliveriesCount($from, $to, $sellers);
 
         return response()->json([
             'code' => 'SUCCESS',

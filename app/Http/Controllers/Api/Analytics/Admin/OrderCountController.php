@@ -21,6 +21,7 @@ class OrderCountController extends Controller
         $service = new OrderStatisticService();
         $from = $request->query('from');
         $to = $request->query('to');
+        $sellers = $request->query('sellers', null);
     
         if($from) {
             $from = Carbon::parse($from);
@@ -31,7 +32,7 @@ class OrderCountController extends Controller
             $to = $to->endOfDay();
         }
 
-        $results = $service->getOrdersCountByDays($from, $to);
+        $results = $service->getOrdersCountByDays($from, $to, $sellers);
         $count = Order::count();
 
         return response()->json([

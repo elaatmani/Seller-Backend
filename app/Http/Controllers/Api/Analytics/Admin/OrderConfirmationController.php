@@ -21,6 +21,7 @@ class OrderConfirmationController extends Controller
 
         $from = $request->query('from');
         $to = $request->query('to');
+        $sellers = $request->query('sellers', null);
     
         if($from) {
             $from = Carbon::parse($from);
@@ -31,7 +32,7 @@ class OrderConfirmationController extends Controller
             $to = $to->endOfDay();
         }
 
-        $results = $service->getConfirmationsCount($from, $to);
+        $results = $service->getConfirmationsCount($from, $to, $sellers);
 
         return response()->json([
             'code' => 'SUCCESS',

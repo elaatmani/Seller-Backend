@@ -21,6 +21,7 @@ class OrderBySellerController extends Controller
 
         $from = $request->query('from');
         $to = $request->query('to');
+        $sellers = $request->query('sellers', null);
     
         if($from) {
             $from = Carbon::parse($from);
@@ -31,7 +32,7 @@ class OrderBySellerController extends Controller
             $to = $to->endOfDay();
         }
 
-        $results = $service->getOrdersBySellers($from, $to);
+        $results = $service->getOrdersBySellers($from, $to, $sellers);
 
         return response()->json([
             'code' => 'SUCCESS',

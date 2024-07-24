@@ -13,6 +13,7 @@ class OrderRevenueController extends Controller
     {
         $from = $request->query('from');
         $to = $request->query('to');
+        $sellers = $request->query('sellers', null);
     
         if($from) {
             $from = Carbon::parse($from);
@@ -22,7 +23,7 @@ class OrderRevenueController extends Controller
             $to = Carbon::parse($to);
             $to = $to->endOfDay();
         }
-        $revenue = FinanceStatisticService::getRevenue($from, $to);
+        $revenue = FinanceStatisticService::getRevenue($from, $to, $sellers);
         
         return response()->json([
             'revenue' => $revenue

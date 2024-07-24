@@ -14,7 +14,7 @@ class OrderStatisticService
 {
 
 
-    public static function getOrdersCountByDays($from = null, $to = null, $seller_id = null)
+    public static function getOrdersCountByDays($from = null, $to = null, $seller_ids = null)
     {
         $from = $from ?? now()->subDays(7)->startOfDay();
         $to = $to ?? now()->endOfDay();
@@ -27,14 +27,13 @@ class OrderStatisticService
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
             })
+            ->when($seller_ids, function($query) use($seller_ids) {
+                $query->whereIn('orders.user_id', $seller_ids);
+            })
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
             ->whereBetween('created_at', [$from, $to])
             ->groupBy(DB::raw('DATE(created_at)'))
             ->orderBy('date', 'asc');
-
-        if ($seller_id) {
-            $query->where('user_id', $seller_id);
-        }
 
         // Generate an array of dates in the range
         $period = new \DatePeriod(
@@ -71,7 +70,7 @@ class OrderStatisticService
     }
 
 
-    public static function getConfirmationsCount($from = null, $to = null)
+    public static function getConfirmationsCount($from = null, $to = null, $seller_ids)
     {
         $confirmations = DB::table('orders')
             ->when($from, function ($query) use ($from) {
@@ -80,6 +79,9 @@ class OrderStatisticService
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
             })
+            ->when($seller_ids, function($query) use($seller_ids) {
+                $query->whereIn('orders.user_id', $seller_ids);
+            })
             ->select('confirmation', DB::raw('count(*) as count'))
             ->groupBy('confirmation')
             ->get();
@@ -87,7 +89,7 @@ class OrderStatisticService
         return $confirmations;
     }
 
-    public static function getDeliveriesCount($from = null, $to = null)
+    public static function getDeliveriesCount($from = null, $to = null, $seller_ids)
     {
         $delivery = DB::table('orders')
             ->when($from, function ($query) use ($from) {
@@ -95,6 +97,9 @@ class OrderStatisticService
             })
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
+            })
+            ->when($seller_ids, function($query) use($seller_ids) {
+                $query->whereIn('orders.user_id', $seller_ids);
             })
             ->whereIn('confirmation', ['confirmer', 'change', 'refund'])
             ->select('delivery', DB::raw('count(*) as count'))
@@ -104,7 +109,7 @@ class OrderStatisticService
         return $delivery;
     }
 
-    public static function getOrdersBySellers($from = null, $to = null, $seller_id = null)
+    public static function getOrdersBySellers($from = null, $to = null, $seller_ids = null)
     {
         // Step 1: Get all seller IDs
         $sellerIds = Role::where('name', 'seller')->first()->users()->where('status', 1)->pluck('id')->toArray();
@@ -121,6 +126,9 @@ class OrderStatisticService
             })
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
+            })
+            ->when($seller_ids, function($query) use($seller_ids) {
+                $query->whereIn('orders.user_id', $seller_ids);
             })
             ->join('users', 'orders.user_id', '=', 'users.id')
             ->joinSub($subQuery, 'total_orders', function ($join) {
@@ -140,7 +148,7 @@ class OrderStatisticService
         return new LengthAwarePaginator($result->forPage(request()->input('page', 1), request()->input('per_page', 10)), $result->count(), request()->input('per_page', 10), request()->input('page', 1));
     }
 
-    public static function getProductsPerformance($from = null, $to = null, $seller_id = null)
+    public static function getProductsPerformance($from = null, $to = null, $seller_ids = null)
     {
 
         $result = DB::table('order_items')
@@ -150,6 +158,9 @@ class OrderStatisticService
             })
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('order_items.created_at', '<=', $to);
+            })
+            ->when($seller_ids, function($query) use($seller_ids) {
+                $query->whereIn('products.user_id', $seller_ids);
             })
             ->select(
                 'products.name',
