@@ -112,7 +112,11 @@ class OrderStatisticService
     public static function getOrdersBySellers($from = null, $to = null, $seller_ids = null)
     {
         // Step 1: Get all seller IDs
-        $sellerIds = Role::where('name', 'seller')->first()->users()->where('status', 1)->pluck('id')->toArray();
+        $sellerIds = Role::where('name', 'seller')->first()->users()->where('status', 1)
+        ->when($seller_ids, function($query) use($seller_ids) {
+            $query->whereIn('id', $seller_ids);
+        })
+        ->pluck('id')->toArray();
 
         // Step 2: Subquery to get the total orders count per seller
         $subQuery = DB::table('orders')
@@ -126,9 +130,6 @@ class OrderStatisticService
             })
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
-            })
-            ->when($seller_ids, function($query) use($seller_ids) {
-                $query->whereIn('orders.user_id', $seller_ids);
             })
             ->join('users', 'orders.user_id', '=', 'users.id')
             ->joinSub($subQuery, 'total_orders', function ($join) {

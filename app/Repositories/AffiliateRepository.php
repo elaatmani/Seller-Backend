@@ -118,6 +118,8 @@ class AffiliateRepository  implements AffiliateRepositoryInterface
                 'ref' => data_get($data, 'sku'),
                 'category_id' => data_get($data, 'category_id'),
                 'product_type' => 'affiliate',
+                'video_url' => '...',
+                'store_url' => '...',
             ]);
 
             self::storeVariations($product, data_get($data, 'variations', []), data_get($data, 'has_variations', false), data_get($data, 'initial_quantity', 0));
