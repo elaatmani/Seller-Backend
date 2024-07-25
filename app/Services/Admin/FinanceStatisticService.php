@@ -53,6 +53,9 @@ class FinanceStatisticService
         
         $fees = DB::table('factorisation_fees')
         ->join('factorisations', 'factorisation_fees.factorisation_id', '=', 'factorisations.id')
+        ->when($seller_ids, function($query) use($seller_ids) {
+            $query->whereIn('factorisations.user_id', $seller_ids);
+        })
         ->when($from || $to, function($query) use($ids) {
             $query->whereIn('orders.seller_factorisation_id', $ids);
         })
