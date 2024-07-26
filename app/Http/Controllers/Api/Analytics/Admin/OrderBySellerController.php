@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api\Analytics\Admin;
 
 use Carbon\Carbon;
-use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\Admin\OrderStatisticService;
-use Illuminate\Support\Facades\DB;
 
-class OrderCountController extends Controller
+class OrderBySellerController extends Controller
 {
     /**
      * Handle the incoming request.
@@ -20,6 +18,7 @@ class OrderCountController extends Controller
     public function __invoke(Request $request)
     {
         $service = new OrderStatisticService();
+
         $from = $request->query('from');
         $to = $request->query('to');
         $sellers = $request->query('sellers', null);
@@ -33,25 +32,11 @@ class OrderCountController extends Controller
             $to = $to->endOfDay();
         }
 
-        $results = $service->getOrdersCountByDays($from, $to, $sellers);
-        $count = DB::table(
-            'orders'
-        )->when($from, function ($query) use ($from) {
-            return $query->whereDate('orders.created_at', '>=', $from);
-        })
-        ->when($to, function ($query) use ($to) {
-            return $query->whereDate('orders.created_at', '<=', $to);
-        })
-        ->when($sellers, function ($query) use ($sellers) {
-            return $query->whereIn('orders.user_id', $sellers);
-        })
-        ->count();
+        $results = $service->getOrdersBySellers($from, $to, $sellers);
 
         return response()->json([
             'code' => 'SUCCESS',
-            'data' => $results,
-            'count' => $count,
+            'data' => $results
         ]);
-
     }
 }

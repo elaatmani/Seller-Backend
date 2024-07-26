@@ -5,20 +5,12 @@ namespace App\Http\Controllers\Api\Analytics\Admin;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Services\Admin\OrderStatisticService;
+use App\Services\Admin\FinanceStatisticService;
 
-class OrderConfirmationController extends Controller
+class OrderRevenueController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function __invoke(Request $request)
+    public function index(Request $request)
     {
-        $service = new OrderStatisticService();
-
         $from = $request->query('from');
         $to = $request->query('to');
         $sellers = $request->query('sellers', null);
@@ -31,12 +23,10 @@ class OrderConfirmationController extends Controller
             $to = Carbon::parse($to);
             $to = $to->endOfDay();
         }
-
-        $results = $service->getConfirmationsCount($from, $to, $sellers);
-
+        $revenue = FinanceStatisticService::getRevenue($from, $to, $sellers);
+        
         return response()->json([
-            'code' => 'SUCCESS',
-            'data' => $results
+            'revenue' => $revenue
         ]);
     }
 }

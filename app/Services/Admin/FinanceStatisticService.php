@@ -5,30 +5,108 @@ namespace App\Services\Admin;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Http;
 
 class FinanceStatisticService
 {
 
-    public static function getAverageOrderValue($from = null, $to = null, $seller_id = null) {
+    public static function getRevenue($from = null, $to = null, $seller_ids = null) {
+        $ids = [];
+        if($from || $to ){
+            $ids = DB::table('factorisations')
+            ->when($from, function($query) use($from) {
+                $query->whereDate('paid_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('paid_at', '<=', $to);
+            })
+            ->select('id')->get()->pluck('id')->values()->toArray();
+        }
+
+        $result = DB::table('order_items')
+        ->join('orders', 'order_items.order_id', '=', 'orders.id')
+        ->where('orders.confirmation', '=', 'confirmer')
+        ->when($seller_ids, function($query) use($seller_ids) {
+            $query->whereIn('orders.user_id', $seller_ids);
+        })
+        ->when($from || $to, function($query) use($ids) {
+            $query->whereIn('orders.seller_factorisation_id', $ids);
+        })
+        ->when($from, function($query) use($from) {
+            $query->whereDate('orders.created_at', '>=', $from);
+        })
+        ->when($to, function($query) use($to) {
+            $query->whereDate('orders.created_at', '<=', $to);
+        })
+        ->select(
+            DB::raw('SUM(CASE WHEN orders.delivery = "livrer" THEN order_items.price ELSE 0 END) as sum_livrer'),
+            DB::raw('SUM(CASE WHEN orders.delivery = "livrer" AND NOT is_paid_by_delivery THEN order_items.price ELSE 0 END) as not_paid_by_delivery'),
+            DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN order_items.price ELSE 0 END) as sum_paid'),
+            DB::raw('count(DISTINCT CASE WHEN orders.delivery = "paid" THEN order_items.order_id ELSE NULL END) as count_orders'),
+            DB::raw('count(DISTINCT CASE WHEN orders.delivery in ("paid", "livrer") THEN order_items.order_id ELSE NULL END) as count_orders_paid_delivered')
+            // DB::raw('SUM(CASE WHEN orders.delivery != "paid" AND orders.is_paid_by_delivery AND NOT orders.is_paid_to_seller THEN order_items.price ELSE 0 END) as sum_to_be_paid'),
+            // DB::raw('SUM(CASE WHEN orders.delivery = "cleared" THEN order_items.price ELSE 0 END) as sum_cleared'),
+            // DB::raw('SUM(order_items.price) as sum_total')
+        )
+        ->first();
+        
+        $fees = DB::table('factorisation_fees')
+        ->join('factorisations', 'factorisation_fees.factorisation_id', '=', 'factorisations.id')
+        ->when($seller_ids, function($query) use($seller_ids) {
+            $query->whereIn('factorisations.user_id', $seller_ids);
+        })
+        ->when($from || $to, function($query) use($ids) {
+            $query->whereIn('orders.seller_factorisation_id', $ids);
+        })
+        ->where([
+            'close' => 1,
+            'paid' => 1
+        ])->sum('factorisation_fees.feeprice');
+
+        $result->cod_fees =  $result->sum_paid * 0.04;
+        $result->shipping_fees =  $result->count_orders * 8;
+        $result->other_fees =  $fees;
+        $result->net_paid =  $result->sum_paid - ($result->cod_fees + $result->shipping_fees + $fees);
+
+        return $result;
+    }
+
+
+    public static function getAverageOrderValue($from = null, $to = null, $seller_ids = null) {
         $ordersCount = DB::table('orders')
             ->where('orders.confirmation', '=', 'confirmer')
+            ->when($seller_ids, function($query) use($seller_ids) {
+                $query->whereIn('orders.user_id', $seller_ids);
+            })
+            ->when($from, function($query) use($from) {
+                $query->whereDate('orders.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('orders.created_at', '<=', $to);
+            })
             ->whereIn('orders.delivery', ['paid', 'cleared', 'livrer'])
             ->count();
                 
-        $result = DB::table('order_items')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->where('orders.confirmation', '=', 'confirmer')
-            ->whereIn('orders.delivery', ['paid', 'cleared', 'livrer'])
-            ->sum('order_items.price');
+        $revenue = self::getRevenue();
+        $totalRevenue = $revenue->sum_livrer + $revenue->sum_paid;
             
-        return round($result / $ordersCount, 2);
+        return $totalRevenue > 0 ? round($totalRevenue / $ordersCount, 2) : 0;
     }
 
-    public static function getDeliveredOrdersRevenue($from = null, $to = null, $seller_id = null) {
+    public static function getDeliveredOrdersRevenue($from = null, $to = null, $seller_ids = null) {
                 
         $result = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->when($seller_ids, function($query) use($seller_ids) {
+                $query->whereIn('orders.user_id', $seller_ids);
+            })
+            ->when($from, function($query) use($from) {
+                $query->whereDate('orders_items.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('orders_items.created_at', '<=', $to);
+            })
             ->where('orders.confirmation', '=', 'confirmer')
             ->whereIn('orders.delivery', ['livrer'])
             ->sum('order_items.price'); 
@@ -36,15 +114,27 @@ class FinanceStatisticService
         return $result;
     }
 
-    public static function getPaidOrdersRevenue($from = null, $to = null, $seller_id = null) {
+    public static function getPaidOrdersRevenue($from = null, $to = null, $seller_ids = null) {
                 
+        // DB::table('factorisation')->whereBetween('paid_at', [$from, $to])->select('id')->get()->values()->toArray();
         $result = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->when($seller_ids, function($query) use($seller_ids) {
+                $query->whereIn('orders.user_id', $seller_ids);
+            })
+            ->when($from, function($query) use($from) {
+                $query->whereDate('orders_items.created_at', '>=', $from);
+            })
+            ->when($to, function($query) use($to) {
+                $query->whereDate('orders_items.created_at', '<=', $to);
+            })
             ->where('orders.confirmation', '=', 'confirmer')
             ->whereIn('orders.delivery', ['paid', 'cleared'])
             ->sum('order_items.price'); 
             
         return $result;
     }
+
+    
 
 }
