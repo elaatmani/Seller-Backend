@@ -121,6 +121,12 @@ class OrderStatisticService
         // Step 2: Subquery to get the total orders count per seller
         $subQuery = DB::table('orders')
             ->select('user_id', DB::raw('COUNT(*) as total_orders'))
+            ->when($from, function ($query) use ($from) {
+                $query->whereDate('orders.created_at', '>=', $from);
+            })
+            ->when($to, function ($query) use ($to) {
+                $query->whereDate('orders.created_at', '<=', $to);
+            })
             ->groupBy('user_id');
 
         // Step 3: Main query to join with users and subquery, and group by confirmation
@@ -144,6 +150,8 @@ class OrderStatisticService
             ->map(function ($items, $key) {
                 return $items->keyBy('confirmation');
             });
+            
+            
 
         // Return the result
         return new LengthAwarePaginator($result->forPage(request()->input('page', 1), request()->input('per_page', 10)), $result->count(), request()->input('per_page', 10), request()->input('page', 1));
