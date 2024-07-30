@@ -22,6 +22,7 @@ class Sourcing extends Model
         'sourcing_status',
         'cost_per_unit',
         'total_cost',
+        'buying_price',
         'video_url',
         'additional_fees',
         'paid_at',
