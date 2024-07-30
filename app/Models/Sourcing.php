@@ -25,7 +25,8 @@ class Sourcing extends Model
         'video_url',
         'additional_fees',
         'paid_at',
-        'is_paid'
+        'is_paid',
+        'buying_price'
     ];
 
     protected $appends = ['seller_name'];
