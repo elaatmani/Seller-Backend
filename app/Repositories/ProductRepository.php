@@ -141,7 +141,8 @@ class ProductRepository  implements ProductRepositoryInterface
                 [
                     'quantity' => $offer['quantity'],
                     'price' => $offer['price'],
-                    'note' => $offer['note']
+                    'note' => $offer['note'],
+                    'user_id' => auth()->id()
                 ]
             );
         }

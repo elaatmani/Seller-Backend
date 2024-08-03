@@ -92,7 +92,7 @@ class Product extends Model implements HasMedia
             'variations' => $this->variations->map->formatForOrder(),
             'image' => $this->image,
             'available_with' => $this->deliveries->map(fn($d) => $d->delivery_id),
-            'offers' => $this->offers,
+            'offers' => $this->offers()->where('user_id', auth()->id())->orWhereNull('user_id')->get(),
             'created_at' => $this->created_at,
         ];
     }

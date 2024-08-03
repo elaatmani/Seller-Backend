@@ -9,17 +9,21 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Affiliate\ProductResource;
 use App\Http\Resources\Affiliate\ProductEditResource;
 use App\Http\Resources\Affiliate\ProductCollectionResource;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Http\Requests\Product\Affiliate\StoreProductRequest;
 use App\Http\Requests\Product\Affiliate\UpdateProductRequest;
 use App\Repositories\Interfaces\AffiliateRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class AffiliateProductController extends Controller
 {
 
     protected $repository;
+    protected $productRepository;
 
-    public function __construct(AffiliateRepositoryInterface $repository) {
+    public function __construct(AffiliateRepositoryInterface $repository, ProductRepositoryInterface $productRepository) {
         $this->repository = $repository;
+        $this->productRepository = $productRepository;
     }
 
     public function index(Request $request) {
@@ -139,5 +143,56 @@ class AffiliateProductController extends Controller
             'code' => 'SUCCESS',
             'product' => $product
         ]);
+    }
+
+    public function getOffers(Request $request, $id)
+    {
+        $product = $this->repository->get($id);
+
+        if(!$product) {
+            return response()->json([
+                'code' => 'ERROR',
+                'message' => 'Product not found'
+            ], 404);
+        }
+        
+        $offers = $product->offers()->where('user_id', auth()->id())->orWhereNull('user_id')->get();
+        
+
+        return response()->json([
+            'code' => 'SUCCESS',
+            'offers' => $offers
+        ]);
+    }
+
+    public function setOffers(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+            $product = $this->repository->get($id);
+
+            if(!$product) {
+                return response()->json([
+                    'code' => 'ERROR',
+                    'message' => 'Product not found'
+                ], 404);
+            }
+            
+            $offers = $request->input('offers', []);
+
+            $offers = $this->productRepository->updateProductOffers($id, $offers);
+
+            DB::commit();
+            return response()->json([
+                'code' => 'SUCCESS',
+                'offers' => $offers
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'code' => 'SERVER_ERROR',
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 }
