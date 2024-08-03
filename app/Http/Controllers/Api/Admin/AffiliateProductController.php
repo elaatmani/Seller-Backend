@@ -12,6 +12,7 @@ use App\Http\Resources\Affiliate\ProductCollectionResource;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Http\Requests\Product\Affiliate\StoreProductRequest;
 use App\Http\Requests\Product\Affiliate\UpdateProductRequest;
+use App\Models\Metadata;
 use App\Repositories\Interfaces\AffiliateRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
@@ -157,11 +158,15 @@ class AffiliateProductController extends Controller
         }
         
         $offers = $product->offers()->where('user_id', auth()->id())->get();
+        $video_url = $product->metadata()->where(['meta_key' => 'video_url_seller_' . auth()->id()])->first()?->meta_value;
+        $store_url = $product->metadata()->where(['meta_key' => 'store_url_seller_' . auth()->id()])->first()?->meta_value;
         
 
         return response()->json([
             'code' => 'SUCCESS',
-            'offers' => $offers
+            'offers' => $offers,
+            'video_url' => $video_url,
+            'store_url' => $store_url
         ]);
     }
 
@@ -181,6 +186,29 @@ class AffiliateProductController extends Controller
             $offers = $request->input('offers', []);
 
             $offers = $this->productRepository->updateProductOffers($id, $offers);
+
+            Metadata::updateOrCreate(
+                [
+                    'model_type' => Product::class, 
+                    'model_id' => $id, 
+                    'meta_key' => 'video_url_seller_' . auth()->id(),
+                ],
+                [
+                    'meta_value' => $request->input('video_url', ''),
+                ]
+            );
+
+            Metadata::updateOrCreate(
+                [
+                    'model_type' => Product::class, 
+                    'model_id' => $id, 
+                    'meta_key' => 'store_url_seller_' . auth()->id(),
+                ],
+                [
+                    'meta_value' => $request->input('store_url', ''),
+                ]
+            );
+            
 
             DB::commit();
             return response()->json([
