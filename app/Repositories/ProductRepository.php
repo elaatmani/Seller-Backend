@@ -26,7 +26,7 @@ class ProductRepository  implements ProductRepositoryInterface
                         });
                     });
             }
-        )->get()->map->formatForOrder();
+        )->get()->map->formatForOrder($id);
     }
 
     public function all($options = [])

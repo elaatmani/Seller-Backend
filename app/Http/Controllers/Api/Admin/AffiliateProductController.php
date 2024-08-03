@@ -156,7 +156,7 @@ class AffiliateProductController extends Controller
             ], 404);
         }
         
-        $offers = $product->offers()->where('user_id', auth()->id())->orWhereNull('user_id')->get();
+        $offers = $product->offers()->where('user_id', auth()->id())->get();
         
 
         return response()->json([

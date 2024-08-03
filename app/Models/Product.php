@@ -81,7 +81,7 @@ class Product extends Model implements HasMedia
         return $this->hasMany(ProductOffer::class);
     }
 
-    public function formatForOrder() {
+    public function formatForOrder($seller_id) {
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -92,7 +92,9 @@ class Product extends Model implements HasMedia
             'variations' => $this->variations->map->formatForOrder(),
             'image' => $this->image,
             'available_with' => $this->deliveries->map(fn($d) => $d->delivery_id),
-            'offers' => $this->offers()->where('user_id', auth()->id())->orWhereNull('user_id')->get(),
+            'offers' => $this->offers()->when($this->product_type == 'affiliate', function($q) use($seller_id) {
+                $q->where('user_id', $seller_id);
+            })->get(),
             'created_at' => $this->created_at,
         ];
     }
