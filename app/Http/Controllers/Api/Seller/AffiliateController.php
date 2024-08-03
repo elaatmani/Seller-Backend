@@ -35,12 +35,14 @@ class AffiliateController extends Controller
     {
         $id = $request->product_id;
 
-        Order::where('user_id', auth()->id())->whereRelation('items', 'product_id', $id);
+        $orders = Order::where('user_id', auth()->id())->whereRelation('items', 'product_id', $id)->count();
 
-        return response()->json([
-            'code' => 'ORDERS_EXISTS',
-            'message' => 'Product cannot be removed from import list because it has orders'
-        ]);
+        if($orders > 0) {
+            return response()->json([
+                'code' => 'ORDERS_EXISTS',
+                'message' => 'Product cannot be removed from import list because it has orders'
+            ]);
+        }
 
         $userProduct->where('user_id', auth()->id())
             ->where('product_id', $id)
