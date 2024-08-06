@@ -13,7 +13,8 @@ class ProductOffer extends Model
         'product_id',
         'quantity',
         'price',
-        'note'
+        'note',
+        'user_id'
     ];
 
 }

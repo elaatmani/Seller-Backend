@@ -9,17 +9,22 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Affiliate\ProductResource;
 use App\Http\Resources\Affiliate\ProductEditResource;
 use App\Http\Resources\Affiliate\ProductCollectionResource;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Http\Requests\Product\Affiliate\StoreProductRequest;
 use App\Http\Requests\Product\Affiliate\UpdateProductRequest;
+use App\Models\Metadata;
 use App\Repositories\Interfaces\AffiliateRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class AffiliateProductController extends Controller
 {
 
     protected $repository;
+    protected $productRepository;
 
-    public function __construct(AffiliateRepositoryInterface $repository) {
+    public function __construct(AffiliateRepositoryInterface $repository, ProductRepositoryInterface $productRepository) {
         $this->repository = $repository;
+        $this->productRepository = $productRepository;
     }
 
     public function index(Request $request) {
@@ -139,5 +144,83 @@ class AffiliateProductController extends Controller
             'code' => 'SUCCESS',
             'product' => $product
         ]);
+    }
+
+    public function getOffers(Request $request, $id)
+    {
+        $product = $this->repository->get($id);
+
+        if(!$product) {
+            return response()->json([
+                'code' => 'ERROR',
+                'message' => 'Product not found'
+            ], 404);
+        }
+        
+        $offers = $product->offers()->where('user_id', auth()->id())->get();
+        $video_url = $product->metadata()->where(['meta_key' => 'video_url_seller_' . auth()->id()])->first()?->meta_value;
+        $store_url = $product->metadata()->where(['meta_key' => 'store_url_seller_' . auth()->id()])->first()?->meta_value;
+        
+
+        return response()->json([
+            'code' => 'SUCCESS',
+            'offers' => $offers,
+            'video_url' => $video_url,
+            'store_url' => $store_url
+        ]);
+    }
+
+    public function setOffers(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+            $product = $this->repository->get($id);
+
+            if(!$product) {
+                return response()->json([
+                    'code' => 'ERROR',
+                    'message' => 'Product not found'
+                ], 404);
+            }
+            
+            $offers = $request->input('offers', []);
+
+            $offers = $this->productRepository->updateProductOffers($id, $offers);
+
+            Metadata::updateOrCreate(
+                [
+                    'model_type' => Product::class, 
+                    'model_id' => $id, 
+                    'meta_key' => 'video_url_seller_' . auth()->id(),
+                ],
+                [
+                    'meta_value' => $request->input('video_url', ''),
+                ]
+            );
+
+            Metadata::updateOrCreate(
+                [
+                    'model_type' => Product::class, 
+                    'model_id' => $id, 
+                    'meta_key' => 'store_url_seller_' . auth()->id(),
+                ],
+                [
+                    'meta_value' => $request->input('store_url', ''),
+                ]
+            );
+            
+
+            DB::commit();
+            return response()->json([
+                'code' => 'SUCCESS',
+                'offers' => $offers
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'code' => 'SERVER_ERROR',
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 }

@@ -28,7 +28,7 @@ class NewProductController extends Controller
                     'variations'
             ];
 
-            if(!auth()->user()->hasRole('admin')){
+            if(!auth()->user()->hasRole('admin') && !auth()->user()->hasRole('affiliate-manager')){
                 $options['where'][] = ['user_id','=',auth()->id()];
             }
 

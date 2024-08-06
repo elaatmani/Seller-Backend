@@ -86,8 +86,8 @@ class SheetHelper {
 
                 
 
-                $product = Product::where([['ref', $sku], ['user_id', $sheet->user_id], ['status', 1]])->orWhere(function($query) use($sheet, $affiliateProductIds) {
-                    $query->whereIn('id', $affiliateProductIds)->where('status', 1);
+                $product = Product::where([['ref', $sku], ['user_id', $sheet->user_id], ['status', 1]])->orWhere(function($query) use($sheet, $affiliateProductIds, $sku) {
+                    $query->whereIn('id', $affiliateProductIds)->where('status', 1)->where('ref', $sku);
                 })->first();
 
                 if(!$product) {

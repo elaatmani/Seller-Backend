@@ -57,7 +57,7 @@ class FinanceStatisticService
             $query->whereIn('factorisations.user_id', $seller_ids);
         })
         ->when($from || $to, function($query) use($ids) {
-            $query->whereIn('orders.seller_factorisation_id', $ids);
+            $query->whereIn('factorisations.id', $ids);
         })
         ->where([
             'close' => 1,

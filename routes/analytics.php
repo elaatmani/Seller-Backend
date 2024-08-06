@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Analytics\Admin\OrderRevenueController;
 use App\Http\Controllers\Api\Analytics\Admin\OrderDeliveryController;
 use App\Http\Controllers\Api\Analytics\Admin\OrderConfirmationController;
 use App\Http\Controllers\Api\Analytics\Admin\ProductPerformanceController;
+use App\Http\Controllers\Api\Analytics\Admin\ChartController;
 
 Route::get('/', function() {
     return response()->json([
@@ -19,6 +20,7 @@ Route::get('/', function() {
     ]);
 });
 
+Route::get('/chart-confirmation', [ChartController::class,'chartConfirmationn']);
 Route::get('/orders-count-by-days', OrderCountController::class);
 Route::get('/confirmations-count', OrderConfirmationController::class);
 Route::get('/deliveries-count', OrderDeliveryController::class);

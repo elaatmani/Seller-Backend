@@ -28,7 +28,7 @@ class ProductRepository  implements ProductRepositoryInterface
                         });
                     });
             }
-        )->get()->map->formatForOrder();
+        )->get()->map->formatForOrder($id);
     }
 
     public function all($options = [])
@@ -143,7 +143,8 @@ class ProductRepository  implements ProductRepositoryInterface
                 [
                     'quantity' => $offer['quantity'],
                     'price' => $offer['price'],
-                    'note' => $offer['note']
+                    'note' => $offer['note'],
+                    'user_id' => auth()->id()
                 ]
             );
         }
