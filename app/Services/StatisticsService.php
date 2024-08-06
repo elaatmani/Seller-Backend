@@ -3,10 +3,11 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\History;
 use App\Models\OrderItem;
 use App\Models\OrderHistory;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Exception;
 class StatisticsService
 {
@@ -95,19 +96,53 @@ class StatisticsService
         return [$all, $new, $reconfirmed, $delivered];
     }
 
-
+    public static function chartConfirmation($request){
+        $treated_from = $request->treated_from;
+        $treated_to = $request->treated_to;
+    
+        $orders = Order::query()
+            ->where('agente_id', auth()->id())
+            ->when(!!$treated_from, fn($q) => $q->whereDate('created_at', '>=', $treated_from))
+            ->when(!!$treated_to, fn($q) => $q->whereDate('created_at', '<=', $treated_to))
+            ->get();
+    
+        $confirmed = $orders->where('confirmation', 'confirmer')->count();
+        $totalCount = $orders->where('confirmation', '!=', 'double')->count();
+    
+        $rate = $totalCount > 0  ? ($confirmed * 100) / $totalCount : 0;
+    
+        return response()->json([
+            "code" => 200,
+            "message" => "Success",
+            "data" => [
+                "total" => $totalCount,
+                "confirmed" => $confirmed,
+                "rate" => $rate
+        ]]);
+    }
     public static function agent($request) {
 
         $orders = Order::query();
 
         $orders->where('agente_id', auth()->id());
 
-        $created_from = $request->created_from;
-        $created_to = $request->created_to;
+        $dropped_from = $request->dropped_from;
+        $dropped_to = $request->dropped_to;
+        $treated_from = $request->treated_from;
+        $treated_to = $request->treated_to;
 
+        
         $orders
-        ->when(!!$created_from, fn($q) => $q->whereDate('created_at', '>=', $created_from))
-        ->when(!!$created_to, fn($q) => $q->whereDate('created_at', '<=', $created_to));
+        ->when(!!$treated_from, fn($q) => $q->whereHas('order_histories', fn($oq) =>
+        $oq->where('type', 'confirmation')
+        ->whereDate('created_at', '>=', $treated_from)))
+
+        ->when(!!$treated_to, fn($q) => $q->whereHas('order_histories', fn($oq) =>
+        $oq->where('type', 'confirmation')
+        ->whereDate('created_at', '<=', $treated_to)));
+        $orders
+        ->when(!!$dropped_from, fn($q) => $q->whereDate('created_at', '>=', $dropped_from))
+        ->when(!!$dropped_to, fn($q) => $q->whereDate('created_at', '<=', $dropped_to));
 
         $orders = $orders->get();
 
@@ -141,7 +176,6 @@ class StatisticsService
             'icon' => 'mdi-package-variant-closed',
             'color' => '#6b7280'
         ];
-
         $earnings = [
             'id' => 5,
             'title' => 'Earnings',
@@ -165,7 +199,6 @@ class StatisticsService
             'id' => 3,
             'title' => 'Confirmed',
             'value' => $confirmed,
-            'percentage' => $totalCount > 0  ? ($confirmed * 100) / $totalCount : 0,
             'icon' => 'mdi-check-all',
             'color' => '#06b6d4'
         ];
@@ -214,9 +247,50 @@ class StatisticsService
             'icon' => 'mdi-new-box',
             'color' => '#a78bfa'
         ];
+        $history = History::query();
+
+        $history->where('actor_id', auth()->id())
+        ->when(!!$dropped_from, fn($q) => $q->whereDate('created_at', '>=', $dropped_from))
+        ->when(!!$dropped_to, fn($q) => $q->whereDate('created_at', '<=', $dropped_to));
+   
+
+        $dropped = $history->where('fields', 'like', '%"field":"agente_id"%')
+                    ->select(DB::raw('count(DISTINCT trackable_id) as count'))
+                    ->first()
+                    ->count;
+        // $confirmedCount = $history->where('fields', 'like', '%"field":"confirmation"%')
+        //             ->where('actor_id', auth()->id()) // Add this line
+        //             ->distinct('trackable_id') // Add this line
+        //             ->count();
+        // Log::info('Confirmed Count: '.$confirmedCount);
+
+        // $totalCount = $history->select(DB::raw('count(DISTINCT trackable_id) as count'))
+        //                     ->first()
+        //                     ->count;
+
+        // Log::info('Total Count: '.$totalCount);
+
+        // $confirmation_rate = ($totalCount > 0) ? ($confirmedCount / $totalCount) * 100 : 0;
+
+        // Log::info('Confirmation Rate: '.$confirmation_rate);
+
+        $dropped = [
+            'id' => 10,
+            'title' => 'Dropped',
+            'value' => $dropped,
+            'icon' => 'mdi-phone-message',
+            'color' => '#358096'
+        ];
+        // $confirmation_rate = [
+        //     'id' => 11,
+        //     'title' => 'Confirmation rate',
+        //     'value' => $confirmation_rate,
+        //     'icon' => 'mdi-chart-timeline-variant',
+        //     'color' => '#76F65D'
+        // ];
 
 
-        $statistics = [$earnings, $all, $confirmed, $upsell, $reported,  $noAnswer, $cancelled, $doubles];
+        $statistics = [$earnings, $all, $confirmed, $upsell, $reported,  $noAnswer, $cancelled, $doubles,$dropped];
 
         if($new['value'] > 0) {
             $statistics[] = $new;
