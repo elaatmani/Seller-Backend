@@ -4,6 +4,7 @@ use App\Events\NewNotification;
 use App\Services\RoadRunnerService;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
+use App\Http\Controllers\Api\PusherController;
 use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\AlertController;
 use App\Http\Controllers\Api\Public\NetPayment;
@@ -60,7 +61,9 @@ Route::get('/export/factorisations/{id}', [FactorisationExportController::class,
 
 //Sanctum Use
 Route::group(['middleware' => ['auth:sanctum']], function () {
-
+    
+    // Push auth
+    Route::post('pusher', PusherController::class);
 
 
     //Roles
