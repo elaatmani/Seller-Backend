@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\City;
-use App\Models\DeliveryPlace;
-use App\Models\Product;
-use App\Models\ProductAgente;
 use App\Models\User;
+use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Spatie\Permission\Models\Role;
+use App\Models\DeliveryPlace;
+use App\Models\ProductAgente;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 
@@ -1219,5 +1220,19 @@ class UserController extends Controller
             ],
             200
         );
+    }
+
+
+    public function lastAction()
+    {
+        $ids = Role::where('name', 'agente')->first()->users()->pluck('id');
+
+        $users = DB::table('users')->whereIn('id', $ids)->select('id', 'last_action', 'firstname', 'lastname')->orderBy('last_action', 'desc')->get();
+
+        return response()->json(
+            [
+                'code' => 'SUCCESS',
+                'users' => $users
+            ]);
     }
 }
