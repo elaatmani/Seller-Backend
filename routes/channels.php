@@ -13,6 +13,18 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
+Broadcast::routes(['middleware' => ['auth:api']]);
+
+Broadcast::channel('users.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
+}); 
+
+Broadcast::channel('user.{userId}', function ($user, $userId) {
+    if ($user->id === $userId) {
+      return array('name' => $user->name, 'id' => $user->id);
+    }
+  });
+
+Broadcast::channel('presence-channel.{id}', function ($user, $id) {
+    return ['id' => $user->id, 'name' => $user->name];
 });
