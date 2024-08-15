@@ -290,7 +290,9 @@ class StatisticsService
         // ];
 
 
-        $statistics = [$earnings, $all, $confirmed, $upsell, $reported,  $noAnswer, $cancelled, $doubles,$dropped];
+        $statistics = [$earnings, $all, $confirmed, $upsell, $reported,  $noAnswer, $cancelled, $doubles
+        // ,$dropped
+    ];
 
         if($new['value'] > 0) {
             $statistics[] = $new;
