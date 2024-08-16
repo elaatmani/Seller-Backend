@@ -109,6 +109,9 @@ class FinanceStatisticService
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
             })
+            ->when($seller_ids && count($seller_ids), function ($query) use ($seller_ids) {
+                $query->whereIn('orders.user_id', $seller_ids);
+            })
             ->sum('order_items.price');
 
         $codfees = ($turnover * 0.04);
