@@ -29,4 +29,25 @@ class OrderRevenueController extends Controller
             'revenue' => $revenue
         ]);
     }
+
+    public function profit(Request $request)
+    {
+        $from = $request->query('from');
+        $to = $request->query('to');
+        $sellers = $request->query('sellers', null);
+    
+        if($from) {
+            $from = Carbon::parse($from);
+        }
+
+        if($to) {
+            $to = Carbon::parse($to);
+            $to = $to->endOfDay();
+        }
+        $profit = FinanceStatisticService::getProfit($from, $to, $sellers);
+        
+        return response()->json([
+            'profit' => $profit
+        ]);
+    }
 }

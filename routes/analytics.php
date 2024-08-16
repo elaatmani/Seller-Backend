@@ -25,5 +25,6 @@ Route::get('/orders-count-by-days', OrderCountController::class);
 Route::get('/confirmations-count', OrderConfirmationController::class);
 Route::get('/deliveries-count', OrderDeliveryController::class);
 Route::get('/revenue', [OrderRevenueController::class, 'index']);
+Route::get('/profit', [OrderRevenueController::class, 'profit']);
 Route::get('/orders-by-sellers', OrderBySellerController::class);
 Route::get('/products-by-performance', ProductPerformanceController::class);
