@@ -126,7 +126,7 @@ class FinanceStatisticService
             'orders' => $orders,
             'profit' => $profit,
             'fees' => $fees,
-            'profit_per_order' => $profit / $orders->paid_count
+            'profit_per_order' => $profit > 0 ? $profit / $orders->paid_count : 0
         ];
     }
 
