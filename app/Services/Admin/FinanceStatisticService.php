@@ -28,7 +28,7 @@ class FinanceStatisticService
                 $query->whereIn('orders.user_id', $seller_ids);
             })
             ->select(
-                DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 1 ELSE 0 END) as paid_count'),
+                DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 1 ELSE 0 END) as orders_count'),
                 DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 8 ELSE 0 END) as shipping_fees'),
                 DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 2 ELSE 0 END) as variant_fees'),
                 DB::raw('SUM(CASE WHEN orders.city like "%inside%" THEN 1.80 ELSE 0 END) as inside_b'),
@@ -77,7 +77,7 @@ class FinanceStatisticService
         return [
             'turnover' => $turnover,
             'orders' => $orders,
-            'aov' => $orders->paid_count > 0 ? $turnover / $orders->paid_count : 0,
+            'aov' => $orders->orders_count > 0 ? $turnover / $orders->orders_count : 0,
             'net_paid' => $net_paid,
             'total_fees' => $fees,
         ];
@@ -85,6 +85,16 @@ class FinanceStatisticService
 
     public static function getProfit($from = null, $to = null, $seller_ids = null)
     {
+        $profitByCreatedAt = self::profitByCreatedAt($from, $to, $seller_ids);
+        $profitByDeliveredAt = self::profitByDeliveredAt($from, $to, $seller_ids);
+
+        return [
+            'profit_by_created_at' => $profitByCreatedAt,
+            'profit_by_delivered_at' => $profitByDeliveredAt,
+        ];
+    }
+
+    public static function profitByCreatedAt($from = null, $to = null, $seller_ids = null) {
         $orders = DB::table('orders')
             ->where('orders.confirmation', 'confirmer')
             ->where('orders.delivery', 'paid')
@@ -98,7 +108,7 @@ class FinanceStatisticService
                 $query->whereIn('orders.user_id', $seller_ids);
             })
             ->select(
-                DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 1 ELSE 0 END) as paid_count'),
+                DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 1 ELSE 0 END) as orders_count'),
                 DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 8 ELSE 0 END) as shipping_fees'),
                 DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 2 ELSE 0 END) as variant_fees'),
                 DB::raw('SUM(CASE WHEN orders.city like "%inside%" THEN 1.80 ELSE 0 END) as inside_b'),
@@ -145,8 +155,7 @@ class FinanceStatisticService
         $fees = ($orders->variant_fees + $orders->inside_b + $orders->outside_b);
 
         $profit = $orders->shipping_fees + $codfees - $fees;
-
-
+        $profitPerOrder = $profit > 0 ? $profit / $orders->orders_count : 0;
 
         return [
             'turnover' => $turnover,
@@ -154,7 +163,83 @@ class FinanceStatisticService
             'orders' => $orders,
             'profit' => $profit,
             'fees' => $fees,
-            'profit_per_order' => $profit > 0 ? $profit / $orders->paid_count : 0,
+            'profit_per_order' => $profitPerOrder,
+            'sourcings_profit' => $sourcings,
+        ];
+    }
+
+    public static function profitByDeliveredAt($from = null, $to = null, $seller_ids = null) {
+        $ids = DB::table('history')
+            ->where('trackable_type', 'App\\Models\\Order')
+            ->where('fields', 'like', '%new_value":"livrer"%')
+            ->when($from, function ($query) use ($from) {
+                $query->whereDate('created_at', '>=', $from);
+            })
+            ->when($to, function ($query) use ($to) {
+                $query->whereDate('orders.created_at', '<=', $to);
+            })->select('trackable_id')->get()->pluck('trackable_id')->toArray();
+
+
+
+        $orders = DB::table('orders')
+            ->where('orders.confirmation', 'confirmer')
+            ->whereIn('orders.delivery', ['livrer', 'paid'])
+            ->whereIn('orders.id', $ids)
+            ->when($seller_ids && count($seller_ids), function ($query) use ($seller_ids) {
+                $query->whereIn('orders.user_id', $seller_ids);
+            })
+            ->select(
+                DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 1 ELSE 0 END) as orders_count'),
+                DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 8 ELSE 0 END) as shipping_fees'),
+                DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 2 ELSE 0 END) as variant_fees'),
+                DB::raw('SUM(CASE WHEN orders.city like "%inside%" THEN 1.80 ELSE 0 END) as inside_b'),
+                DB::raw('SUM(CASE WHEN orders.city like "%inside%" THEN 1 ELSE 0 END) as inside_b_count'),
+                DB::raw('SUM(CASE WHEN orders.city not like "%inside%" THEN 2.60 ELSE 0 END) as outside_b'),
+                DB::raw('SUM(CASE WHEN orders.city not like "%inside%" THEN 1 ELSE 0 END) as outside_b_count'),
+
+            )
+            ->first();
+
+        $turnover = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('orders.confirmation', 'confirmer')
+            ->whereIn('orders.delivery', ['livrer', 'paid'])
+            ->whereIn('orders.id', $ids)
+            ->when($seller_ids && count($seller_ids), function ($query) use ($seller_ids) {
+                $query->whereIn('orders.user_id', $seller_ids);
+            })
+            ->sum('order_items.price');
+
+        $sourcings = DB::table('sourcings')
+            ->where('quotation_status', 'confirmed')
+            ->where('buying_price', '>', 0)
+            ->when($seller_ids && count($seller_ids), function ($query) use ($seller_ids) {
+                $query->whereIn('sourcings.user_id', $seller_ids);
+            })
+            ->when($from, function ($query) use ($from) {
+                $query->whereDate('sourcings.created_at', '>=', $from);
+            })
+            ->when($to, function ($query) use ($to) {
+                $query->whereDate('sourcings.created_at', '<=', $to);
+            })
+            ->select(
+                DB::raw('SUM((cost_per_unit - buying_price) * estimated_quantity) as profit')    
+            )
+            ->first()->profit;
+
+        $codfees = ($turnover * 0.04);
+        $fees = ($orders->variant_fees + $orders->inside_b + $orders->outside_b);
+
+        $profit = $orders->shipping_fees + $codfees - $fees;
+        $profitPerOrder = $profit > 0 ? $profit / $orders->orders_count : 0;
+
+        return [
+            'turnover' => $turnover,
+            'cod_fees' => ($turnover * 0.04),
+            'orders' => $orders,
+            'profit' => $profit,
+            'fees' => $fees,
+            'profit_per_order' => $profitPerOrder,
             'sourcings_profit' => $sourcings,
         ];
     }
