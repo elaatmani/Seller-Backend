@@ -189,9 +189,9 @@ class FinanceStatisticService
                 $query->whereIn('orders.user_id', $seller_ids);
             })
             ->select(
-                DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 1 ELSE 0 END) as orders_count'),
-                DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 8 ELSE 0 END) as shipping_fees'),
-                DB::raw('SUM(CASE WHEN orders.delivery = "paid" THEN 2 ELSE 0 END) as variant_fees'),
+                DB::raw('SUM(CASE WHEN orders.delivery in ("paid", "livrer") THEN 1 ELSE 0 END) as orders_count'),
+                DB::raw('SUM(CASE WHEN orders.delivery in ("paid", "livrer") THEN 8 ELSE 0 END) as shipping_fees'),
+                DB::raw('SUM(CASE WHEN orders.delivery in ("paid", "livrer") THEN 2 ELSE 0 END) as variant_fees'),
                 DB::raw('SUM(CASE WHEN orders.city like "%inside%" THEN 1.80 ELSE 0 END) as inside_b'),
                 DB::raw('SUM(CASE WHEN orders.city like "%inside%" THEN 1 ELSE 0 END) as inside_b_count'),
                 DB::raw('SUM(CASE WHEN orders.city not like "%inside%" THEN 2.60 ELSE 0 END) as outside_b'),
