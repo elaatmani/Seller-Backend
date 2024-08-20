@@ -176,7 +176,7 @@ class FinanceStatisticService
                 $query->whereDate('created_at', '>=', $from);
             })
             ->when($to, function ($query) use ($to) {
-                $query->whereDate('orders.created_at', '<=', $to);
+                $query->whereDate('created_at', '<=', $to);
             })->select('trackable_id')->get()->pluck('trackable_id')->toArray();
 
 
