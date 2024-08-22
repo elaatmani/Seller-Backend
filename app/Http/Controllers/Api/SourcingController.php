@@ -9,7 +9,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Sourcing\StoreSourcingRequest;
 use App\Http\Requests\Sourcing\UpdateSourcingRequest;
 use App\Repositories\Interfaces\SourcingRepositoryInterface;
-
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use App\Mail\SendEmail;
 class SourcingController extends Controller
 {
 
@@ -133,7 +135,23 @@ class SourcingController extends Controller
     {
         try {
             DB::beginTransaction();
+            $oldSourcing = $this->repository->get($id);
             $sourcing = $this->repository->update($id, $request->all());
+            $statusChanged = '';
+            if ($oldSourcing->quotation_status != $sourcing->quotation_status) {
+                $statusChanged = 'Quotation Status: ' . $sourcing->quotation_status;
+            } elseif ($oldSourcing->sourcing_status != $sourcing->sourcing_status) {
+                $statusChanged = 'Sourcing Status: ' . $sourcing->sourcing_status;
+            }
+    
+            try {
+                $email = $sourcing->seller->email;
+                Mail::to($email)->send(new SendEmail($sourcing, $statusChanged));
+                Log::info('Email sent successfully to ' . $email);
+            } catch (\Exception $e) {
+                // An error occurred while sending the email
+                Log::error('Failed to send email to ' . $email . '. Error: ' . $e->getMessage());
+            }
             DB::commit();
 
             return response()->json([
