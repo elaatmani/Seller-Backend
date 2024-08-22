@@ -35,7 +35,7 @@ class SendEmail extends Mailable
      */
     public function build()
     {
-        return $this->from('admin@gmail.com', 'Yassine El attmani')->subject('Sourcing Created')
+        return $this->from('admin@gmail.com', 'CODSQUAD TEAM')->subject('Sourcing Created')
                     ->view('emails.sourcing.created')
                     ->with([
                         'sourcingId' => $this->sourcing->id,
