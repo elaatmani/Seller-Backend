@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\Public\AgentController;
 use App\Http\Controllers\Api\Public\OrderController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Seller\SellerController;
+use App\Http\Controllers\Api\Charts\KpiAgenteController;
 use App\Http\Controllers\Api\SupplyRequestController;
 use App\Http\Controllers\Api\TemporaryMediaController;
 use App\Http\Controllers\Api\Admin\InventoryController;
@@ -82,6 +83,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/user/update', [AuthController::class, 'updateAccount']);
     Route::get('/auth/permission', [AuthController::class, 'userPermission']);
 
+    Route::group(['prefix' => 'agentekpi'], function () {
+        Route::get('/all', [KpiagenteController::class, 'getAllKpis']);
+        Route::get('/treated_or_handled', [KpiAgenteController::class, 'TreatedOrHandledOrders']);
+        Route::get('/dropped_orders', [KpiAgenteController::class, 'DroppedOrders']);
+        Route::get('/confirmed_orders', [KpiAgenteController::class, 'ConfirmedOrders']);
+        Route::get('/delivered_orders', [KpiAgenteController::class, 'DeliveredOrders']);
+        Route::get('/top_agentes', [KpiAgenteController::class, 'TopAgentesInConfirmation']);
+    });
 
 
     //All Users
