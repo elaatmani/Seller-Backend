@@ -27,7 +27,7 @@ class OrderStatisticService
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
             })
-            ->when($seller_ids, function($query) use($seller_ids) {
+            ->when($seller_ids, function ($query) use ($seller_ids) {
                 $query->whereIn('orders.user_id', $seller_ids);
             })
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
@@ -79,7 +79,7 @@ class OrderStatisticService
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
             })
-            ->when($seller_ids, function($query) use($seller_ids) {
+            ->when($seller_ids, function ($query) use ($seller_ids) {
                 $query->whereIn('orders.user_id', $seller_ids);
             })
             ->select('confirmation', DB::raw('count(*) as count'))
@@ -98,7 +98,7 @@ class OrderStatisticService
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('orders.created_at', '<=', $to);
             })
-            ->when($seller_ids, function($query) use($seller_ids) {
+            ->when($seller_ids, function ($query) use ($seller_ids) {
                 $query->whereIn('orders.user_id', $seller_ids);
             })
             ->whereIn('confirmation', ['confirmer', 'change', 'refund'])
@@ -113,10 +113,10 @@ class OrderStatisticService
     {
         // Step 1: Get all seller IDs
         $sellerIds = Role::where('name', 'seller')->first()->users()->where('status', 1)
-        ->when($seller_ids, function($query) use($seller_ids) {
-            $query->whereIn('id', $seller_ids);
-        })
-        ->pluck('id')->toArray();
+            ->when($seller_ids, function ($query) use ($seller_ids) {
+                $query->whereIn('id', $seller_ids);
+            })
+            ->pluck('id')->toArray();
 
         // Step 2: Subquery to get the total orders count per seller
         $subQuery = DB::table('orders')
@@ -150,8 +150,8 @@ class OrderStatisticService
             ->map(function ($items, $key) {
                 return $items->keyBy('confirmation');
             });
-            
-            
+
+
 
         // Return the result
         return new LengthAwarePaginator($result->forPage(request()->input('page', 1), request()->input('per_page', 10)), $result->count(), request()->input('per_page', 10), request()->input('page', 1));
@@ -161,6 +161,10 @@ class OrderStatisticService
     {
 
         $result = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('orders.confirmation', 'confirmer')
+            ->whereIn('orders.delivery', ['paid', 'livrer'])
+
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->when($from, function ($query) use ($from) {
                 $query->whereDate('order_items.created_at', '>=', $from);
@@ -168,7 +172,7 @@ class OrderStatisticService
             ->when($to, function ($query) use ($to) {
                 $query->whereDate('order_items.created_at', '<=', $to);
             })
-            ->when($seller_ids, function($query) use($seller_ids) {
+            ->when($seller_ids, function ($query) use ($seller_ids) {
                 $query->whereIn('products.user_id', $seller_ids);
             })
             ->select(
