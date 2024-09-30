@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SourcingController;
 use App\Http\Controllers\Api\Admin\AdsController;
+use App\Http\Controllers\Api\Admin\CreditSellerController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Admin\SaleController;
 use App\Http\Controllers\Api\Admin\ShopController;
@@ -281,6 +282,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/ads/new', [AdsController::class, 'store']);
     Route::post('/ads/update/{id}', [AdsController::class, 'update']);
     Route::delete('/ads/delete/{id}', [AdsController::class, 'destroy']);
+
+    //Credit
+    Route::post('/credit', [CreditSellerController::class, 'index']);
+    Route::post('/credit/new', [CreditSellerController::class, 'store']);
+    Route::post('/credit/update/{id}', [CreditSellerController::class, 'update']);
+    Route::delete('/credit/delete/{id}', [CreditSellerController::class, 'destroy']);
 
     // Factorisation
     Route::post('/v1/factorisation', [NewFactorisationController::class, 'index']);
