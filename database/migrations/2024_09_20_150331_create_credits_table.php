@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('credits', function (Blueprint $table) {
             $table->id();
-            $table->integer('seller_id');
-            $table->float('amount');
-            $table->date('credited_at');
-            $table->date('paid_at');
+            $table->integer('seller_id')->nullable()->default(null);
+            $table->float('amount')->nullable()->default(0);
+            $table->date('credited_at')->nullable()->default(null);
+            $table->date('paid_at')->nullable()->default(null);
             $table->timestamps();
         });
     }
