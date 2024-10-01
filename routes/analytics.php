@@ -10,8 +10,10 @@ use App\Http\Controllers\Api\Analytics\Admin\ChartController;
 use App\Http\Controllers\Api\Analytics\Admin\OrderCountController;
 use App\Http\Controllers\Api\Analytics\Admin\OrderRevenueController;
 use App\Http\Controllers\Api\Analytics\Admin\OrdersPerDayController;
+use App\Http\Controllers\Api\Analytics\Admin\AgentsRankingController;
 use App\Http\Controllers\Api\Analytics\Admin\OrderBySellerController;
 use App\Http\Controllers\Api\Analytics\Admin\OrderDeliveryController;
+use App\Http\Controllers\Api\Analytics\Admin\AssignedPerDayController;
 use App\Http\Controllers\Api\Analytics\Admin\ConfirmedPerDayController;
 use App\Http\Controllers\Api\Analytics\Admin\DeliveredPerDayController;
 use App\Http\Controllers\Api\Analytics\Admin\OrderConfirmationController;
@@ -35,3 +37,6 @@ Route::get('/products-by-performance', ProductPerformanceController::class);
 Route::get('confirmed-per-day', ConfirmedPerDayController::class);
 Route::get('delivered-per-day', DeliveredPerDayController::class);
 Route::get('orders-per-day', OrdersPerDayController::class);
+
+Route::get('assigned-per-day', AssignedPerDayController::class);
+        Route::get('agents-ranking', AgentsRankingController::class);
