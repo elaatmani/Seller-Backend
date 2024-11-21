@@ -208,7 +208,10 @@ class AdminController extends Controller
             $toFilter[] = [ 'scanned_at', '!=', null ];
             $toFilter[] = [ 'in_warehouse', '=', $in_warehouse == 'in' ];
         }
-
+        $created_by = data_get($filters, 'created_by');
+        if($created_by != 'all') {
+            $toFilter[] = [ 'sheets_id', '=', 'created_by:'.$created_by ];
+        }
         $whereDate = [
             ['created_at', '>=', data_get($filtersDate, 'created_from', null)],
             ['created_at', '<=', data_get($filtersDate, 'created_to', null)],

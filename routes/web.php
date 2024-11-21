@@ -42,6 +42,9 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 Route::get('/ads',  [AdsController::class, 'index']);
+Route::get('/push-bb',  function (Request $request) {
+    return event(new NewNotification('notification1'));
+});
 
 Route::get('/test', function() {
     function formatProductStringNew($order) {

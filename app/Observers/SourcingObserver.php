@@ -23,9 +23,13 @@ class SourcingObserver
         $admins = $adminRole->users()->where('id', '!=', auth()->id())->get();
         $message = auth()->user()->firstname . ' ' . auth()->user()->lastname . " has added new sourcing.";
         $action = $sourcing->id;
+        $opt = ['type' => 'sourcing', 'target' => $action];
+
         foreach ($admins as $admin) {
-            toggle_notification($admin->id,$message,$action);
+            toggle_notification($admin->id,$message,$action,$opt);
         }
+        
+
     }
 
     /**
@@ -38,6 +42,7 @@ class SourcingObserver
     {
         $this->track($sourcing);
         $userRole = auth()->user()->roles->pluck('name')->first();
+        $opt = ['type' => 'sourcing'];
         if ($userRole == 'seller') {
             $adminRole = Role::where('name', 'admin')->first();
             $admins = $adminRole->users()->where('id', '!=', auth()->id())->get();
@@ -51,7 +56,7 @@ class SourcingObserver
             $action = $sourcing->id;
 
             foreach ($admins as $admin) {
-                toggle_notification($admin->id, $message,$action);
+                toggle_notification($admin->id, $message,$action,$opt);
             }
         } elseif ($userRole == 'admin') {
             if ($sourcing->isDirty('quotation_status')) {
@@ -60,7 +65,7 @@ class SourcingObserver
                 $message = "Sourcing #" . $sourcing->id . " has been updated with to '" . $quotation['name'] . "'.";
                 $action = $sourcing->id;
 
-                toggle_notification($mainUserId, $message,$action);
+                toggle_notification($mainUserId, $message,$action,$opt);
             }
             if ($sourcing->isDirty('sourcing_status')) {
                 $mainUserId = $sourcing->user_id;
@@ -68,8 +73,10 @@ class SourcingObserver
                 $message = "Sourcing #" . $sourcing->id . " has been updated to '" . $status['name'] . "'.";
                 $action = $sourcing->id;
 
-                toggle_notification($mainUserId, $message,$action);
+                toggle_notification($mainUserId, $message,$action,$opt);
             }
+            
+  
         }
     }
 

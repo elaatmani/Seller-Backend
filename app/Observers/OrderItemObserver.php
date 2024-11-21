@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Observers;
-
+use App\Models\ProductVariation;
+use Spatie\Permission\Models\Role;
+use App\Models\User;
 use Exception;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -22,6 +24,12 @@ class OrderItemObserver
      */
     public function created(OrderItem $orderItem)
     {
+        try {
+            $this->OutOfStock2($orderItem);
+        } catch (\Throwable $th) {
+            Log::channel('tracking')->info(json_encode($th->getMessage()));
+        }
+
         try {
             $custom_fields = [
                 [
@@ -56,11 +64,18 @@ class OrderItemObserver
      */
     public function updated(OrderItem $orderItem)
     {
-        //
+        try {
+            $this->OutOfStock2($orderItem);
+        } catch (\Throwable $th) {
+            Log::channel('tracking')->info(json_encode($th->getMessage()));
+        }
+
     }
 
     public function updating(OrderItem $orderItem)
     {
+       
+        OrderItemHistoryService::observe($orderItem);
 
 
         try {
@@ -150,5 +165,49 @@ class OrderItemObserver
     public function forceDeleted(OrderItem $orderItem)
     {
         //
+    }
+
+    public function OutOfStock2(OrderItem $orderItem)
+    {
+
+        $productVariation = ProductVariation::where('id', $orderItem->product_variation_id)
+        ->first();
+        $oldAttributes = $orderItem->getOriginal(); // Old values
+        $newAttributes = $orderItem->getAttributes(); // New values
+
+        $diff = data_get($newAttributes, 'quantity', 0) - data_get($oldAttributes, 'quantity', 0);
+
+        $quantityToCheck = $productVariation->available_quantity - $diff;
+
+        // Log::info('quantityToCheck :' . $quantityToCheck);
+        // Log::info('available_quantity :' . $productVariation->available_quantity);
+        // Log::info('old Quantité :' . $oldAttributes['quantity']);
+        // Log::info('new Quantité :' . $newAttributes['quantity']);
+        // Log::info('diff :' . $diff);
+
+        
+        Log::info('Product Variation updated for id: ' . $productVariation->id . ' with is_out_of_stock: ' . $productVariation->is_out_of_stock);
+
+        if ($quantityToCheck <= $productVariation->stockAlert){
+            if(!$productVariation->is_out_of_stock) {
+                $adminRole = Role::where('name', 'admin')->first();
+                $message = 'Product ' . $productVariation->product->name . ' is running low on stock.';
+                $action = $orderItem->id;
+                $opt = ['type' => 'products', 'target' => $productVariation->product->id];
+                foreach ($adminRole->users as $admin) {
+                    toggle_notification($admin->id, $message, $action,$opt);
+                    // Log::info('admin');
+                }
+                $seller = User::find($productVariation->product->user_id);
+                if ($seller) {
+                    toggle_notification($seller->id, $message, $action,$opt);
+                }
+                
+                $productVariation->is_out_of_stock = true;
+            }
+        } else {
+            $productVariation->is_out_of_stock = false;
+        }
+        $productVariation->save();
     }
 }

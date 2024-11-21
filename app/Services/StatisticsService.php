@@ -747,7 +747,16 @@ class StatisticsService
             'color' => '#f43f5e'
         ];
         $delivery[] = $cancelled;
-
+        $returned = $deliveryOrders->where('delivery', 'retourner')->count();
+        $return = [
+            'id' => 7,
+            'title' => 'Returned',
+            'value' => $returned,
+            'percentage' => $deliveryOrders->count() > 0  ? ($returned * 100) / $deliveryOrders->count() : 0,
+            'icon' => 'mdi-keyboard-return',
+            'color' => '#7c3aed'
+        ];
+        $delivery[] = $return;
 
         
 

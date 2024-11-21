@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use App\Events\NewNotification;
 use App\Services\RoadRunnerService;
 use Illuminate\Support\Facades\Route;
@@ -62,6 +63,31 @@ Route::get('/export/factorisations/{id}', [FactorisationExportController::class,
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
 
+    //pusher 
+
+    Route::post('/pusher_auth', function (Request $request) {
+        $socketId = $request->input('socket_id');
+        $channelName = $request->input('channel_name');
+        $user = auth()->user(); // Assuming you have a user authentication system in place
+    
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 403);
+        }
+    
+        $pusher = new Pusher\Pusher(
+            env('PUSHER_APP_KEY'),
+            env('PUSHER_APP_SECRET'),
+            env('PUSHER_APP_ID'),
+            [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'encrypted' => false,
+            ]
+        );
+    
+        $auth = $pusher->socket_auth($channelName, $socketId,  $user->id);
+    
+        return response()->json($auth);
+    });
 
     //Roles
     Route::get('/auth/roles', [UserController::class, 'roles']);
@@ -142,8 +168,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/shops/new', [ShopController::class, 'store']);
     Route::post('/shops/update/{id}', [ShopController::class, 'update']);
     Route::delete('/shops/delete/{id}', [ShopController::class, 'destroy']);
-
-
 
 
 
