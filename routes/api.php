@@ -40,6 +40,7 @@ use App\Http\Controllers\Api\Public\OrderWarehouseController;
 use App\Http\Controllers\Api\Admin\NewFactorisationController;
 use App\Http\Controllers\Api\Seller\WithdrawalMethodController;
 use App\Http\Controllers\Api\Export\FactorisationExportController;
+use App\Http\Controllers\Api\CancelReasonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -334,6 +335,13 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Order warehouse control
     Route::post('/warehouse-control', OrderWarehouseController::class);
+
+    Route::group(['prefix' => 'cancel-reasons'], function() {
+        Route::get('/', [CancelReasonController::class, 'index']);
+        Route::post('/', [CancelReasonController::class, 'store']);
+        Route::get('/analytics', [CancelReasonController::class, 'analytics']);
+        Route::get('/products', [CancelReasonController::class, 'products']);
+    });
 
     // Withdrawal methods for sellers
     Route::get('/withdrawal-methods', [WithdrawalMethodController::class, 'index']);

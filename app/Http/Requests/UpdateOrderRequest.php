@@ -34,7 +34,7 @@ class UpdateOrderRequest extends FormRequest
             'phone' => ['required'],
             'adresse' => [ 'required' ],
             'city' => ['required', new CityExists($this->input('confirmation'))],
-            'note' => [new OrderNote($this->input('confirmation'))],
+            'cancel_reason' => [new OrderNote($this->input('confirmation'))],
             'affectation' => [new OrderAffectation($this->input('confirmation'))],
             'items' => ['required', new OrderItems()],
         ];

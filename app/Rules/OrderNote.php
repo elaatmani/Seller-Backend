@@ -12,7 +12,7 @@ class OrderNote implements Rule
     protected $require_note = [ 'annuler' ];
 
     protected $custom_messages = [
-        'annuler' => 'Add cancellation note.'
+        'annuler' => 'Add cancellation reason.'
     ];
 
     /**

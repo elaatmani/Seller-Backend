@@ -24,6 +24,7 @@ class Order extends Model
         'affectation',
         'delivery',
         'note',
+        'cancel_reason',
         'price',
         'reported_agente_note',
         'reported_delivery_note',
