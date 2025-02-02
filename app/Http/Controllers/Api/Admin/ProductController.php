@@ -18,6 +18,7 @@ use App\Models\InventoryMovementVariation;
 use App\Models\ProductAgente;
 use App\Models\ProductDelivery;
 use App\Models\ProductImage;
+use App\Http\Resources\ProductResource;
 use App\Models\User;
 use App\Repositories\ProductRepository;
 use App\Services\RoadRunnerCODSquad;
@@ -262,17 +263,14 @@ class ProductController extends Controller
 
             $product = Product::with('variations', 'variations.warehouse','deliveries')->find($id);
             if (isset($product)) {
-                $product = ProductHelper::get_state($product);
-                return response()->json(
-                    [
-                        'status' => true,
-                        'code' => 'SUCCESS',
-                        'data' => [
-                            'products' => $product,
-                        ],
+                // $product = ProductHelper::get_state($product);
+                return response()->json([
+                    'status' => true,
+                    'code' => 'SUCCESS',
+                    'data' => [
+                        'product' => new ProductResource($product),
                     ],
-                    200
-                );
+                ], 200);
             } else {
                 return response()->json(
                     [
@@ -318,8 +316,6 @@ class ProductController extends Controller
             }
 
             $product = Product::findOrFail($id);
-
-
 
             if (!isset($product)) {
                 return response()->json(
