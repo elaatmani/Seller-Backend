@@ -211,7 +211,7 @@ class ProductController extends Controller
                     'code' => 'PRODUCT_CREATED',
                     'message' => 'Product Created Successfully!',
                     'data' => [
-                        'product' => ProductHelper::with_tracking(Product::find($product->id))
+                        'product' => new ProductResource($product),
                     ]
                 ],
                 200
@@ -503,7 +503,7 @@ class ProductController extends Controller
                     'code' => 'PRODUCT_UPDATED',
                     'message' => 'Product Updated Successfully!',
                     'data' => [
-                        'product' => ProductHelper::with_tracking(Product::find($product->id))
+                        'product' => new ProductResource($product),
                     ]
                 ],
                 200
