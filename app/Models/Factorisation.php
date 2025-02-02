@@ -23,6 +23,7 @@ class Factorisation extends Model
         'close_at',
         'paid_at',
         'comment',
+        'exchange_rate',
         'withdrawal_method_id',
         'attachement_image'
     ];
@@ -36,6 +37,7 @@ class Factorisation extends Model
         'paid' => 'boolean',
         'commands_number' => 'integer',
         'price' => 'float',
+        'exchange_rate' => 'float',
         'close_at' => 'datetime',
         'paid_at' => 'datetime',
         'comment' => 'string'
