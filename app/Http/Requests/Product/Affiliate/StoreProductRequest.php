@@ -41,15 +41,15 @@ class StoreProductRequest extends FormRequest
             'media' => ['required'],
 
             'has_variations' => 'required|boolean',
-            'initial_quantity' => [
-                'required_if:has_variations,false',
-                'integer',
-                function ($attribute, $value, $fail) {
-                    if (!$this->has_variations && $value == 0) {
-                        $fail('The initial quantity field must be greater than 0 when the product has no variations.');
-                    }
-                },
-            ],
+            // 'initial_quantity' => [
+            //     'required_if:has_variations,false',
+            //     'integer',
+            //     function ($attribute, $value, $fail) {
+            //         if (!$this->has_variations && $value == 0) {
+            //             $fail('The initial quantity field must be greater than 0 when the product has no variations.');
+            //         }
+            //     },
+            // ],
 
             'variations' => [
                 'required_if:has_variations,true',
@@ -61,16 +61,16 @@ class StoreProductRequest extends FormRequest
                 },
             ],
 
-            'variations.*.quantity' => [
-                'required_if:has_variations,true',
-                'integer',
-                'min:1',
-                function ($attribute, $value, $fail) {
-                    if ($this->has_variations && $value <= 0) {
-                        $fail('Each variation quantity must be greater than 0.');
-                    }
-                },
-            ],
+            // 'variations.*.quantity' => [
+            //     'required_if:has_variations,true',
+            //     'integer',
+            //     'min:1',
+            //     function ($attribute, $value, $fail) {
+            //         if ($this->has_variations && $value <= 0) {
+            //             $fail('Each variation quantity must be greater than 0.');
+            //         }
+            //     },
+            // ],
 
         ];
     }
