@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Admin\ShopController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\SheetController;
+use App\Http\Controllers\Api\Analytics\Admin\AgentsPerformanceController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Public\AgentController;
 use App\Http\Controllers\Api\Public\OrderController;
@@ -92,6 +93,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/confirmed_orders', [KpiAgenteController::class, 'ConfirmedOrders']);
         Route::get('/delivered_orders', [KpiAgenteController::class, 'DeliveredOrders']);
         Route::get('/top_agentes', [KpiAgenteController::class, 'TopAgentesInConfirmation']);
+        Route::get('/performance', [KpiAgenteController::class, 'AgentPerformance']);
     });
 
 

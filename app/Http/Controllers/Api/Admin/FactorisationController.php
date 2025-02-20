@@ -392,7 +392,8 @@ class FactorisationController extends Controller
                         500
                     );
                 }
-
+                
+                $factorisation->exchange_rate = $request->exchange_rate;
 
                 $factorisation->close = $request->close;
                 if ($request->close == true) {

@@ -19,32 +19,38 @@ class KpiagenteController extends Controller
     private function calculateData(Request $request, $modelType)
     {
         $agenteId = $request->input("selectedAgenteId");
-
+    
         $this->startDate = $request->input("startDate") ? Carbon::parse($request->input("startDate")) : Carbon::now()->subDays(7);
         $this->endDate = $request->input("endDate") ? Carbon::parse($request->input("endDate")) : Carbon::now();
-
+    
         if ($this->startDate->eq($this->endDate)) {
             $this->endDate->addDay(); // Add one day to the end date
         }
-
-
+    
         if ($modelType === 'order') {
             $this->model = Order::query();
         } else {
             $this->model = History::query();
         }
-
+    
         $field = $modelType === 'order' ? 'agente_id' : 'actor_id';
-
+    
+        // Apply filters
         $this->model->with('user')
             ->when($agenteId != 0, function ($query) use ($agenteId, $field) {
                 $query->whereIn($field, $agenteId);
             }, function ($q) use ($field) {
                 $q->where($field, '!=', null);
+            })
+            ->when($request->has('selectedProductId') && !empty($request->input('selectedProductId')), function ($query) use ($request) {
+                // Filter by multiple product_ids
+                $query->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                      ->whereIn('order_items.product_id', $request->input('selectedProductId'));
             });
-
+    
         return $this->model;
     }
+    
 
 
     public function TreatedOrHandledOrders(Request $request, $isAgente = false)
@@ -88,46 +94,46 @@ class KpiagenteController extends Controller
         ]);
     }
 
-   public function DroppedOrders(Request $request, $isAgente = false)
-{
-    $orders = $this->calculateData($request, 'history');
+    public function DroppedOrders(Request $request, $isAgente = false)
+    {
+        $orders = $this->calculateData($request, 'history');
 
-    $orders
-        ->join('orders as o', 'history.trackable_id', '=', 'o.id')
-        ->where('history.trackable_type', 'like', '%Order%')
-        ->where('history.fields', 'like', '%agente_id%')
-        ->whereBetween('history.created_at', [$this->startDate, $this->endDate])
-        ->where('o.confirmation', '!=', 'double')
-        ->select('history.created_at', 'history.trackable_id', 'history.actor_id', 'o.confirmation');
+        $orders
+            ->join('orders as o', 'history.trackable_id', '=', 'o.id')
+            ->where('history.trackable_type', 'like', '%Order%')
+            ->where('history.fields', 'like', '%agente_id%')
+            ->whereBetween('history.created_at', [$this->startDate, $this->endDate])
+            ->where('o.confirmation', '!=', 'double')
+            ->select('history.created_at', 'history.trackable_id', 'history.actor_id', 'o.confirmation');
 
-    $droppedOrdersByDate =  DB::table(DB::raw("({$orders->toSql()}) as sub"))
-        ->mergeBindings($orders->getQuery())
-        ->when($isAgente, function ($query) {
-            $query->join('users', 'sub.actor_id', '=', 'users.id');
-        })
-        ->selectRaw('DATE(sub.created_at) as date, count(DISTINCT sub.trackable_id) as count' . ($isAgente ? ', CONCAT(users.firstname, " ", users.lastname) as agente_fullname' : ''))
-        ->groupBy('date')
-        ->when($isAgente, function ($query) {
-            $query->groupBy('agente_fullname');  // Group by 'agente_fullname' only if $isAgente is true
-        })
-        ->get();
+        $droppedOrdersByDate =  DB::table(DB::raw("({$orders->toSql()}) as sub"))
+            ->mergeBindings($orders->getQuery())
+            ->when($isAgente, function ($query) {
+                $query->join('users', 'sub.actor_id', '=', 'users.id');
+            })
+            ->selectRaw('DATE(sub.created_at) as date, count(DISTINCT sub.trackable_id) as count' . ($isAgente ? ', CONCAT(users.firstname, " ", users.lastname) as agente_fullname' : ''))
+            ->groupBy('date')
+            ->when($isAgente, function ($query) {
+                $query->groupBy('agente_fullname');  // Group by 'agente_fullname' only if $isAgente is true
+            })
+            ->get();
 
-    $droppedOrdersCount = $orders->count(DB::raw('DISTINCT history.trackable_id'));
+        $droppedOrdersCount = $orders->count(DB::raw('DISTINCT history.trackable_id'));
 
-    return response()->json([
-        'code' => 'SUCCESS',
-        'data' => [
-            'card' => [
-                'id' => 2,
-                'title' => 'Dropped Orders',
-                'value' => $droppedOrdersCount,
-                'icon' => 'mdi-parachute-outline',
-                'color' => '#FECDAA'
+        return response()->json([
+            'code' => 'SUCCESS',
+            'data' => [
+                'card' => [
+                    'id' => 2,
+                    'title' => 'Dropped Orders',
+                    'value' => $droppedOrdersCount,
+                    'icon' => 'mdi-parachute-outline',
+                    'color' => '#FECDAA'
+                ],
+                'droppedOrdersByDate' => $droppedOrdersByDate,
             ],
-            'droppedOrdersByDate' => $droppedOrdersByDate,
-        ],
-    ]);
-}
+        ]);
+    }
 
 
 
@@ -212,7 +218,7 @@ class KpiagenteController extends Controller
                     'title' => 'Delivered Orders',
                     'value' => $deliveredOrdersCount,
                     'percentage' => $deliveredOrdersPourcentage,
-                                        'val' => $allOrdersConfirmedOrders,
+                    'val' => $allOrdersConfirmedOrders,
 
                     'icon' => 'mdi-truck-check',
                     'color' => '#10b981'
@@ -231,7 +237,7 @@ class KpiagenteController extends Controller
 
         // Check and call each KPI method based on the filter
         if (in_array('all', $kpisToReturn) || in_array('ordersTreatedOrHandled', $kpisToReturn)) {
-            $result['ordersTreatedOrHandled'] = $this->TreatedOrHandledOrders($request , true)->getData(true)['data'];
+            $result['ordersTreatedOrHandled'] = $this->TreatedOrHandledOrders($request, true)->getData(true)['data'];
         }
 
         if (in_array('all', $kpisToReturn) || in_array('droppedOrders', $kpisToReturn)) {
@@ -273,4 +279,33 @@ class KpiagenteController extends Controller
             'data' => $topAgents,
         ]);
     }
+
+    public function AgentPerformance(Request $request)
+    {
+        // Calculate the data using the existing calculateData function
+        $orders = $this->calculateData($request, 'order');
+    
+        // Filter the orders to only include confirmed and delivered ones
+        $orders->whereBetween('orders.created_at', [$this->startDate, $this->endDate])
+               ->where('confirmation', 'confirmer')
+               ->whereIn('delivery', ["livrer", "paid"]);
+    
+        $topAgents = $orders->select(
+                'orders.agente_id', // Select the agente_id from orders
+                'users.firstname', // Select firstname from users
+                'users.lastname',  // Select lastname from users
+                DB::raw('count(*) as confirmed_count'),
+                DB::raw('sum(case when delivery in ("livrer", "paid") then 1 else 0 end) as delivered_count')
+            )
+            ->join('users', 'orders.agente_id', '=', 'users.id') // Join orders with users table on agente_id
+            ->groupBy('orders.agente_id', 'users.firstname', 'users.lastname') // Group by agent and user name
+            ->orderByDesc('confirmed_count')
+            ->get();
+    
+        return response()->json([
+            'code' => 'SUCCESS',
+            'data' => $topAgents,
+        ]);
+    }
+    
 }
