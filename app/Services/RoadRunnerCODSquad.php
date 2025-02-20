@@ -61,12 +61,14 @@ class RoadRunnerCODSquad
     }
 
     public static function http($endpoint, $params) {
+        $params['target_endpoint'] = self::endpoint($endpoint);
+        $endpoint = 'https://concretcar.com/recieve.php?target_endpoint=' . $params['target_endpoint'];
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
             'Authorization' => 'Bearer ' . env('ROAD_RUNNER_CODSQUAD_API_KEY', ''),
             'X-Access-Token' => env('ROAD_RUNNER_CODSQUAD_ACCESS_TOKEN', '')
-            ])->post(self::endpoint($endpoint), $params);
+            ])->post($endpoint, $params);
 
         if ($response->successful()) {
             // Order created successfully.
@@ -114,7 +116,7 @@ class RoadRunnerCODSquad
 
 
     public static function orders() {
-        return self::http('list/', [ 'company' => 'codsquad', 'daterange' => '2023/10/29 - 2023/11/15' ]);
+        return self::http('list/', [ 'company' => 'codsquad', 'daterange' => '2024/10/10 - 2024/10/15' ]);
     }
 
     public static function rates() {
