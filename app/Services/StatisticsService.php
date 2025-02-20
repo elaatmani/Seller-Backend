@@ -786,6 +786,20 @@ class StatisticsService
             'color' => '#10b981'
         ];
         $delivery[] = $delivered;
+
+        $delivered_ids = $deliveryOrders->where('delivery', 'livrer')->pluck('id');
+
+        $delivered_cash = DB::table('order_items')->whereIn('order_id', $delivered_ids)->get()->sum('price');
+
+        $delivered = [
+            'id' => 2,
+            'title' => 'Delivered Cash',
+            'value' => '$' . $delivered_cash,
+            'icon' => 'mdi-currency-usd',
+            'color' => '#10b981'
+        ];
+
+        $delivery[] = $delivered;
         
         $paidCount = $deliveryOrders->where('delivery', 'paid')->count();
         $paid = [
