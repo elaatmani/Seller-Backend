@@ -49,7 +49,7 @@ class TurnoverByDayController extends Controller
 
         // Format final result
         $finalResult = $dates->map(function ($total, $date) {
-            return ['date' => $date, 'total' => $total];
+            return ['date' => $date, 'total' => round((int) $total, 2)];
         })->values();
 
         return response()->json([
