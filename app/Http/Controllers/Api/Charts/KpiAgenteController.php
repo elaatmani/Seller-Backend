@@ -265,7 +265,7 @@ class KpiagenteController extends Controller
         $orders = $this->calculateData($request, 'order');
 
         // Filter the orders to only include confirmed ones
-        $orders->whereBetween('created_at', [$this->startDate, $this->endDate])
+        $orders->whereBetween('orders.created_at', [$this->startDate, $this->endDate])
             ->where('confirmation', 'confirmer');
 
         // Get the count of confirmed orders per agent
