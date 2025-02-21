@@ -269,8 +269,10 @@ class KpiagenteController extends Controller
             ->where('confirmation', 'confirmer');
 
         // Get the count of confirmed orders per agent
-        $topAgents = $orders->select('agente_id', DB::raw('count(*) as confirmed_count'))
-            ->groupBy('agente_id')
+        $topAgents = $orders
+            ->join('users', 'users.id', '=', 'orders.agente_id')
+            ->select('orders.agente_id', 'users.firstname', 'users.lastname', DB::raw('count(*) as confirmed_count'))
+            ->groupBy('orders.agente_id', 'users.firstname', 'users.lastname')
             ->orderByDesc('confirmed_count')
             ->get();
 
