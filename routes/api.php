@@ -94,6 +94,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('/delivered_orders', [KpiAgenteController::class, 'DeliveredOrders']);
         Route::get('/top_agentes', [KpiAgenteController::class, 'TopAgentesInConfirmation']);
         Route::get('/performance', [KpiAgenteController::class, 'AgentPerformance']);
+        Route::get('/agents-by-confirmation', [KpiAgenteController::class, 'agentsByConfirmation']);
+        Route::get('/agents-by-delivery', [KpiAgenteController::class, 'agentsByDelivery']);
+        Route::get('/agents-performance-lifetime', [KpiAgenteController::class, 'agentsPerformanceLifetime']);
+        Route::get('/agents-performance-by-time', [KpiAgenteController::class, 'agentsPerformanceByTime']);
     });
 
 
